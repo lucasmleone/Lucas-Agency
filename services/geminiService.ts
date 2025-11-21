@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { PlanType, AIAnalysisResult } from "../types";
+import { PlanType, AIAnalysisResult, AIResponseAnalysis } from "../types";
 
 // Initialize the client
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -110,5 +110,46 @@ export const generateFollowUpEmail = async (
   } catch (error) {
     console.error("Gemini Email Error:", error);
     return { subject: "Error", body: "No se pudo generar el correo." };
+  }
+};
+
+export const analyzeClientResponse = async (
+  replyText: string,
+  currentStage: string
+): Promise<AIResponseAnalysis> => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Analiza la siguiente respuesta de correo de un cliente para determinar si debemos avanzar a la siguiente etapa del proyecto.
+      
+      ETAPA ACTUAL: ${currentStage}
+      RESPUESTA DEL CLIENTE: "${replyText}"
+      
+      OBJETIVO DE ANÁLISIS:
+      - Si la etapa es "Prospección", buscamos interés en agendar reunión o llenar formulario.
+      - Si la etapa es "Propuesta", buscamos un "Acepto", "Sí", "De acuerdo" explícito para proceder.
+      
+      Salida JSON:
+      - decision: ACCEPTED (Si aprueba/quiere seguir), REJECTED (Si dice no), MORE_INFO (Si hace preguntas), UNCLEAR (Si no se entiende).
+      - summary: Breve resumen de 1 frase sobre lo que dijo.
+      - sentimentScore: 0 a 100 (Positividad).`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            decision: { type: Type.STRING, enum: ['ACCEPTED', 'REJECTED', 'UNCLEAR', 'MORE_INFO'] },
+            summary: { type: Type.STRING },
+            sentimentScore: { type: Type.NUMBER }
+          }
+        }
+      }
+    });
+
+    const text = response.text;
+    if (!text) throw new Error("No response from AI");
+    return JSON.parse(text) as AIResponseAnalysis;
+  } catch (error) {
+    return { decision: 'UNCLEAR', summary: 'Error al analizar con IA', sentimentScore: 50 };
   }
 };

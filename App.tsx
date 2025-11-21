@@ -32,7 +32,9 @@ import {
   Link as LinkIcon,
   Eye,
   Lock,
-  Settings
+  Settings,
+  ExternalLink,
+  Search
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -47,9 +49,9 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import { Project, ProjectStatus, PlanType, FinanceRecord, ProjectLog, MaintenanceStatus, Client, PaymentStatus } from './types';
+import { Project, ProjectStatus, PlanType, FinanceRecord, ProjectLog, MaintenanceStatus, Client, PaymentStatus, AIResponseAnalysis } from './types';
 import { initialProjects, initialFinance, initialLogs, initialClients } from './services/mockData';
-import { analyzeLead } from './services/geminiService';
+import { analyzeLead, analyzeClientResponse } from './services/geminiService';
 
 // --- Utils ---
 
@@ -93,10 +95,29 @@ Validez: Esta propuesta digital vence automáticamente en 30 días.`;
 
 // --- Plantillas de Email ---
 
-const getEmailTemplate = (type: string, project: Project) => {
+const getEmailTemplate = (type: string, project: Project, referralLink: string = '') => {
   const clientName = project.clientName;
   
   switch(type) {
+    case 'PROSPECTION':
+      return {
+        subject: `Consulta Desarrollo Web - ${clientName}`,
+        body: `Hola ${clientName},
+
+Gracias por tu interés en trabajar con Leone Agencia. 
+
+Para poder darte un presupuesto exacto y entender mejor lo que necesitas, por favor llena este breve formulario de "Discovery":
+
+LINK AL FORMULARIO:
+${referralLink}
+
+En cuanto lo recibamos, analizaremos tu caso y te enviaremos una propuesta formal en menos de 24 horas.
+
+Quedamos atentos.
+
+Saludos,
+Equipo Leone Agencia`
+      };
     case 'PROPOSAL':
       return {
         subject: `Propuesta de Desarrollo Web - ${clientName} - Leone Agencia`,
@@ -112,7 +133,7 @@ TÉRMINOS Y CONDICIONES
 ${TYC_TEXT}
 ---
 
-Para comenzar, por favor responde a este correo confirmando tu aceptación o haz clic en el botón de abajo (si estuviéramos en una plataforma automática).
+Para comenzar, por favor responde a este correo confirmando tu aceptación.
 
 Quedo atento a tus comentarios.
 
@@ -153,10 +174,19 @@ const PublicForm = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
     budget: '',
     description: '',
     url: '',
-    goal: ''
+    goal: '',
+    referrer: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+        setFormData(prev => ({...prev, referrer: ref}));
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,8 +194,7 @@ const PublicForm = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
     await onSubmit({ ...formData, budget: Number(formData.budget) });
     setIsSubmitting(false);
     setSuccess(true);
-    setTimeout(() => setSuccess(false), 5000);
-    setFormData({ name: '', email: '', phone: '', plan: PlanType.SINGLE, budget: '', description: '', url: '', goal: '' });
+    // Don't clear form immediately to show success message
   };
 
   return (
@@ -179,16 +208,15 @@ const PublicForm = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-gray-50 py-8 px-4 shadow-lg sm:rounded-xl sm:px-10 border border-gray-100">
           {success ? (
-            <div className="rounded-md bg-green-50 p-4 border border-green-200">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-bold text-green-800">¡Solicitud Enviada!</h3>
-                  <p className="mt-1 text-sm text-green-700">Te contactaremos pronto.</p>
-                </div>
+            <div className="rounded-md bg-green-50 p-6 border border-green-200 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
               </div>
+              <h3 className="text-lg font-bold text-green-900 mb-2">¡Solicitud Enviada!</h3>
+              <p className="text-sm text-green-700">Hemos recibido tu información. Te contactaremos en breve a <b>{formData.email}</b>.</p>
+              <button onClick={() => window.location.reload()} className="mt-6 text-sm text-indigo-600 hover:underline font-medium">
+                Enviar otra respuesta
+              </button>
             </div>
           ) : (
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -231,6 +259,10 @@ const PublicForm = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
               <button type="submit" disabled={isSubmitting} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-gray-900 hover:bg-black transition-colors">
                 {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
               </button>
+              
+              {formData.referrer && (
+                  <p className="text-center text-xs text-gray-400 mt-2">Ref: {formData.referrer}</p>
+              )}
             </form>
           )}
         </div>
@@ -283,23 +315,76 @@ const ActionCenter = ({ projects }: { projects: Project[] }) => {
   );
 };
 
+// Componente Modal para Análisis IA
+const AIResponseModal = ({ 
+  isOpen, 
+  onClose, 
+  onAnalyze, 
+  isAnalyzing 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onAnalyze: (text: string) => void;
+  isAnalyzing: boolean;
+}) => {
+  const [text, setText] = useState('');
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+        <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
+           <Sparkles className="w-5 h-5 text-indigo-600 mr-2" />
+           Analizar Respuesta del Cliente
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+           Como no tenemos acceso a tu correo privado, copia y pega la respuesta del cliente aquí. 
+           La IA determinará si aprobar o rechazar la etapa automáticamente.
+        </p>
+        <textarea 
+          className="w-full border border-gray-300 rounded-lg p-3 text-sm h-32 mb-4 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          placeholder="Ej: 'Hola, me parece perfecto el presupuesto, avancemos.'"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <div className="flex justify-end gap-3">
+           <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded text-sm font-medium">Cancelar</button>
+           <button 
+             onClick={() => onAnalyze(text)} 
+             disabled={!text.trim() || isAnalyzing}
+             className="px-4 py-2 bg-indigo-600 text-white rounded text-sm font-bold hover:bg-indigo-700 disabled:opacity-50 flex items-center"
+           >
+             {isAnalyzing ? 'Analizando...' : 'Procesar con IA'}
+           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // 3. Project Detail - Workflow Command Center
 const ProjectDetail = ({ 
   project, 
+  client,
   logs, 
   onClose, 
   onAddLog,
   onUpdateLog,
   onUpdateProject,
-  onDeleteProject
+  onDeleteProject,
+  referralLink
 }: { 
   project: Project; 
+  client?: Client;
   logs: ProjectLog[]; 
   onClose: () => void;
   onAddLog: (text: string) => void;
   onUpdateLog: (logId: string, text: string) => void;
   onUpdateProject: (updated: Partial<Project>) => void;
   onDeleteProject: (id: string) => void;
+  referralLink: string;
 }) => {
   // Tabs: Workflow, Data, Logs
   const [activeTab, setActiveTab] = useState<'workflow' | 'data' | 'logs'>('workflow');
@@ -326,6 +411,10 @@ const ProjectDetail = ({
 
   const [newComment, setNewComment] = useState('');
   const [deleteStage, setDeleteStage] = useState(0);
+
+  // AI Analysis State
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Handlers
   const handleStatusChange = (newStatus: ProjectStatus) => {
@@ -362,6 +451,44 @@ const ProjectDetail = ({
     alert('Copiado al portapapeles');
   };
 
+  const handleOpenEmail = (type: string) => {
+    const template = getEmailTemplate(type, project, referralLink);
+    const email = client?.email || '';
+    // Encode properly to ensure special characters work
+    const subject = encodeURIComponent(template.subject);
+    const body = encodeURIComponent(template.body);
+    
+    // Use window.location.href instead of window.open for better mailto reliability
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    
+    onAddLog(`Abierto borrador de email (${type}) para ${email}`);
+  };
+
+  const handleAnalyzeResponse = async (text: string) => {
+    setIsAnalyzing(true);
+    const analysis: AIResponseAnalysis = await analyzeClientResponse(text, status);
+    setIsAnalyzing(false);
+    setShowAIModal(false);
+
+    if (analysis.decision === 'ACCEPTED') {
+      alert(`✅ RESPUESTA POSITIVA DETECTADA\n"${analysis.summary}"\n\nAvanzando etapa automáticamente...`);
+      onAddLog(`IA: Cliente aceptó. "${analysis.summary}". Avanzando etapa.`);
+      
+      if (status === ProjectStatus.PROSPECTION) {
+        handleStageChange(ProjectStatus.DISCOVERY);
+      } else if (status === ProjectStatus.PROPOSAL) {
+        handleStageChange(ProjectStatus.WAITING_RESOURCES);
+      }
+    } else if (analysis.decision === 'REJECTED') {
+      alert(`❌ RESPUESTA NEGATIVA\n"${analysis.summary}"\n\nEl proyecto se marcará como Perdido.`);
+      onAddLog(`IA: Cliente rechazó. "${analysis.summary}".`);
+      handleStageChange(ProjectStatus.LOST);
+    } else {
+      alert(`⚠️ RESPUESTA AMBIGUA\n"${analysis.summary}"\n\nLa IA no está segura. Revisa manualmente.`);
+      onAddLog(`IA: Respuesta ambigua. "${analysis.summary}".`);
+    }
+  };
+
   // Helper to render Technical Sheet Side Panel (Visible in Stage 5+)
   const TechnicalSheet = () => (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-xs space-y-3 h-fit">
@@ -383,6 +510,14 @@ const ProjectDetail = ({
       <div className="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity" onClick={onClose}></div>
       <div className="relative bg-white rounded-t-xl sm:rounded-xl text-left overflow-hidden shadow-2xl transform transition-all w-full sm:max-w-6xl h-[95vh] flex flex-col">
         
+        {/* AI Analysis Modal */}
+        <AIResponseModal 
+            isOpen={showAIModal} 
+            onClose={() => setShowAIModal(false)} 
+            onAnalyze={handleAnalyzeResponse}
+            isAnalyzing={isAnalyzing}
+        />
+
         {/* Header */}
         <div className="bg-gray-900 px-4 sm:px-6 py-4 flex justify-between items-center shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -568,7 +703,36 @@ const ProjectDetail = ({
                     {status === ProjectStatus.PROSPECTION && (
                         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                             <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Users className="w-5 h-5 mr-2"/> 1. Prospección</h4>
-                            <p className="text-sm text-gray-600 mb-4">Objetivo: Obtener datos mínimos y filtrar.</p>
+                            <p className="text-sm text-gray-600 mb-4">Objetivo: Enviar formulario para obtener datos mínimos y filtrar.</p>
+                            
+                            {/* Email Link Button */}
+                            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
+                                <p className="text-xs text-blue-800 mb-2 font-bold uppercase">Tu Link de Captación:</p>
+                                <div className="flex gap-2 mb-4">
+                                    <input 
+                                        readOnly 
+                                        value={referralLink} 
+                                        className="flex-1 text-xs border border-blue-200 rounded p-2 bg-white text-gray-600"
+                                    />
+                                    <button onClick={() => copyToClipboard(referralLink)} className="bg-white border border-blue-200 p-2 rounded hover:bg-blue-100">
+                                        <Copy className="w-4 h-4 text-blue-600"/>
+                                    </button>
+                                </div>
+
+                                <p className="text-xs text-blue-800 mb-2 font-bold">Acción Requerida:</p>
+                                <button 
+                                    onClick={() => handleOpenEmail('PROSPECTION')}
+                                    className="w-full bg-blue-600 text-white px-4 py-3 rounded font-bold text-sm hover:bg-blue-700 flex items-center justify-center shadow-sm"
+                                >
+                                    <Mail className="w-4 h-4 mr-2"/> Redactar Email de Contacto (Google Forms)
+                                </button>
+                                <div className="mt-3 text-center">
+                                   <button onClick={() => setShowAIModal(true)} className="text-xs text-indigo-600 font-bold hover:underline flex items-center justify-center w-full">
+                                      <Sparkles className="w-3 h-3 mr-1"/> Analizar Respuesta del Cliente (IA)
+                                   </button>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="bg-gray-50 p-3 rounded">
                                     <span className="text-xs font-bold text-gray-500 block mb-1">Web Actual</span>
@@ -590,11 +754,11 @@ const ProjectDetail = ({
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={() => { handleSaveData(); handleStageChange(ProjectStatus.DISCOVERY); }} className="bg-indigo-600 text-white px-4 py-2 rounded font-bold text-sm hover:bg-indigo-700 flex items-center">
-                                    Guardar & Aprobar &rarr; Ir a Discovery
+                                <button onClick={() => { handleSaveData(); handleStageChange(ProjectStatus.DISCOVERY); }} className="bg-gray-900 text-white px-4 py-2 rounded font-bold text-sm hover:bg-black flex items-center">
+                                    <Check className="w-4 h-4 mr-2" /> Aprobar &rarr; Ir a Discovery
                                 </button>
                                 <button onClick={() => handleStageChange(ProjectStatus.LOST)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded font-bold text-sm hover:bg-gray-300">
-                                    Descartar (Lead Perdido)
+                                    Descartar
                                 </button>
                             </div>
                         </div>
@@ -635,24 +799,38 @@ const ProjectDetail = ({
                     {status === ProjectStatus.PROPOSAL && (
                         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                             <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2"/> 3. Propuesta y Contrato</h4>
-                            <p className="text-sm text-gray-600 mb-4">Envía la propuesta automática con los T&C. Espera la aceptación.</p>
+                            <p className="text-sm text-gray-600 mb-4">Envía la propuesta automática con los T&C.</p>
                             
-                            <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-4">
-                                <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Vista Previa del Email</h5>
-                                <div className="text-xs text-gray-800 whitespace-pre-wrap font-mono bg-white p-3 border rounded max-h-60 overflow-y-auto">
-                                    {getEmailTemplate('PROPOSAL', project).body}
+                            <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6">
+                                <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Acciones de Envío</h5>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={() => handleOpenEmail('PROPOSAL')}
+                                        className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded font-bold text-sm hover:bg-indigo-700 flex items-center justify-center shadow-sm"
+                                    >
+                                        <Mail className="w-4 h-4 mr-2"/> Enviar Propuesta (Email)
+                                    </button>
+                                    <button 
+                                        onClick={() => copyToClipboard(getEmailTemplate('PROPOSAL', project).body)} 
+                                        className="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded font-bold text-sm hover:bg-gray-50"
+                                        title="Copiar Texto"
+                                    >
+                                        <Copy className="w-4 h-4"/>
+                                    </button>
                                 </div>
-                                <button 
-                                    onClick={() => copyToClipboard(getEmailTemplate('PROPOSAL', project).body)} 
-                                    className="mt-2 text-xs text-indigo-600 font-bold flex items-center hover:underline"
-                                >
-                                    <Copy className="w-3 h-3 mr-1"/> Copiar al Portapapeles
-                                </button>
+                                <div className="mt-3 text-center">
+                                   <button onClick={() => setShowAIModal(true)} className="text-xs text-indigo-600 font-bold hover:underline flex items-center justify-center w-full">
+                                      <Sparkles className="w-3 h-3 mr-1"/> Analizar Respuesta del Cliente (IA)
+                                   </button>
+                                </div>
                             </div>
 
-                            <div className="flex gap-3">
-                                <button onClick={() => handleStageChange(ProjectStatus.WAITING_RESOURCES)} className="bg-green-600 text-white px-4 py-2 rounded font-bold text-sm hover:bg-green-700 flex items-center w-full justify-center">
-                                    <Check className="w-4 h-4 mr-2"/> Cliente Aceptó Presupuesto
+                            <div className="border-t border-gray-100 pt-6">
+                                <button 
+                                    onClick={() => handleStageChange(ProjectStatus.WAITING_RESOURCES)} 
+                                    className="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-bold text-sm hover:bg-green-700 flex items-center justify-center shadow-md"
+                                >
+                                    <CheckCircle className="w-5 h-5 mr-2"/> ✅ Cliente Aceptó (Manual)
                                 </button>
                             </div>
                         </div>
@@ -806,6 +984,10 @@ const App = () => {
   const [auth, setAuth] = useState({ email: '', password: '' });
   const [loginError, setLoginError] = useState<string | null>(null);
 
+  // Link Personalizado (Simulado basado en el host actual)
+  // En producción esto sería el dominio real
+  const referralLink = `${window.location.origin}?view=public&ref=${auth.email.split('@')[0] || 'admin'}`;
+
   // Modal agregar cliente
   const [showAddClient, setShowAddClient] = useState(false);
   const [newClient, setNewClient] = useState({ name: '', email: '', company: '', phone: '' });
@@ -813,6 +995,14 @@ const App = () => {
   // Modal agregar Proyecto
   const [showAddProject, setShowAddProject] = useState(false);
   const [newProjectData, setNewProjectData] = useState({ clientId: '', plan: PlanType.SINGLE, budget: '', deadline: '' });
+
+  // Check URL params for public view routing
+  useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('view') === 'public') {
+          setView('public');
+      }
+  }, []);
 
   // --- Acciones ---
 
@@ -830,10 +1020,10 @@ const App = () => {
   };
 
   const handlePublicSubmit = async (data: any) => {
-    // 1. Análisis IA
+    // 1. Análisis IA (Opcional)
     // const analysis = await analyzeLead(data.plan, data.budget, data.description || "");
     
-    // 2. Crear Cliente (si es nuevo, simplificado para demo)
+    // 2. Crear Cliente
     const newClientId = Date.now().toString();
     const newClientObj: Client = {
       id: newClientId,
@@ -841,7 +1031,8 @@ const App = () => {
       email: data.email,
       phone: data.phone,
       registeredAt: new Date().toISOString().split('T')[0],
-      company: 'N/A'
+      company: 'N/A',
+      notes: data.referrer ? `Referido por: ${data.referrer}` : undefined
     };
     setClients(prev => [...prev, newClientObj]);
 
@@ -852,11 +1043,11 @@ const App = () => {
       clientName: data.name,
       planType: data.plan,
       budget: data.budget,
-      status: ProjectStatus.PROSPECTION, // Stage 1
+      status: ProjectStatus.PROSPECTION, // Stage 1 initially, but logic says skip to 2
       paymentStatus: PaymentStatus.PENDING,
       maintenanceStatus: MaintenanceStatus.FREE_PERIOD,
       deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      alertNeeds: '', // analysis.alert || undefined,
+      alertNeeds: '', 
       description: data.description,
       discoveryData: {
           currentUrl: data.url,
@@ -868,6 +1059,9 @@ const App = () => {
       }
     };
 
+    // Auto-advance to Stage 2 based on requirement "pasa directamente a etapa 2"
+    newProject.status = ProjectStatus.DISCOVERY;
+
     // 4. Guardar
     setProjects(prev => [...prev, newProject]);
     
@@ -876,7 +1070,7 @@ const App = () => {
       id: Date.now().toString(),
       projectId: newProject.id,
       author: 'Sistema',
-      comment: `Lead recibido vía web.`, // Viabilidad: ${analysis.viabilityScore}/100.
+      comment: `Lead recibido vía web (Ref: ${data.referrer || 'Directo'}). Avanzado a Discovery.`, 
       createdAt: new Date().toISOString().split('T')[0]
     };
     setLogs(prev => [...prev, newLog]);
@@ -980,9 +1174,15 @@ const App = () => {
     setMobileMenuOpen(false);
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Link copiado al portapapeles');
+  };
+
   // --- Derived State ---
   const selectedProject = useMemo(() => projects.find(p => p.id === selectedProjectId), [projects, selectedProjectId]);
   const selectedProjectLogs = useMemo(() => logs.filter(l => l.projectId === selectedProjectId), [logs, selectedProjectId]);
+  const selectedProjectClient = useMemo(() => selectedProject ? clients.find(c => c.id === selectedProject.clientId) : undefined, [selectedProject, clients]);
 
   // --- Vistas ---
 
@@ -1163,8 +1363,8 @@ const App = () => {
                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                </div>
                <div className="flex items-center gap-2">
-                   <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-700">A</div>
-                   <span className="text-sm font-medium text-gray-700 hidden sm:inline">Admin</span>
+                   <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-700">{auth.email.charAt(0).toUpperCase()}</div>
+                   <span className="text-sm font-medium text-gray-700 hidden sm:inline">{auth.email.split('@')[0]}</span>
                </div>
            </div>
         </header>
@@ -1173,9 +1373,20 @@ const App = () => {
           
           {view === 'dashboard' && (
             <div className="space-y-8">
-              <div className="flex justify-between items-end">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Resumen General</h2>
-                  <p className="text-xs sm:text-sm text-gray-500">{new Date().toLocaleDateString()}</p>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Resumen General</h2>
+                    <p className="text-xs sm:text-sm text-gray-500">{new Date().toLocaleDateString()}</p>
+                  </div>
+                  <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-lg flex items-center gap-3 w-full sm:w-auto">
+                      <div className="flex-1">
+                          <p className="text-[10px] font-bold text-indigo-500 uppercase">Tu Link de Captación</p>
+                          <p className="text-xs font-medium text-indigo-900 truncate max-w-[200px]">{referralLink}</p>
+                      </div>
+                      <button onClick={() => copyToClipboard(referralLink)} className="bg-white p-2 rounded border border-indigo-200 hover:bg-indigo-100 text-indigo-600">
+                          <Copy className="w-4 h-4"/>
+                      </button>
+                  </div>
               </div>
               
               <ActionCenter projects={projects} />
@@ -1482,12 +1693,14 @@ const App = () => {
       {selectedProject && (
         <ProjectDetail 
           project={selectedProject}
+          client={selectedProjectClient}
           logs={selectedProjectLogs}
           onClose={() => setSelectedProjectId(null)}
           onAddLog={handleAddLog}
           onUpdateLog={handleUpdateLog}
           onUpdateProject={handleUpdateProject}
           onDeleteProject={handleDeleteProject}
+          referralLink={referralLink}
         />
       )}
     </div>

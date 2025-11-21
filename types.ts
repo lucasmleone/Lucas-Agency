@@ -96,3 +96,9 @@ export interface AIAnalysisResult {
   viabilityScore: number;
   suggestedPlan?: string;
 }
+
+export interface AIResponseAnalysis {
+  decision: 'ACCEPTED' | 'REJECTED' | 'UNCLEAR' | 'MORE_INFO';
+  summary: string;
+  sentimentScore: number;
+}
