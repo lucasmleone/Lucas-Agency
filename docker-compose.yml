@@ -24,7 +24,11 @@ services:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
     restart: always
-    environment: MYSQL_DATABASE=${DB_NAME} MYSQL_USER=${DB_USER} MYSQL_PASSWORD=${DB_PASS} MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-agency_db}
+      MYSQL_USER: ${DB_USER:-user}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS}
     volumes:
       - db_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
