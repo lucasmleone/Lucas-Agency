@@ -200,12 +200,8 @@ router.delete('/projects/:id', async (req, res) => {
 // --- Clients ---
 
 router.get('/clients', async (req, res) => {
-    console.log('📋 GET /clients called');
-    console.log('User ID:', req.user?.id);
     try {
-        console.log('Querying database for user_id:', req.user.id);
         const [rows] = await pool.query('SELECT * FROM clients WHERE user_id = ?', [req.user.id]);
-        console.log('Raw rows from DB:', rows.length);
 
         const clients = rows.map(c => ({
             id: String(c.id),
@@ -213,14 +209,12 @@ router.get('/clients', async (req, res) => {
             email: c.email,
             phone: c.phone,
             company: c.company,
-            registeredAt: c.created_at ? c.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+            registeredAt: c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             notes: c.notes
         }));
-        console.log('Mapped clients:', clients.length);
         res.json(clients);
     } catch (err) {
-        console.error('❌ ERROR in GET /clients:', err.message);
-        console.error('Stack:', err.stack);
+        console.error('Error fetching clients:', err);
         res.status(500).json({ error: 'Error fetching clients' });
     }
 });
