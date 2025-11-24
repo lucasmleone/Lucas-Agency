@@ -1,0 +1,353 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "email": "demo@agency.com",
+            "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+            "agent_code": "AGENT_DEMO1"
+        }
+    ],
+    "clients": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "name": "Cliente Demo",
+            "email": "cliente@demo.com",
+            "phone": "123456789",
+            "company": "Demo Corp",
+            "status": "active",
+            "created_at": "2023-01-01T00:00:00.000Z"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "name": "cliente",
+            "email": "email@mail.com",
+            "phone": "2139823187",
+            "company": "empresa",
+            "status": "active",
+            "created_at": "2025-11-22T22:15:35.277Z"
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "name": "cliente 2 ",
+            "email": "email2@mail.com",
+            "phone": "327817",
+            "company": "empresa 2",
+            "status": "active",
+            "created_at": "2025-11-22T22:24:42.102Z"
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "name": "cliente3",
+            "email": "email3@mail.com",
+            "phone": "231231",
+            "company": "empresa 3 ",
+            "status": "active",
+            "created_at": "2025-11-22T22:29:30.968Z"
+        },
+        {
+            "id": 5,
+            "user_id": 1,
+            "name": "cliente4",
+            "email": "mail4@mail.com",
+            "phone": "67832163872163",
+            "company": "empresa4 ",
+            "status": "active",
+            "created_at": "2025-11-22T22:41:29.958Z"
+        }
+    ],
+    "projects": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "client_id": 1,
+            "name": "Web Corporativa",
+            "description": "Rediseño web",
+            "start_date": "2023-01-01",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "clientName": "Cliente Demo",
+            "blockedStatus": true,
+            "blockedReason": "me dice que no me puede pagar\n",
+            "blockedSince": "2025-11-22T22:53:32.637Z"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "client_id": "1",
+            "name": "Desconocido",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-12-06",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "clientName": "Unknown"
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "client_id": "2",
+            "name": "Desconocido",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-12-06",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "budget": 300,
+            "clientName": "cliente"
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "client_id": "1763850282091",
+            "name": "cliente 2 ",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-12-06",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "budget": 300,
+            "clientName": "Unknown"
+        },
+        {
+            "id": 5,
+            "user_id": 1,
+            "client_id": "4",
+            "name": "cliente3",
+            "description": "",
+            "start_date": null,
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"hoajasals\",\"competitors\":\"sadhdslads\",\"references\":\"sandndsa\",\"materialStatus\":\"jksadjksadjnkas\",\"currentUrl\":\"ni idea cual es la url\",\"objective\":\"obejtivo\"}",
+            "budget": 3000,
+            "clientName": "cliente3"
+        },
+        {
+            "id": 6,
+            "user_id": 1,
+            "client_id": "5",
+            "name": "cliente4",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-12-06",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "clientName": "cliente4"
+        },
+        {
+            "id": 7,
+            "user_id": 1,
+            "client_id": "1",
+            "name": "Cliente Demo",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-12-07",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "clientName": "Cliente Demo"
+        }
+    ],
+    "finance": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "type": "Ingreso",
+            "amount": 500,
+            "description": "Anticipo Web",
+            "date": "2023-01-01",
+            "status": "completed"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "type": "Gasto",
+            "amount": 200,
+            "description": "compre un perro",
+            "date": "2025-11-22"
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "project_id": "6",
+            "type": "Ingreso",
+            "amount": 100,
+            "description": "anticipo",
+            "date": "2025-11-22",
+            "status": "completed"
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "project_id": null,
+            "type": "Ingreso",
+            "amount": 100,
+            "description": "antiic",
+            "date": "2025-11-22",
+            "status": "completed"
+        },
+        {
+            "id": 5,
+            "user_id": 1,
+            "project_id": "6",
+            "type": "Ingreso",
+            "amount": 200,
+            "description": "anticipo",
+            "date": "2025-11-22",
+            "status": "completed"
+        },
+        {
+            "id": 6,
+            "user_id": 1,
+            "project_id": "6",
+            "type": "Gasto",
+            "amount": 20,
+            "description": "liceh",
+            "date": "2025-11-23",
+            "status": "completed"
+        }
+    ],
+    "logs": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "project_id": 1,
+            "message": "Proyecto iniciado",
+            "created_at": "2023-01-01T00:00:00.000Z"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "project_id": "1763849745066",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-22T22:15:45.112Z"
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "project_id": 1,
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-22T22:20:04.632Z"
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "project_id": 1,
+            "message": "Estado cambiado manualmente a: 2. Propuesta",
+            "created_at": "2025-11-22T22:20:42.361Z"
+        },
+        {
+            "id": 5,
+            "user_id": 1,
+            "project_id": 1,
+            "message": "Estado cambiado manualmente a: 3. Espera Recursos",
+            "created_at": "2025-11-22T22:20:49.146Z"
+        },
+        {
+            "id": 6,
+            "user_id": 1,
+            "project_id": 1,
+            "message": "Estado cambiado a: 4. Producción",
+            "created_at": "2025-11-22T22:21:16.669Z"
+        },
+        {
+            "id": 7,
+            "user_id": 1,
+            "project_id": 1,
+            "message": "Estado cambiado a: 5. Cierre y Entrega",
+            "created_at": "2025-11-22T22:21:41.589Z"
+        },
+        {
+            "id": 8,
+            "user_id": 1,
+            "project_id": 1,
+            "message": "el cliente se enojo",
+            "created_at": "2025-11-22T22:22:10.395Z"
+        },
+        {
+            "id": 9,
+            "user_id": 1,
+            "project_id": "1763850261624",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-22T22:24:21.644Z"
+        },
+        {
+            "id": 10,
+            "user_id": 1,
+            "project_id": "1763850296491",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-22T22:24:56.507Z"
+        },
+        {
+            "id": 11,
+            "user_id": 1,
+            "project_id": "5",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-22T22:29:53.829Z"
+        },
+        {
+            "id": 12,
+            "user_id": 1,
+            "project_id": 5,
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-22T22:32:13.309Z"
+        },
+        {
+            "id": 13,
+            "user_id": 1,
+            "project_id": 5,
+            "message": "mamitaaa que complicado",
+            "created_at": "2025-11-22T22:33:18.601Z"
+        },
+        {
+            "id": 14,
+            "user_id": 1,
+            "project_id": 5,
+            "message": "mamita que complicado",
+            "created_at": "2025-11-22T22:33:31.885Z"
+        },
+        {
+            "id": 15,
+            "user_id": 1,
+            "project_id": 5,
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-22T22:34:43.821Z"
+        },
+        {
+            "id": 16,
+            "user_id": 1,
+            "project_id": "6",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-22T22:41:46.841Z"
+        },
+        {
+            "id": 17,
+            "user_id": 1,
+            "project_id": "3",
+            "message": "Proyecto bloqueado: me dice que no me puede pagar\n",
+            "created_at": "2025-11-22T22:53:32.667Z"
+        },
+        {
+            "id": 18,
+            "user_id": 1,
+            "project_id": "6",
+            "message": "wqw,dsda",
+            "created_at": "2025-11-23T02:23:57.837Z"
+        },
+        {
+            "id": 19,
+            "user_id": 1,
+            "project_id": "7",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-23T03:00:29.224Z"
+        }
+    ]
+}

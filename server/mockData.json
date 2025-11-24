@@ -1,0 +1,792 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "email": "demo@agency.com",
+            "password_hash": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+            "agent_code": "AGENT_DEMO1"
+        }
+    ],
+    "clients": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "name": "cliente 1",
+            "email": "email@email.com",
+            "phone": "11111111",
+            "company": "EMPRESA NUEVA TEST",
+            "status": "active",
+            "created_at": "2025-11-24T00:53:08.128Z"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "name": "Jose Leone",
+            "email": "joseleone19@gmail.com",
+            "phone": "111111",
+            "company": "La olga",
+            "status": "active",
+            "created_at": "2025-11-24T05:35:45.708Z"
+        }
+    ],
+    "projects": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "client_id": "1",
+            "name": "cliente 1",
+            "description": "",
+            "start_date": null,
+            "status": "4. Producción",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "clientName": "cliente 1",
+            "payment_status": "Pendiente",
+            "maintenance_status": "FREE_PERIOD",
+            "checklists": "{\"depositPaid\":false,\"infoReceived\":false,\"fillerAccepted\":false,\"finalPaymentPaid\":false}",
+            "dev_url": "",
+            "basePrice": 300,
+            "finalPrice": 300,
+            "base_price": 300,
+            "final_price": 300,
+            "end_date": "2028-01-01",
+            "plan": "Single Page"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "client_id": "1",
+            "name": "cliente 1",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-11-24",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"asdsa\",\"competitors\":\"saddsad\",\"references\":\"sdadsad\",\"materialStatus\":\"dsadsada\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "planType": "Single Page",
+            "clientName": "cliente 1",
+            "plan": "Single Page",
+            "dev_url": "",
+            "base_price": 300,
+            "final_price": 240,
+            "payment_status": "Pagado (100%)",
+            "discount": 20,
+            "discount_type": "percentage",
+            "pricing_notes": "pidio un descuento porque se hace con plantilla"
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "client_id": "1",
+            "name": "cliente 1",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-12-12",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "planType": "Single Page",
+            "clientName": "cliente 1"
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "client_id": "1",
+            "name": "cliente 1",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-11-25",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "planType": "Single Page",
+            "clientName": "cliente 1",
+            "plan": "Single Page",
+            "dev_url": "",
+            "base_price": 300,
+            "final_price": 300
+        },
+        {
+            "id": 5,
+            "user_id": 1,
+            "client_id": "2",
+            "name": "Jose Leone",
+            "description": "",
+            "start_date": null,
+            "end_date": "2025-12-24",
+            "status": "1. Discovery",
+            "checklists": "{}",
+            "discovery_data": "{\"buyerPersona\":\"\",\"competitors\":\"\",\"references\":\"\",\"materialStatus\":\"\",\"currentUrl\":\"\",\"objective\":\"\"}",
+            "planType": "Single Page",
+            "clientName": "Jose Leone"
+        }
+    ],
+    "finance": [],
+    "logs": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-24T00:53:18.536Z"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 7. Entregado",
+            "created_at": "2025-11-24T00:53:23.481Z"
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 1. Discovery",
+            "created_at": "2025-11-24T00:55:06.296Z"
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 7. Entregado",
+            "created_at": "2025-11-24T03:48:12.614Z"
+        },
+        {
+            "id": 5,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 1. Discovery",
+            "created_at": "2025-11-24T04:05:36.386Z"
+        },
+        {
+            "id": 6,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 2. Propuesta",
+            "created_at": "2025-11-24T04:05:52.770Z"
+        },
+        {
+            "id": 7,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 3. Espera Recursos",
+            "created_at": "2025-11-24T04:06:02.229Z"
+        },
+        {
+            "id": 8,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 4. Producción",
+            "created_at": "2025-11-24T04:06:06.117Z"
+        },
+        {
+            "id": 9,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 7. Entregado",
+            "created_at": "2025-11-24T04:11:42.367Z"
+        },
+        {
+            "id": 10,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Estado cambiado manualmente a: 4. Producción",
+            "created_at": "2025-11-24T04:36:52.152Z"
+        },
+        {
+            "id": 11,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T04:37:10.609Z"
+        },
+        {
+            "id": 12,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-24T04:43:18.268Z"
+        },
+        {
+            "id": 13,
+            "user_id": 1,
+            "project_id": "3",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-24T04:43:39.492Z"
+        },
+        {
+            "id": 14,
+            "user_id": 1,
+            "project_id": "4",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-24T04:43:57.167Z"
+        },
+        {
+            "id": 15,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T04:47:04.082Z"
+        },
+        {
+            "id": 16,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T04:51:20.208Z"
+        },
+        {
+            "id": 17,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:01:28.743Z"
+        },
+        {
+            "id": 18,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:05:15.029Z"
+        },
+        {
+            "id": 19,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:24:16.570Z"
+        },
+        {
+            "id": 20,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:27:49.418Z"
+        },
+        {
+            "id": 21,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:29:41.174Z"
+        },
+        {
+            "id": 22,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:29:57.712Z"
+        },
+        {
+            "id": 23,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:30:48.857Z"
+        },
+        {
+            "id": 24,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Estado cambiado a: 2. Propuesta",
+            "created_at": "2025-11-24T05:30:48.863Z"
+        },
+        {
+            "id": 25,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:31:20.364Z"
+        },
+        {
+            "id": 26,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Estado cambiado manualmente a: 1. Discovery",
+            "created_at": "2025-11-24T05:31:46.018Z"
+        },
+        {
+            "id": 27,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:31:53.380Z"
+        },
+        {
+            "id": 28,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:34:29.661Z"
+        },
+        {
+            "id": 29,
+            "user_id": 1,
+            "project_id": "5",
+            "message": "Proyecto creado manualmente.",
+            "created_at": "2025-11-24T05:36:00.098Z"
+        },
+        {
+            "id": 30,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:36:19.703Z"
+        },
+        {
+            "id": 31,
+            "user_id": 1,
+            "project_id": "2",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:36:20.645Z"
+        },
+        {
+            "id": 32,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:37:05.660Z"
+        },
+        {
+            "id": 33,
+            "user_id": 1,
+            "project_id": "1",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:37:06.366Z"
+        },
+        {
+            "id": 34,
+            "user_id": 1,
+            "project_id": "4",
+            "message": "Datos del proyecto actualizados (Edición Manual).",
+            "created_at": "2025-11-24T05:42:04.117Z"
+        }
+    ],
+    "maintenance_tasks": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "project_id": "1",
+            "created_at": "2025-11-24T00:53:23.488Z",
+            "free_until": "2026-01-23T00:53:23.488Z",
+            "status": "active",
+            "monthly_tasks": [
+                {
+                    "id": "1763945603489",
+                    "month": 1,
+                    "date": "2025-12-24T00:53:23.488Z",
+                    "completed": true,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": true
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": true
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": true
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": true
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": true
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": true
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": true
+                        }
+                    ],
+                    "reportSent": false
+                },
+                {
+                    "id": "1763945603490",
+                    "month": 2,
+                    "date": "2026-01-23T00:53:23.488Z",
+                    "completed": true,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": true
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": true
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": true
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": true
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": true
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": true
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": true
+                        }
+                    ],
+                    "reportSent": false
+                },
+                {
+                    "id": "1763945631869",
+                    "month": 3,
+                    "date": "2026-02-22T00:53:23.488Z",
+                    "completed": false,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": false
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": false
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": false
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": false
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": false
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": false
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": false
+                        }
+                    ],
+                    "reportSent": false
+                },
+                {
+                    "id": "1763945631870",
+                    "month": 4,
+                    "date": "2026-03-24T00:53:23.488Z",
+                    "completed": false,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": false
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": false
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": false
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": false
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": false
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": false
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": false
+                        }
+                    ],
+                    "reportSent": false
+                },
+                {
+                    "id": "1763945631871",
+                    "month": 5,
+                    "date": "2026-04-23T00:53:23.488Z",
+                    "completed": false,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": false
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": false
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": false
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": false
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": false
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": false
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": false
+                        }
+                    ],
+                    "reportSent": false
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "project_id": "1",
+            "created_at": "2025-11-24T03:48:12.609Z",
+            "free_until": "2026-01-23T03:48:12.609Z",
+            "status": "active",
+            "monthly_tasks": [
+                {
+                    "id": "1763956092610",
+                    "month": 1,
+                    "date": "2025-12-24T03:48:12.609Z",
+                    "completed": false,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": false
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": false
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": false
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": false
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": false
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": false
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": false
+                        }
+                    ],
+                    "reportSent": false
+                },
+                {
+                    "id": "1763956092611",
+                    "month": 2,
+                    "date": "2026-01-23T03:48:12.609Z",
+                    "completed": false,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": false
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": false
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": false
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": false
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": false
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": false
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": false
+                        }
+                    ],
+                    "reportSent": false
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "project_id": "1",
+            "created_at": "2025-11-24T04:11:42.359Z",
+            "free_until": "2026-01-23T04:11:42.359Z",
+            "status": "active",
+            "monthly_tasks": [
+                {
+                    "id": "1763957502360",
+                    "month": 1,
+                    "date": "2025-12-24T04:11:42.359Z",
+                    "completed": false,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": false
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": false
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": false
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": false
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": false
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": false
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": false
+                        }
+                    ],
+                    "reportSent": false
+                },
+                {
+                    "id": "1763957502361",
+                    "month": 2,
+                    "date": "2026-01-23T04:11:42.359Z",
+                    "completed": false,
+                    "checklist": [
+                        {
+                            "id": "1",
+                            "text": "Verificar estado online (Uptime)",
+                            "completed": false
+                        },
+                        {
+                            "id": "2",
+                            "text": "Backup Manual (UpdraftPlus) a nube externa",
+                            "completed": false
+                        },
+                        {
+                            "id": "3",
+                            "text": "Revisión de Logs de Seguridad (Bloqueos/Intentos de login)",
+                            "completed": false
+                        },
+                        {
+                            "id": "4",
+                            "text": "Actualización de Plugins (Uno a uno/Lote)",
+                            "completed": false
+                        },
+                        {
+                            "id": "5",
+                            "text": "Actualización de WordPress Core y Tema",
+                            "completed": false
+                        },
+                        {
+                            "id": "6",
+                            "text": "Limpieza de SPAM y vaciado de Caché",
+                            "completed": false
+                        },
+                        {
+                            "id": "7",
+                            "text": "Test visual en incógnito y prueba de formularios",
+                            "completed": false
+                        }
+                    ],
+                    "reportSent": false
+                }
+            ]
+        }
+    ]
+}

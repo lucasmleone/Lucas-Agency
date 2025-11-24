@@ -1,14 +1,13 @@
 
 export enum ProjectStatus {
-  PROSPECTION = '1. Prospección',
-  DISCOVERY = '2. Discovery',
-  PROPOSAL = '3. Propuesta',
-  WAITING_RESOURCES = '4. Espera Recursos',
-  PRODUCTION = '5. Producción',
-  DELIVERY = '6. Cierre y Entrega',
-  CANCELLED = '7. Cancelado',
-  LOST = '7. Perdido',
-  DELIVERED = '8. Entregado'
+  DISCOVERY = '1. Discovery',
+  PROPOSAL = '2. Propuesta',
+  WAITING_RESOURCES = '3. Espera Recursos',
+  PRODUCTION = '4. Producción',
+  DELIVERY = '5. Cierre y Entrega',
+  CANCELLED = '6. Cancelado',
+  LOST = '6. Perdido',
+  DELIVERED = '7. Entregado'
 }
 
 export enum PaymentStatus {
@@ -18,16 +17,16 @@ export enum PaymentStatus {
 }
 
 export enum PlanType {
-  SINGLE = 'Single Page ($300)',
-  MULTI = 'Multipage ($600)',
-  ECOMMERCE = 'E-commerce ($900)',
-  CUSTOM = 'Personalizado (Cotizar)'
+  SINGLE = 'Single Page',
+  MULTI = 'Multipage',
+  ECOMMERCE = 'E-commerce',
+  CUSTOM = 'Personalizado'
 }
 
 export enum MaintenanceStatus {
-  FREE_PERIOD = 'Periodo Gratuito (2 Meses)',
-  ACTIVE_PAID = 'Activo ($10/mes)',
-  INACTIVE = 'Inactivo/Cancelado'
+  FREE_PERIOD = "FREE_PERIOD",
+  ACTIVE = "ACTIVE",
+  CANCELLED = "CANCELLED"
 }
 
 export interface Client {
@@ -61,18 +60,32 @@ export interface Project {
   clientId: string;
   clientName: string; // Denormalized for easier display
   planType: PlanType;
-  budget: number;
+  // budget: number; // Removed in favor of FinanceRecords
   status: ProjectStatus;
   paymentStatus: PaymentStatus;
   maintenanceStatus?: MaintenanceStatus;
   deadline: string;
   alertNeeds?: string; // AI generated warning
   description?: string;
-  
+
   // New Fields for 7-Stage Workflow
   discoveryData?: DiscoveryData;
   checklists?: ProjectChecklists;
   devUrl?: string;
+
+  // Blocking Status
+  blockedStatus?: boolean;
+  blockedReason?: string;
+  blockedSince?: string; // ISO date
+
+  // Pricing Fields
+  basePrice?: number; // Base price according to plan
+  customPrice?: number; // Custom/quoted price
+  discount?: number; // Discount amount (can be % or fixed)
+  discountType?: 'percentage' | 'fixed'; // Type of discount
+  finalPrice?: number; // Calculated final price
+  pricingNotes?: string; // Notes about pricing/quote
+  nextMaintenanceDate?: string; // Next scheduled maintenance task date
 }
 
 export interface ProjectLog {
@@ -85,6 +98,7 @@ export interface ProjectLog {
 
 export interface FinanceRecord {
   id: string;
+  projectId?: string; // Optional for general expenses, required for project payments
   type: 'Ingreso' | 'Gasto';
   amount: number;
   description: string;
@@ -102,3 +116,44 @@ export interface AIResponseAnalysis {
   summary: string;
   sentimentScore: number;
 }
+
+// =====================================================
+// MAINTENANCE SYSTEM
+// =====================================================
+
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+  notes?: string;
+}
+
+export interface MonthlyTask {
+  id: string;
+  month: number;                  // 1, 2, 3, etc.
+  date: string;                   // Fecha programada (ISO string)
+  completed: boolean;
+  checklist: ChecklistItem[];
+  reportSent: boolean;
+}
+
+export interface MaintenanceTask {
+  id: string;
+  projectId: string;
+  createdAt: string;              // Fecha de creación (= fecha entrega)
+  freeUntil: string;              // createdAt + 60 días
+  status: 'active' | 'requires_payment' | 'inactive';
+  monthlyTasks: MonthlyTask[];
+}
+
+// Checklist estándar para mantenimiento
+export const MAINTENANCE_CHECKLIST: Omit<ChecklistItem, 'completed' | 'notes'>[] = [
+  { id: '1', text: 'Verificar estado online (Uptime)' },
+  { id: '2', text: 'Backup Manual (UpdraftPlus) a nube externa' },
+  { id: '3', text: 'Revisión de Logs de Seguridad (Bloqueos/Intentos de login)' },
+  { id: '4', text: 'Actualización de Plugins (Uno a uno/Lote)' },
+  { id: '5', text: 'Actualización de WordPress Core y Tema' },
+  { id: '6', text: 'Limpieza de SPAM y vaciado de Caché' },
+  { id: '7', text: 'Test visual en incógnito y prueba de formularios' }
+];
+
