@@ -33,11 +33,7 @@ const limiter = rateLimit({
 });
 
 // Middleware
-app.use(helmet({
-    contentSecurityPolicy: false, // Disable CSP for now (HTTP-only testing)
-    crossOriginOpenerPolicy: false, // Disable for HTTP
-    crossOriginEmbedderPolicy: false
-}));
+// app.use(helmet()); // Disabled for HTTP testing
 if (process.env.NODE_ENV === 'production') {
     app.use(limiter); // Apply rate limiting only in production
 }
