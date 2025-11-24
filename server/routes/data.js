@@ -4,33 +4,6 @@ import { verifyToken } from './auth.js';
 
 const router = express.Router();
 
-// TEMP: Test clients without auth middleware
-router.get('/clients', async (req, res) => {
-    try {
-        // Hardcode user_id for testing
-        const [rows] = await pool.query('SELECT * FROM clients WHERE user_id = ?', [1]);
-
-        const clients = [];
-        for (let i = 0; i < rows.length; i++) {
-            const c = rows[i];
-            clients.push({
-                id: String(c.id),
-                name: c.name,
-                email: c.email || '',
-                phone: c.phone || '',
-                company: c.company || '',
-                registeredAt: c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                notes: c.notes || ''
-            });
-        }
-
-        res.json(clients);
-    } catch (err) {
-        console.error('[CLIENTS TEST] Error:', err.message, err.stack);
-        res.status(500).json({ error: 'Error fetching clients', details: err.message });
-    }
-});
-
 router.use(verifyToken);
 
 // --- Projects ---
@@ -228,36 +201,21 @@ router.delete('/projects/:id', async (req, res) => {
 
 router.get('/clients', async (req, res) => {
     try {
-        console.log('[CLIENTS] Starting request, user:', req.user);
         const [rows] = await pool.query('SELECT * FROM clients WHERE user_id = ?', [req.user.id]);
-        console.log('[CLIENTS] Query complete, row count:', rows.length);
 
-        const clients = [];
-        for (let i = 0; i < rows.length; i++) {
-            try {
-                const c = rows[i];
-                console.log(`[CLIENTS] Processing row ${i}:`, c.id, c.name);
-                clients.push({
-                    id: String(c.id),
-                    name: c.name,
-                    email: c.email || '',
-                    phone: c.phone || '',
-                    company: c.company || '',
-                    registeredAt: c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                    notes: c.notes || ''
-                });
-                console.log(`[CLIENTS] Row ${i} processed successfully`);
-            } catch (rowErr) {
-                console.error(`[CLIENTS] Error processing row ${i}:`, rowErr);
-                throw rowErr;
-            }
-        }
+        const clients = rows.map(c => ({
+            id: String(c.id),
+            name: c.name,
+            email: c.email || '',
+            phone: c.phone || '',
+            company: c.company || '',
+            registeredAt: c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            notes: c.notes || ''
+        }));
 
-        console.log('[CLIENTS] All rows processed, returning:', clients.length, 'clients');
         res.json(clients);
     } catch (err) {
-        console.error('[CLIENTS] Fatal error:', err.message);
-        console.error('[CLIENTS] Stack:', err.stack);
+        console.error('Error fetching clients:', err);
         res.status(500).json({ error: 'Error fetching clients', details: err.message });
     }
 });
