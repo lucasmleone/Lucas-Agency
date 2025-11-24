@@ -92,6 +92,16 @@ router.put('/projects/:id', async (req, res) => {
     const p = req.body;
     const { id } = req.params;
 
+    // Helper to convert ISO date to MySQL DATE format
+    const toMySQLDate = (dateStr) => {
+        if (!dateStr) return null;
+        try {
+            return new Date(dateStr).toISOString().split('T')[0];
+        } catch (e) {
+            return null;
+        }
+    };
+
     if (process.env.NODE_ENV === 'development') {
         console.log('[UPDATE PROJECT]', id, 'user:', req.user.id);
     }
@@ -125,7 +135,7 @@ router.put('/projects/:id', async (req, res) => {
             p.maintenanceStatus,
             JSON.stringify(p.checklists),
             JSON.stringify(p.discoveryData),
-            p.deadline || p.endDate, // Fix: Frontend sends deadline
+            toMySQLDate(p.deadline || p.endDate), // Fix: Frontend sends deadline
             p.planType || p.plan,    // Fix: Frontend sends planType
             p.devUrl,
             p.description,
