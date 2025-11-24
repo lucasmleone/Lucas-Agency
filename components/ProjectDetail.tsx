@@ -26,9 +26,79 @@ const getEmailTemplate = (type: 'PROPOSAL' | 'REVIEW', project: Project) => {
         ? `Propuesta de Proyecto - ${project.clientName} (${project.planType})`
         : `Revisión de Avances - ${project.clientName}`;
 
-    const body = type === 'PROPOSAL'
-        ? `Hola,\n\nAdjunto encontrarás la propuesta detallada para el proyecto de ${project.clientName}.\n\nQuedo atento a tus comentarios.\n\nSaludos,`
-        : `Hola,\n\nTe invito a revisar los avances del proyecto de ${project.clientName}.\n\nPuedes verlos aquí: ${project.devUrl || '[URL pendiente]'}\n\nEspero tu feedback.\n\nSaludos,`;
+    let body = '';
+
+    if (type === 'PROPOSAL') {
+        const price = project.finalPrice ? `$${project.finalPrice.toLocaleString()}` : 'A cotizar';
+
+        body = `Hola,
+
+Adjunto encontrarás la propuesta detallada para el proyecto de ${project.clientName}.
+
+---
+**PRESUPUESTO ESTIMADO**
+**Plan Seleccionado:** ${project.planType}
+**Inversión Total:** ${price}
+
+**DETALLE DE SERVICIOS INCLUIDOS**
+Para garantizar un resultado profesional y de alto impacto, el servicio incluye:
+- **Desarrollo Web Optimizado:** Código limpio enfocado en velocidad de carga y posicionamiento en buscadores (SEO Técnico).
+- **Diseño Responsivo:** Visualización perfecta en celulares, tablets y computadoras.
+- **Funcionalidades Clave:** Integración con WhatsApp, formularios de contacto y mapas interactivos.
+- **Seguridad y Soporte:** Configuración de certificado SSL (candado seguro) y 2 meses de mantenimiento técnico bonificado.
+
+---
+**TÉRMINOS Y CONDICIONES DEL SERVICIO**
+
+1. **Alcance y Exclusiones**
+Este presupuesto cubre el desarrollo web y la optimización básica para buscadores (SEO).
+*Exclusiones:* NO incluye diseño de identidad corporativa (creación de logotipos, manuales de marca) ni servicios de fotografía. El Cliente deberá proporcionar estos activos en la calidad adecuada.
+
+2. **Plazos de Ejecución**
+El tiempo estimado para la entrega de la Primera Revisión (Borrador Funcional) es de 4 semanas.
+*Inicio del cómputo:* Este plazo comenzará a contar únicamente cuando se cumplan dos condiciones:
+- Recepción del comprobante de pago del anticipo (50%).
+- Entrega del 100% de la información base solicitada (Briefing).
+
+3. **Entrega de Contenidos (Textos)**
+El Cliente es responsable de entregar los textos finales antes del inicio.
+*Retrasos:* Si el Cliente se demora en la entrega, podrá solicitar al Desarrollador el uso de textos provisionales (genéricos o IA) para no detener el avance visual. La revisión y corrección final de estos textos será responsabilidad del Cliente durante las rondas de revisión.
+
+4. **Vigencia del Proyecto (Inactividad)**
+Para garantizar el flujo de trabajo, el proyecto tiene una vigencia activa de 30 días tras cada entrega o solicitud de feedback por parte del Desarrollador.
+*Stand-by:* Si el Cliente no responde en este periodo, el proyecto pasará a estado "Inactivo" y saldrá de la agenda de producción. Su reactivación dependerá exclusivamente de la disponibilidad futura del Desarrollador.
+
+5. **Forma de Pago y Propiedad**
+- *Anticipo:* 50% a la firma para reservar fecha y comenzar.
+- *Saldo Final:* 50% restante contra la aprobación del sitio, antes de la publicación en el dominio final o entrega de credenciales.
+*Propiedad Intelectual:* Los derechos de uso y acceso administrativo al sitio web permanecen como propiedad del Desarrollador hasta la liquidación total de la factura.
+
+6. **Validez del Presupuesto**
+Esta cotización tiene una validez de 30 días naturales desde su fecha de emisión. Pasado este plazo, los precios y condiciones podrán ser modificados.
+
+---
+**ACEPTACIÓN AUTOMÁTICA**
+Para aceptar esta propuesta, hacé click en el siguiente enlace:
+👉 ${window.location.origin}/accept-proposal/${project.id}
+
+---
+
+¿Tenés dudas? Respondé este email y te las aclaramos.
+
+Saludos,
+Lucas Agency
+`;
+    } else {
+        body = `Hola,
+
+Te invito a revisar los avances del proyecto de ${project.clientName}.
+
+Puedes verlos aquí: ${project.devUrl || '[URL pendiente]'}
+
+Espero tu feedback.
+
+Saludos,`;
+    }
 
     return { subject, body };
 };
@@ -40,7 +110,7 @@ interface ProjectDetailProps {
     onClose: () => void;
     onAddLog: (text: string) => void;
     onUpdateLog: (logId: string, text: string) => void;
-    onUpdateProject: (updated: Partial<Project>) => void;
+    onUpdateProject: (updated: Partial<Project>) => Promise<void>;
     onDeleteProject: (id: string) => void;
     finances: FinanceRecord[];
     onAddFinance: (finance: Omit<FinanceRecord, 'id'>) => Promise<void>;
@@ -154,13 +224,24 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         setShowToast({ show: true, message: 'Copiado al portapapeles', type: 'success' });
     };
 
-    const handleOpenEmail = (type: 'PROPOSAL' | 'REVIEW') => {
-        const template = getEmailTemplate(type, project);
+    const handleCopyEmail = async (type: 'PROPOSAL' | 'REVIEW') => {
+        // Use project ID directly - simpler and more reliable
+        const currentProject = project;
+
+        const template = getEmailTemplate(type, currentProject);
         const email = client?.email || '';
-        const subject = encodeURIComponent(template.subject);
-        const body = encodeURIComponent(template.body);
-        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-        onAddLog(`Abierto borrador de email (${type}) para ${email}`);
+
+        // Copy body to clipboard
+        navigator.clipboard.writeText(template.body);
+
+        // Show success toast
+        setShowToast({
+            show: true,
+            message: `Email de ${type === 'PROPOSAL' ? 'propuesta' : 'revisión'} copiado al portapapeles`,
+            type: 'success'
+        });
+
+        onAddLog(`Copiado borrador de email (${type}) para ${email}`);
     };
 
     const TechnicalSheet = () => (
@@ -171,6 +252,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             <div><span className="font-bold text-gray-600 block">Competencia:</span> {discoveryData.competitors || '-'}</div>
             <div><span className="font-bold text-gray-600 block">Referencias:</span> {discoveryData.references || '-'}</div>
             <div><span className="font-bold text-gray-600 block">Materiales:</span> {discoveryData.materialStatus || '-'}</div>
+            <div><span className="font-bold text-gray-600 block">Otros Comentarios:</span> {discoveryData.otherComments || '-'}</div>
             <div className="pt-2 border-t border-gray-200">
                 <span className="font-bold text-gray-600 block mb-1">URL Desarrollo:</span>
                 <a href={generalData.devUrl} target="_blank" rel="noreferrer" className="text-indigo-600 underline truncate block">{generalData.devUrl || 'No asignada'}</a>
@@ -619,6 +701,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Estado Materiales</label>
                                             <textarea rows={3} value={discoveryData.materialStatus} onChange={e => setDiscoveryData({ ...discoveryData, materialStatus: e.target.value })} className="w-full border rounded p-2 text-sm" />
                                         </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Otros Comentarios</label>
+                                            <textarea rows={3} value={discoveryData.otherComments || ''} onChange={e => setDiscoveryData({ ...discoveryData, otherComments: e.target.value })} className="w-full border rounded p-2 text-sm" placeholder="Cualquier otro detalle importante..." />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -759,6 +845,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 <label className="block text-xs font-bold text-gray-700 mb-1">Estado Materiales (Logo/Texto)</label>
                                                 <input className="w-full border-gray-300 rounded text-sm p-2" value={discoveryData.materialStatus} onChange={e => setDiscoveryData({ ...discoveryData, materialStatus: e.target.value })} />
                                             </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Otros Comentarios</label>
+                                                <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.otherComments || ''} onChange={e => setDiscoveryData({ ...discoveryData, otherComments: e.target.value })} placeholder="Información adicional relevante..." />
+                                            </div>
                                             <div className="flex justify-between pt-4">
                                                 <button onClick={handleSaveData} className="text-indigo-600 text-sm font-bold hover:underline">Guardar Datos</button>
                                                 <button onClick={() => { handleSaveData(); handleStageChange(ProjectStatus.PROPOSAL); }} className="bg-gray-900 text-white px-4 py-2 rounded font-bold text-sm hover:bg-black flex items-center">
@@ -778,17 +868,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Acciones de Envío</h5>
                                             <div className="flex gap-3">
                                                 <button
-                                                    onClick={() => handleOpenEmail('PROPOSAL')}
+                                                    onClick={() => handleCopyEmail('PROPOSAL')}
                                                     className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded font-bold text-sm hover:bg-indigo-700 flex items-center justify-center shadow-sm"
                                                 >
-                                                    <Mail className="w-4 h-4 mr-2" /> Enviar Propuesta (Email)
-                                                </button>
-                                                <button
-                                                    onClick={() => copyToClipboard(getEmailTemplate('PROPOSAL', project).body)}
-                                                    className="bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded font-bold text-sm hover:bg-gray-50"
-                                                    title="Copiar Texto"
-                                                >
-                                                    <Copy className="w-4 h-4" />
+                                                    <Copy className="w-4 h-4 mr-2" /> Copiar Propuesta (Portapapeles)
                                                 </button>
                                             </div>
                                         </div>

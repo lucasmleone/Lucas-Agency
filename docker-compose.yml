@@ -15,19 +15,16 @@ services:
       - DB_HOST=db
       - DB_NAME=agency_db
       - DB_USER=user
-      - DB_PASS=userpassword
-      - JWT_SECRET=supersecretkey123
+      - DB_PASS=${DB_PASS}
+      - JWT_SECRET=${JWT_SECRET}
       - NODE_ENV=production
+      - USE_MOCK_DB=false
 
   db:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
     restart: always
-    environment:
-      MYSQL_DATABASE: agency_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: userpassword
-      MYSQL_ROOT_PASSWORD: rootpassword
+    environment: MYSQL_DATABASE=${DB_NAME} MYSQL_USER=${DB_USER} MYSQL_PASSWORD=${DB_PASS} MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
     volumes:
       - db_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql

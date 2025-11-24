@@ -23,6 +23,7 @@ import { useAuth } from './context/AuthContext';
 import { Layout } from './components/Layout';
 import { LoginPage } from './components/LoginPage';
 import { RegisterPage } from './components/RegisterPage';
+import { ProposalAccepted } from './components/ProposalAccepted';
 import { Dashboard } from './components/Dashboard';
 import { ProjectDetail } from './components/ProjectDetail';
 import { PricingConfigModal } from './components/PricingConfigModal';
@@ -155,8 +156,8 @@ function App() {
     updateLog(logId, text);
   };
 
-  const handleUpdateProject = (updatedFields: any) => {
-    if (selectedProjectId) updateProject(selectedProjectId, updatedFields);
+  const handleUpdateProject = async (updatedFields: any) => {
+    if (selectedProjectId) await updateProject(selectedProjectId, updatedFields);
   };
 
   const handleDeleteProject = (id: string) => {
@@ -237,6 +238,16 @@ function App() {
   const selectedProjectClient = useMemo(() => selectedProject ? clients.find(c => c.id === selectedProject.clientId) : undefined, [selectedProject, clients]);
 
   // --- Vistas ---
+
+  // Public Routes (No Auth Required)
+  const location = window.location; // Using window.location since we might not be inside Router context yet if App is the one being wrapped? 
+  // Wait, I wrapped App in index.tsx, so I can use useLocation.
+  // But to be safe and minimal, I can just use window.location.pathname which works regardless.
+  // Actually, let's use the Router hook if possible, but window.location is 100% safe here.
+
+  if (window.location.pathname.startsWith('/accept-proposal/')) {
+    return <ProposalAccepted />;
+  }
 
   if (authLoading || (isAuthenticated && dataLoading)) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
@@ -379,7 +390,7 @@ function App() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-8">
 
           {view === 'dashboard' && (
-            <Dashboard projects={projects} finances={finances} />
+            <Dashboard projects={projects} finances={finances} logs={logs} />
           )}
 
           {view === 'projects' && (
@@ -490,14 +501,22 @@ function App() {
                               </h3>
                               <p className="text-sm text-gray-500 mt-0.5">{project.planType}</p>
                             </div>
-                            <span className={`px-2.5 py-1 text-xs font-medium rounded-lg ${project.status === ProjectStatus.DELIVERED
-                              ? 'bg-gray-100 text-gray-700'
-                              : project.status === ProjectStatus.WAITING_RESOURCES
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-blue-50 text-blue-700'
-                              }`}>
-                              {project.status.split('.')[1] || project.status}
-                            </span>
+                            <div className="flex flex-col gap-2 items-end">
+                              <span className={`px-2.5 py-1 text-xs font-medium rounded-lg ${project.status === ProjectStatus.DELIVERED
+                                ? 'bg-gray-100 text-gray-700'
+                                : project.status === ProjectStatus.WAITING_RESOURCES
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-blue-50 text-blue-700'
+                                }`}>
+                                {project.status.split('.')[1] || project.status}
+                              </span>
+                              {/* Show acceptance badge if in WAITING_RESOURCES */}
+                              {project.status === ProjectStatus.WAITING_RESOURCES && (
+                                <span className="px-2.5 py-1 text-xs font-medium rounded-lg bg-green-100 text-green-700 flex items-center gap-1">
+                                  ✓ Presupuesto Aceptado
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {/* Urgency Badge */}
@@ -632,10 +651,6 @@ function App() {
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => {
-                                setNewClient(client);
-                                setShowAddClient(true);
-                              }}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Editar cliente"
                             >
@@ -645,7 +660,6 @@ function App() {
                               onClick={() => {
                                 setDeleteClientConfirm({
                                   show: true,
-                                  clientId: client.id,
                                   clientName: client.name
                                 });
                               }}

@@ -68,6 +68,19 @@ CREATE TABLE IF NOT EXISTS project_logs (
     INDEX idx_project_id (project_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS maintenance_tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    project_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    free_until TIMESTAMP NULL,
+    status VARCHAR(50) DEFAULT 'active',
+    monthly_tasks JSON,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    INDEX idx_project_id (project_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Demo User (Password: demo123)
 INSERT INTO users (email, password_hash, agent_code) 
 VALUES ('demo@agency.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'AGENT_DEMO1')

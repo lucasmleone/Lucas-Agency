@@ -89,11 +89,52 @@ export const mockPool = {
                     return [{ affectedRows: 0 }, []];
                 }
 
+                // Handle update of just the token
+                if (s.includes('set proposal_token = ? where id = ?')) {
+                    const token = params[0];
+                    const id = params[1];
+                    const projectIndex = db.projects.findIndex(p => p.id == id);
+                    if (projectIndex !== -1) {
+                        db.projects[projectIndex].proposal_token = token;
+                        saveData(db);
+                        return [{ affectedRows: 1 }, []];
+                    }
+                    return [{ affectedRows: 0 }, []];
+                }
+
+                // Handle update of just the status
+                if (s.includes('set status = ? where id = ?')) {
+                    console.log('MockDB: Updating status for ID', params[1], 'to', params[0]);
+                    const status = params[0];
+                    const id = params[1];
+                    const projectIndex = db.projects.findIndex(p => p.id == id);
+                    if (projectIndex !== -1) {
+                        db.projects[projectIndex].status = status;
+                        saveData(db);
+                        console.log('MockDB: Status updated successfully');
+                        return [{ affectedRows: 1 }, []];
+                    }
+                    console.log('MockDB: Project not found for status update');
+                    return [{ affectedRows: 0 }, []];
+                }
+
                 // Full update (existing logic)
-                // UPDATE projects SET status=?, payment_status=?, maintenance_status=?, checklists=?, discovery_data=?, end_date=?, plan=?, dev_url=?, description=?, blocked_status=?, blocked_reason=?, blocked_since=?, base_price=?, custom_price=?, discount=?, discount_type=?, final_price=?, pricing_notes=? WHERE id=? AND user_id=?
-                const id = params[18]; // id is the 19th parameter (index 18)
+                // UPDATE projects SET status=?, payment_status=?, maintenance_status=?, checklists=?, discovery_data=?, end_date=?, plan=?, dev_url=?, description=?, blocked_status=?, blocked_reason=?, blocked_since=?, base_price=?, custom_price=?, discount=?, discount_type=?, final_price=?, pricing_notes=?, proposal_token=? WHERE id=? AND user_id=?
+
+                // Fix: id is at index 19, user_id at 20, proposal_token at 18
+                const id = params[19];
+                const userId = params[20];
+                const proposalToken = params[18];
+
+                if (!id) {
+                    console.error('MockDB: Full Update failed - ID is undefined. Params length:', params.length);
+                    // If we fell through here with a short params list, it means a specific handler failed to match
+                    return [{ affectedRows: 0 }, []];
+                }
+
                 const projectIndex = db.projects.findIndex(p => p.id == id);
                 if (projectIndex !== -1) {
+                    console.log('MockDB: Full update for project', id);
                     db.projects[projectIndex] = {
                         ...db.projects[projectIndex],
                         status: params[0],
@@ -102,23 +143,27 @@ export const mockPool = {
                         checklists: params[3],
                         discovery_data: params[4],
                         end_date: params[5],
-                        plan: params[6],  // Changed from planType to plan
+                        plan: params[6],
                         dev_url: params[7],
                         description: params[8],
-                        blocked_status: params[9],  // Changed from blockedStatus
-                        blocked_reason: params[10],  // Changed from blockedReason
-                        blocked_since: params[11],  // Changed from blockedSince
-                        base_price: params[12],  // Changed from basePrice
-                        custom_price: params[13],  // Changed from customPrice
+                        blocked_status: params[9],
+                        blocked_reason: params[10],
+                        blocked_since: params[11],
+                        base_price: params[12],
+                        custom_price: params[13],
                         discount: params[14],
-                        discount_type: params[15],  // Changed from discountType
-                        final_price: params[16],  // Changed from finalPrice
-                        pricing_notes: params[17]  // Changed from pricingNotes
+                        discount_type: params[15],
+                        final_price: params[16],
+                        pricing_notes: params[17],
+                        proposal_token: proposalToken
                     };
                     saveData(db);
+                } else {
+                    console.error('MockDB: Project not found for full update:', id);
                 }
                 return [{ affectedRows: 1 }, []];
             }
+
             if (s.includes('delete from')) {
                 // DELETE FROM projects WHERE id = ?
                 const id = params[0];
@@ -128,7 +173,17 @@ export const mockPool = {
             }
 
             // Join logic for GET
-            const userProjects = db.projects.map(p => {
+            let projectsToReturn = db.projects;
+
+            if (s.includes('where proposal_token =')) {
+                const token = params[0];
+                projectsToReturn = db.projects.filter(p => p.proposal_token === token);
+            } else if (s.includes('where id =')) {
+                const id = params[0];
+                projectsToReturn = db.projects.filter(p => p.id == id);
+            }
+
+            const userProjects = projectsToReturn.map(p => {
                 const clientName = db.clients.find(c => c.id == p.client_id)?.name || 'Unknown';
 
                 // Find maintenance task
@@ -236,7 +291,7 @@ export const mockPool = {
         }
 
         // --- Logs ---
-        if (s.includes('from project_logs') || s.includes('into project_logs')) {
+        if (s.includes('from project_logs') || s.includes('into project_logs') || s.includes('update project_logs')) {
             if (s.includes('insert into')) {
                 const newLog = {
                     id: db.logs.length + 1,
@@ -248,6 +303,18 @@ export const mockPool = {
                 db.logs.push(newLog);
                 saveData(db);
                 return [{ insertId: newLog.id }, []];
+            }
+            if (s.includes('update project_logs')) {
+                // UPDATE project_logs SET message = ? WHERE id = ? AND user_id = ?
+                const message = params[0];
+                const id = params[1];
+                const logIndex = db.logs.findIndex(l => l.id == id);
+                if (logIndex !== -1) {
+                    db.logs[logIndex].message = message;
+                    saveData(db);
+                    return [{ affectedRows: 1 }, []];
+                }
+                return [{ affectedRows: 0 }, []];
             }
             return [db.logs, []];
         }

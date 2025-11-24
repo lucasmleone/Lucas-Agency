@@ -12,6 +12,7 @@ import {
 import { TrendingUp, Briefcase, DollarSign, CheckCircle } from 'lucide-react';
 import { Project, ProjectStatus, FinanceRecord, PaymentStatus } from '../types';
 import { ActionCenter } from './ActionCenter';
+import { WorkloadWidget } from './WorkloadWidget';
 
 interface DashboardProps {
     projects: Project[];
@@ -20,7 +21,7 @@ interface DashboardProps {
     onNavigate?: (view: 'projects' | 'clients' | 'finance' | 'dashboard') => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ projects, finances }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ projects, finances, logs }) => {
     const totalIncome = finances.filter(f => f.type === 'Ingreso').reduce((a, b) => a + b.amount, 0);
     const totalExpenses = finances.filter(f => f.type === 'Gasto').reduce((a, b) => a + b.amount, 0);
     const netIncome = totalIncome - totalExpenses;
@@ -38,6 +39,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, finances }) => {
 
             {/* Action Center */}
             <ActionCenter projects={projects} />
+
+            {/* Workload Calendar */}
+            <div className="mb-8">
+                <WorkloadWidget projects={projects} />
+            </div>
 
             {/* Stats Cards - Apple Style */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -107,6 +113,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, finances }) => {
                             <Bar dataKey="Gastos" fill="#FF3B30" radius={[6, 6, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
+                </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Actividad Reciente</h3>
+                <div className="space-y-4">
+                    {/* We need to fetch logs. For now, we'll assume they are passed or fetch them. 
+                        The Dashboard component receives 'logs' prop but it's optional and currently undefined in App.tsx usage.
+                        Let's update App.tsx to pass logs to Dashboard first. 
+                        But for now, let's just render what we have or a placeholder if empty.
+                    */}
+                    {logs && logs.length > 0 ? (
+                        logs.slice(0, 5).map((log: any) => {
+                            const project = projects.find(p => String(p.id) === String(log.projectId));
+                            return (
+                                <div key={log.id} className="flex items-start gap-3 pb-3 border-b border-gray-100 last:border-0">
+                                    <div className="w-2 h-2 mt-2 rounded-full bg-blue-500 flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <p className="text-sm text-gray-800">{log.message || log.comment}</p>
+                                            {project && (
+                                                <span className="text-xs text-blue-600 font-medium px-2 py-0.5 bg-blue-50 rounded">
+                                                    {project.clientName}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-gray-500">
+                                            {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'Fecha desconocida'}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <p className="text-sm text-gray-500">No hay actividad reciente.</p>
+                    )}
                 </div>
             </div>
         </div>

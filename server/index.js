@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.js';
 import dataRoutes from './routes/data.js';
 import configRoutes from './routes/config.js';
 import maintenanceRoutes from './routes/maintenance.js';
+import publicRoutes from './routes/public.js';
 
 dotenv.config();
 
@@ -46,6 +47,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 // API Routes
+// API Routes
+app.use('/api/public', publicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', dataRoutes);
 app.use('/api/config', configRoutes);

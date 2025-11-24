@@ -116,7 +116,8 @@ router.put('/projects/:id', async (req, res) => {
         discount = ?,
         discount_type = ?,
         final_price = ?,
-        pricing_notes = ?
+        pricing_notes = ?,
+        proposal_token = ?
       WHERE id = ? AND user_id = ?
     `, [
             p.status,
@@ -137,6 +138,7 @@ router.put('/projects/:id', async (req, res) => {
             p.discountType,
             p.finalPrice,
             p.pricingNotes,
+            p.proposalToken, // Add token
             id,
             req.user.id
         ]);

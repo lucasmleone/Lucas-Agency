@@ -46,6 +46,7 @@ export interface DiscoveryData {
   materialStatus: string;
   currentUrl: string;
   objective: string;
+  otherComments?: string;
 }
 
 export interface ProjectChecklists {
@@ -72,6 +73,7 @@ export interface Project {
   discoveryData?: DiscoveryData;
   checklists?: ProjectChecklists;
   devUrl?: string;
+  proposalToken?: string;
 
   // Blocking Status
   blockedStatus?: boolean;
