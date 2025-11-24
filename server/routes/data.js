@@ -203,13 +203,22 @@ router.get('/clients', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM clients WHERE user_id = ?', [req.user.id]);
 
+        const safeDate = (d) => {
+            try {
+                if (!d) return new Date().toISOString().split('T')[0];
+                return new Date(d).toISOString().split('T')[0];
+            } catch (e) {
+                return new Date().toISOString().split('T')[0];
+            }
+        };
+
         const clients = rows.map(c => ({
             id: String(c.id),
             name: c.name,
             email: c.email,
             phone: c.phone,
             company: c.company,
-            registeredAt: c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            registeredAt: safeDate(c.created_at),
             notes: c.notes
         }));
         res.json(clients);
