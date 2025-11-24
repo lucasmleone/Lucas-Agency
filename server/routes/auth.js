@@ -50,6 +50,7 @@ router.post('/login', authLimiter, validateLogin, async (req, res) => {
             httpOnly: true,
             secure: false, // Disabled for HTTP testing (enable with HTTPS in production)
             sameSite: 'lax',
+            path: '/',
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
