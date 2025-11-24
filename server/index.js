@@ -75,7 +75,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    if (process.env.NODE_ENV !== 'production') {
-        console.log(`Server running on port ${PORT}`);
-    }
+    console.log(`Server running on port ${PORT}`);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
 });
