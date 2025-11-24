@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const ProposalAccepted: React.FC = () => {
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -22,7 +22,7 @@ export const ProposalAccepted: React.FC = () => {
             }
 
             try {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+                const apiUrl = import.meta.env.VITE_API_URL || '/api';
                 const response = await fetch(`${apiUrl}/public/accept-proposal`, {
                     method: 'POST',
                     headers: {

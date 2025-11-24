@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_URL = process.env.NODE_ENV === 'production'
     ? '/api'
-    : (import.meta.env.VITE_API_URL || 'http://localhost:3001/api');
+    : (import.meta.env.VITE_API_URL || '/api');
 
 export interface PricingConfig {
     "Single Page": number;

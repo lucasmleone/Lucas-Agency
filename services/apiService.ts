@@ -1,6 +1,6 @@
 import { Project, Client, FinanceRecord, ProjectLog, MaintenanceTask } from '../types';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const DATA_URL = BASE_URL;
 const AUTH_URL = `${BASE_URL}/auth`;
 
