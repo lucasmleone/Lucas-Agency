@@ -4,6 +4,33 @@ import { verifyToken } from './auth.js';
 
 const router = express.Router();
 
+// TEMP: Test clients without auth middleware
+router.get('/clients', async (req, res) => {
+    try {
+        // Hardcode user_id for testing
+        const [rows] = await pool.query('SELECT * FROM clients WHERE user_id = ?', [1]);
+
+        const clients = [];
+        for (let i = 0; i < rows.length; i++) {
+            const c = rows[i];
+            clients.push({
+                id: String(c.id),
+                name: c.name,
+                email: c.email || '',
+                phone: c.phone || '',
+                company: c.company || '',
+                registeredAt: c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                notes: c.notes || ''
+            });
+        }
+
+        res.json(clients);
+    } catch (err) {
+        console.error('[CLIENTS TEST] Error:', err.message, err.stack);
+        res.status(500).json({ error: 'Error fetching clients', details: err.message });
+    }
+});
+
 router.use(verifyToken);
 
 // --- Projects ---
