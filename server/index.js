@@ -38,9 +38,11 @@ if (process.env.NODE_ENV === 'production') {
     app.use(limiter); // Apply rate limiting only in production
 }
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.CLIENT_URL
-        : ['http://localhost:5173', 'http://localhost:3000'],
+    origin: (origin, callback) => {
+        // Allow all origins for now (testing purposes)
+        // In production with HTTPS, you'd want to restrict this
+        callback(null, true);
+    },
     credentials: true
 }));
 app.use(express.json());
