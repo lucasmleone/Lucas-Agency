@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_12345';
 // Rate limiter for auth routes
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'production' ? 5 : 1000, // 5 requests per windowMs in prod, 1000 in dev
+    max: 100, // 100 requests per windowMs
     message: { error: 'Too many attempts, please try again later' },
     standardHeaders: true,
     legacyHeaders: false,

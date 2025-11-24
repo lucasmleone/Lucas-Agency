@@ -201,30 +201,37 @@ router.delete('/projects/:id', async (req, res) => {
 
 router.get('/clients', async (req, res) => {
     try {
+        console.log('[CLIENTS] Starting request, user:', req.user);
         const [rows] = await pool.query('SELECT * FROM clients WHERE user_id = ?', [req.user.id]);
+        console.log('[CLIENTS] Query complete, row count:', rows.length);
 
-        const safeDate = (d) => {
+        const clients = [];
+        for (let i = 0; i < rows.length; i++) {
             try {
-                if (!d) return new Date().toISOString().split('T')[0];
-                return new Date(d).toISOString().split('T')[0];
-            } catch (e) {
-                return new Date().toISOString().split('T')[0];
+                const c = rows[i];
+                console.log(`[CLIENTS] Processing row ${i}:`, c.id, c.name);
+                clients.push({
+                    id: String(c.id),
+                    name: c.name,
+                    email: c.email || '',
+                    phone: c.phone || '',
+                    company: c.company || '',
+                    registeredAt: c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    notes: c.notes || ''
+                });
+                console.log(`[CLIENTS] Row ${i} processed successfully`);
+            } catch (rowErr) {
+                console.error(`[CLIENTS] Error processing row ${i}:`, rowErr);
+                throw rowErr;
             }
-        };
+        }
 
-        const clients = rows.map(c => ({
-            id: String(c.id),
-            name: c.name,
-            email: c.email,
-            phone: c.phone,
-            company: c.company,
-            registeredAt: safeDate(c.created_at),
-            notes: c.notes
-        }));
+        console.log('[CLIENTS] All rows processed, returning:', clients.length, 'clients');
         res.json(clients);
     } catch (err) {
-        console.error('Error fetching clients:', err);
-        res.status(500).json({ error: 'Error fetching clients' });
+        console.error('[CLIENTS] Fatal error:', err.message);
+        console.error('[CLIENTS] Stack:', err.stack);
+        res.status(500).json({ error: 'Error fetching clients', details: err.message });
     }
 });
 
