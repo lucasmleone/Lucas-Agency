@@ -34,26 +34,9 @@ const limiter = rateLimit({
 
 // Middleware
 app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "https://cdn.tailwindcss.com",
-                "https://aistudiocdn.com"
-            ],
-            styleSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "https://fonts.googleapis.com",
-                "https://cdn.tailwindcss.com"
-            ],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            connectSrc: ["'self'", "https://aistudiocdn.com"],
-            imgSrc: ["'self'", "data:", "https:"]
-        }
-    }
+    contentSecurityPolicy: false, // Disable CSP for now (HTTP-only testing)
+    crossOriginOpenerPolicy: false, // Disable for HTTP
+    crossOriginEmbedderPolicy: false
 }));
 if (process.env.NODE_ENV === 'production') {
     app.use(limiter); // Apply rate limiting only in production
