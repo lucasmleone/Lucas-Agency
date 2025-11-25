@@ -65,6 +65,17 @@ router.get('/projects', async (req, res) => {
 
 router.post('/projects', async (req, res) => {
     const p = req.body;
+
+    // Helper to convert ISO date to MySQL DATE format
+    const toMySQLDate = (dateStr) => {
+        if (!dateStr) return null;
+        try {
+            return new Date(dateStr).toISOString().split('T')[0];
+        } catch (e) {
+            return null;
+        }
+    };
+
     try {
         const [result] = await pool.query(`
       INSERT INTO projects (user_id, client_id, name, description, start_date, end_date, status, checklists, discovery_data, plan)
@@ -74,8 +85,8 @@ router.post('/projects', async (req, res) => {
             p.clientId,
             p.clientName || '',
             p.description || '',
-            p.startDate || null,
-            p.deadline,
+            toMySQLDate(p.startDate),
+            toMySQLDate(p.deadline),
             p.status || '1. Discovery',
             JSON.stringify(p.checklists || {}),
             JSON.stringify(p.discoveryData || {}),
