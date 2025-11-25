@@ -21,5 +21,5 @@ EXPOSE 80
 # Set environment
 ENV NODE_ENV=production
 
-# Start server
-CMD ["node", "server/index.js"]
+# Start server with memory limit for t2.micro (Free Tier)
+CMD ["node", "--max-old-space-size=256", "server/index.js"]
