@@ -662,6 +662,10 @@ function App() {
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
                             <button
+                              onClick={() => {
+                                setNewClient({ ...client, phone: client.phone || '' });
+                                setShowAddClient(true);
+                              }}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Editar cliente"
                             >
@@ -671,6 +675,7 @@ function App() {
                               onClick={() => {
                                 setDeleteClientConfirm({
                                   show: true,
+                                  clientId: client.id,
                                   clientName: client.name
                                 });
                               }}
