@@ -97,7 +97,8 @@ CREATE TABLE IF NOT EXISTS maintenance_tasks (
     INDEX idx_project_id (project_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Demo User (Password: demo123)
+-- Demo User (Password: password123)
 INSERT INTO users (email, password_hash, agent_code) 
-VALUES ('demo@agency.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'AGENT_DEMO1')
+VALUES ('demo@agency.com', '$2a$10$EIYwIabAGXUtBmijVUtnpOxW55h2.Bg9c29sYmfmpQ9koCr/tBEyG', 'AGENT_DEMO1')
 ON DUPLICATE KEY UPDATE email=email;
+
