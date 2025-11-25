@@ -1,9 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Clock, Wrench } from 'lucide-react';
 import { Project, ProjectStatus } from '../types';
 
 interface WorkloadWidgetProps {
     projects: Project[];
+}
+
+interface CalendarEvent {
+    type: 'delivery' | 'maintenance';
+    project: Project;
+    date: Date;
 }
 
 export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
@@ -24,33 +30,43 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
     const daysInMonth = getDaysInMonth(year, month);
     const firstDay = getFirstDayOfMonth(year, month);
 
-    // Filter active projects with deadlines in this month
-    const monthProjects = useMemo(() => {
+    // Collect all calendar events (deliveries + maintenance) for this month
+    const monthEvents = useMemo(() => {
+        const events: CalendarEvent[] = [];
 
+        projects.forEach(p => {
+            // Add delivery events
+            if (p.deadline) {
+                const dateStr = p.deadline.includes('T') ? p.deadline : p.deadline + 'T00:00:00';
+                const pDate = new Date(dateStr);
+                if (pDate.getMonth() === month && pDate.getFullYear() === year) {
+                    events.push({ type: 'delivery', project: p, date: pDate });
+                }
+            }
 
-        const filtered = projects.filter(p => {
-            if (!p.deadline) return false;
-            // Parse deadline - handle both "YYYY-MM-DD" and "YYYY-MM-DDTHH:MM:SS.sssZ" formats
-            const dateStr = p.deadline.includes('T') ? p.deadline : p.deadline + 'T00:00:00';
-            const pDate = new Date(dateStr);
-            const matches = pDate.getMonth() === month && pDate.getFullYear() === year;
-            return matches;
+            // Add maintenance events
+            if (p.nextMaintenanceDate) {
+                const dateStr = p.nextMaintenanceDate.includes('T') ? p.nextMaintenanceDate : p.nextMaintenanceDate + 'T00:00:00';
+                const mDate = new Date(dateStr);
+                if (mDate.getMonth() === month && mDate.getFullYear() === year) {
+                    events.push({ type: 'maintenance', project: p, date: mDate });
+                }
+            }
         });
 
-        return filtered;
+        return events;
     }, [projects, month, year]);
 
-    // Group projects by day
-    const projectsByDay = useMemo(() => {
-        const map: Record<number, Project[]> = {};
-        monthProjects.forEach(p => {
-            const dateStr = p.deadline.includes('T') ? p.deadline : p.deadline + 'T00:00:00';
-            const day = new Date(dateStr).getDate();
+    // Group events by day
+    const eventsByDay = useMemo(() => {
+        const map: Record<number, CalendarEvent[]> = {};
+        monthEvents.forEach(event => {
+            const day = event.date.getDate();
             if (!map[day]) map[day] = [];
-            map[day].push(p);
+            map[day].push(event);
         });
         return map;
-    }, [monthProjects]);
+    }, [monthEvents]);
 
     const handlePrevMonth = () => {
         setCurrentDate(new Date(year, month - 1, 1));
@@ -75,11 +91,11 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
 
         // Days of month
         for (let day = 1; day <= daysInMonth; day++) {
-            const dayProjects = projectsByDay[day] || [];
+            const dayEvents = eventsByDay[day] || [];
             const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
 
-            // Calculate load level
-            const loadLevel = dayProjects.length;
+            // Calculate load level (count all events)
+            const loadLevel = dayEvents.length;
             let loadColor = 'bg-gray-50';
             if (loadLevel === 1) loadColor = 'bg-green-50';
             if (loadLevel === 2) loadColor = 'bg-yellow-50';
@@ -90,18 +106,33 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
                     <span className={`text-xs font-bold ${isToday ? 'text-indigo-600' : 'text-gray-400'} absolute top-1 left-2`}>{day}</span>
 
                     <div className="mt-5 space-y-1 overflow-y-auto max-h-[calc(100%-1.25rem)] custom-scrollbar">
-                        {dayProjects.map(p => (
+                        {dayEvents.map((event, idx) => (
                             <div
-                                key={p.id}
-                                className="text-[10px] px-1.5 py-0.5 rounded bg-white border border-gray-200 shadow-sm truncate cursor-help"
-                                title={`${p.clientName} - ${p.planType}`}
+                                key={`${event.type}-${event.project.id}-${idx}`}
+                                className={`text-[10px] px-1.5 py-0.5 rounded border shadow-sm truncate cursor-help ${event.type === 'maintenance'
+                                    ? 'bg-purple-50 border-purple-200'
+                                    : 'bg-white border-gray-200'
+                                    }`}
+                                title={event.type === 'maintenance'
+                                    ? `Mantenimiento - ${event.project.clientName}`
+                                    : `${event.project.clientName} - ${event.project.planType}`
+                                }
                             >
-                                <span className={`w-1.5 h-1.5 rounded-full inline-block mr-1 ${p.status === ProjectStatus.DISCOVERY ? 'bg-indigo-400' :
-                                    p.status === ProjectStatus.PROPOSAL ? 'bg-blue-400' :
-                                        p.status === ProjectStatus.WAITING_RESOURCES ? 'bg-orange-400' :
-                                            'bg-green-400'
-                                    }`}></span>
-                                {p.clientName}
+                                {event.type === 'maintenance' ? (
+                                    <>
+                                        <Wrench className="w-2.5 h-2.5 inline-block mr-1 text-purple-600" />
+                                        <span className="text-purple-700">{event.project.clientName}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className={`w-1.5 h-1.5 rounded-full inline-block mr-1 ${event.project.status === ProjectStatus.DISCOVERY ? 'bg-indigo-400' :
+                                            event.project.status === ProjectStatus.PROPOSAL ? 'bg-blue-400' :
+                                                event.project.status === ProjectStatus.WAITING_RESOURCES ? 'bg-orange-400' :
+                                                    'bg-green-400'
+                                            }`}></span>
+                                        {event.project.clientName}
+                                    </>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -118,7 +149,7 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-indigo-600" />
-                    <h3 className="font-bold text-gray-800">Carga de Trabajo (Entregas)</h3>
+                    <h3 className="font-bold text-gray-800">Carga de Trabajo (Entregas y Mantenimientos)</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     <button onClick={handlePrevMonth} className="p-1 hover:bg-gray-200 rounded-full transition-colors">
@@ -143,10 +174,16 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
                 {renderCalendarDays()}
             </div>
 
-            <div className="p-3 bg-gray-50 border-t border-gray-200 flex gap-4 text-xs text-gray-500 justify-center">
-                <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-50 border border-green-100"></div> Baja (1)</div>
-                <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-50 border border-yellow-100"></div> Media (2)</div>
-                <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-50 border border-red-100"></div> Alta (3+)</div>
+            <div className="p-3 bg-gray-50 border-t border-gray-200 space-y-2">
+                <div className="flex gap-4 text-xs text-gray-500 justify-center">
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-50 border border-green-100"></div> Baja (1)</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-50 border border-yellow-100"></div> Media (2)</div>
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-50 border border-red-100"></div> Alta (3+)</div>
+                </div>
+                <div className="flex gap-4 text-xs text-gray-500 justify-center border-t border-gray-200 pt-2">
+                    <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-gray-300"></div> Entrega</div>
+                    <div className="flex items-center gap-1"><Wrench className="w-3 h-3 text-purple-600" /> Mantenimiento</div>
+                </div>
             </div>
         </div>
     );
