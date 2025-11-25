@@ -1,6 +1,13 @@
-# Dockerfile simplificado - requiere que dist/ ya esté compilado localmente
-FROM node:18-alpine
+# Stage 1: Build Frontend
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
 
+# Stage 2: Production Server
+FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files
@@ -9,8 +16,8 @@ COPY package*.json ./
 # Install ONLY production dependencies
 RUN npm ci --only=production
 
-# Copy built frontend (ya compilado localmente)
-COPY dist ./dist
+# Copy built frontend from builder stage
+COPY --from=builder /app/dist ./dist
 
 # Copy server code
 COPY server ./server
