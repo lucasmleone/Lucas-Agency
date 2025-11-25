@@ -26,11 +26,21 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
 
     // Filter active projects with deadlines in this month
     const monthProjects = useMemo(() => {
-        return projects.filter(p => {
+        console.log('[CALENDAR DEBUG] Total projects:', projects.length);
+        console.log('[CALENDAR DEBUG] Current month/year:', month, year);
+
+        const filtered = projects.filter(p => {
+            console.log('[CALENDAR DEBUG] Project:', p.clientName, 'deadline:', p.deadline);
             if (!p.deadline) return false;
             const pDate = new Date(p.deadline + 'T00:00:00'); // Fix timezone issue
-            return pDate.getMonth() === month && pDate.getFullYear() === year;
+            console.log('[CALENDAR DEBUG] Parsed date:', pDate, 'month:', pDate.getMonth(), 'year:', pDate.getFullYear());
+            const matches = pDate.getMonth() === month && pDate.getFullYear() === year;
+            console.log('[CALENDAR DEBUG] Matches?', matches);
+            return matches;
         });
+
+        console.log('[CALENDAR DEBUG] Filtered projects:', filtered.length);
+        return filtered;
     }, [projects, month, year]);
 
     // Group projects by day

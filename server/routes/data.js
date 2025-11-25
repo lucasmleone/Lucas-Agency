@@ -192,8 +192,8 @@ router.put('/projects/:id', async (req, res) => {
                     });
                 }
 
-                const createdAt = new Date().toISOString();
-                const freeUntil = new Date(now + 60 * 24 * 60 * 60 * 1000).toISOString();
+                const createdAt = new Date().toISOString().replace('T', ' ').slice(0, 19);
+                const freeUntil = new Date(now + 60 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19);
 
                 await pool.query(`
                     INSERT INTO maintenance_tasks (user_id, project_id, created_at, free_until, status, monthly_tasks)
