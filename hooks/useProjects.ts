@@ -32,9 +32,21 @@ export const useProjects = () => {
         }
     }, [isAuthenticated]);
 
+    // Initial load
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    // Auto-refresh every 60 seconds
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const intervalId = setInterval(() => {
+            loadData();
+        }, 60000); // 60 seconds
+
+        return () => clearInterval(intervalId);
+    }, [isAuthenticated, loadData]);
 
     const addProject = async (projectData: any) => {
         const client = clients.find(c => c.id === projectData.clientId);
@@ -157,6 +169,7 @@ export const useProjects = () => {
         logs,
         clients,
         loading,
+        refreshData: loadData,
         addProject,
         updateProject,
         deleteProject,

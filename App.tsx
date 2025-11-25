@@ -16,7 +16,8 @@ import {
   Calendar,
   Wrench,
   Edit2,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 import { Project, ProjectStatus, PlanType, ProjectLog, FinanceRecord } from './types';
 import { useAuth } from './context/AuthContext';
@@ -101,6 +102,7 @@ function App() {
     logs,
     clients,
     loading: dataLoading,
+    refreshData,
     addProject,
     updateProject,
     deleteProject,
@@ -399,6 +401,14 @@ function App() {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">Cartera de Proyectos</h2>
                 <div className="flex gap-3">
+                  <button
+                    onClick={() => refreshData()}
+                    className="bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                    title="Actualizar Proyectos"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Actualizar
+                  </button>
                   <button
                     onClick={() => setProjectSortBy(projectSortBy === 'deadline' ? 'client' : 'deadline')}
                     className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
