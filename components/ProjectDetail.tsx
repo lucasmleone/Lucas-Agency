@@ -21,6 +21,23 @@ import { usePricingConfig } from '../hooks/usePricingConfig';
 import { Project, ProjectStatus, PlanType, ProjectLog, Client, PaymentStatus, FinanceRecord } from '../types';
 import { getBasePriceForPlan, calculateFinalPrice, getPlanDisplayName, formatCurrency } from '../utils/pricing';
 
+// Helper to format date from YYYY-MM-DD without timezone conversion
+const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
+    if (!dateStr) return 'Sin fecha';
+
+    // Parse the date parts directly to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+
+    // Create date at local midnight (not UTC)
+    const date = new Date(year, month - 1, day);
+
+    return date.toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
 const getEmailTemplate = (type: 'PROPOSAL' | 'REVIEW', project: Project) => {
     const subject = type === 'PROPOSAL'
         ? `Propuesta de Proyecto - ${project.clientName} (${project.planType})`
@@ -225,7 +242,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
         // Auto-save to backend immediately
         onUpdateProject({ deadline: newDeadline });
-        onAddLog(`Fecha de entrega actualizada: ${new Date(newDeadline).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}`);
+        onAddLog(`Fecha de entrega actualizada: ${formatDateForDisplay(newDeadline)}`);
     };
 
     const copyToClipboard = async (text: string) => {
@@ -358,7 +375,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 {project.clientName}
                             </h3>
                             <p className="text-gray-400 text-xs mt-1">
-                                {generalData.planType} | {generalData.deadline ? new Date(generalData.deadline).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin fecha'}
+                                {generalData.planType} | {generalData.deadline ? formatDateForDisplay(generalData.deadline) : 'Sin fecha'}
                             </p>
                         </div>
                         <select
