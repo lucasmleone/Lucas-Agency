@@ -355,7 +355,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     <p className="text-xs font-bold text-indigo-800 uppercase">Saldo Restante (Proyecto)</p>
                                     <div className="flex items-baseline gap-2">
                                         <p className="text-2xl font-black text-indigo-700">
-                                            ${formatCurrency((project.finalPrice || calculateFinalPrice(
+                                            {formatCurrency((project.finalPrice || calculateFinalPrice(
                                                 project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
                                                 project.customPrice,
                                                 project.discount,
@@ -365,7 +365,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 .reduce((acc, curr) => acc + curr.amount, 0))}
                                         </p>
                                         <span className="text-xs text-indigo-600">
-                                            de ${formatCurrency(project.finalPrice || calculateFinalPrice(
+                                            de {formatCurrency(project.finalPrice || calculateFinalPrice(
                                                 project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
                                                 project.customPrice,
                                                 project.discount,

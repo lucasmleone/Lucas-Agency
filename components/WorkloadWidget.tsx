@@ -26,20 +26,17 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
 
     // Filter active projects with deadlines in this month
     const monthProjects = useMemo(() => {
-        console.log('[CALENDAR DEBUG] Total projects:', projects.length);
-        console.log('[CALENDAR DEBUG] Current month/year:', month, year);
+
 
         const filtered = projects.filter(p => {
-            console.log('[CALENDAR DEBUG] Project:', p.clientName, 'deadline:', p.deadline);
             if (!p.deadline) return false;
-            const pDate = new Date(p.deadline + 'T00:00:00'); // Fix timezone issue
-            console.log('[CALENDAR DEBUG] Parsed date:', pDate, 'month:', pDate.getMonth(), 'year:', pDate.getFullYear());
+            // Parse deadline - handle both "YYYY-MM-DD" and "YYYY-MM-DDTHH:MM:SS.sssZ" formats
+            const dateStr = p.deadline.includes('T') ? p.deadline : p.deadline + 'T00:00:00';
+            const pDate = new Date(dateStr);
             const matches = pDate.getMonth() === month && pDate.getFullYear() === year;
-            console.log('[CALENDAR DEBUG] Matches?', matches);
             return matches;
         });
 
-        console.log('[CALENDAR DEBUG] Filtered projects:', filtered.length);
         return filtered;
     }, [projects, month, year]);
 
@@ -47,7 +44,8 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
     const projectsByDay = useMemo(() => {
         const map: Record<number, Project[]> = {};
         monthProjects.forEach(p => {
-            const day = new Date(p.deadline + 'T00:00:00').getDate();
+            const dateStr = p.deadline.includes('T') ? p.deadline : p.deadline + 'T00:00:00';
+            const day = new Date(dateStr).getDate();
             if (!map[day]) map[day] = [];
             map[day].push(p);
         });
