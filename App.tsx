@@ -29,6 +29,7 @@ import { ProjectDetail } from './components/ProjectDetail';
 import { PricingConfigModal } from './components/PricingConfigModal';
 import { Toast } from './components/Toast';
 import { useProjects } from './hooks/useProjects';
+import { formatCurrency } from './utils/pricing';
 
 // =====================================================
 // UTILITY FUNCTIONS
@@ -266,7 +267,7 @@ function App() {
       <div className="w-64 bg-gray-900 text-white hidden md:flex flex-col shadow-xl">
         <div className="p-6 border-b border-gray-800">
           <h1 className="text-xl font-black tracking-tighter">LEONE AGENCIA</h1>
-          <p className="text-xs text-gray-500 mt-1">Admin Console v2.0</p>
+          <p className="text-xs text-gray-500 mt-1">Admin Console v2.2 FIX</p>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
           <button
@@ -366,7 +367,7 @@ function App() {
             <button onClick={toggleMobileMenu} className="text-gray-600 hover:text-gray-900 mr-3">
               <Menu className="w-6 h-6" />
             </button>
-            <span className="font-black text-lg">LEONE</span>
+            <span className="font-black text-lg">LEONE <span className="text-xs text-green-600 bg-green-100 px-1 rounded ml-2">v2.2 FIX</span></span>
           </div>
           <div className="flex items-center justify-end w-full gap-4">
             <button
@@ -539,11 +540,11 @@ function App() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-xs text-gray-500 mb-1">Ingresos</p>
-                              <p className="text-lg font-semibold text-green-600">${income.toLocaleString()}</p>
+                              <p className="text-lg font-semibold text-green-600">{formatCurrency(income)}</p>
                             </div>
                             <div className="text-right">
                               <p className="text-xs text-gray-500 mb-1">Gastos</p>
-                              <p className="text-lg font-semibold text-red-600">${expenses.toLocaleString()}</p>
+                              <p className="text-lg font-semibold text-red-600">{formatCurrency(expenses)}</p>
                             </div>
                           </div>
 

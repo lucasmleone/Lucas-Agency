@@ -31,6 +31,12 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, onMenuClick, title })
                     />
                 </div>
 
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-xl">L</span>
+                    </div>
+                    <span className="text-xl font-bold text-gray-900">Lucas Agency <span className="text-xs text-green-600 bg-green-100 px-1 rounded">v2.1 FIX</span></span>
+                </div>
                 <div className="flex items-center gap-3 pl-1">
                     <div className="text-right hidden sm:block">
                         <p className="text-sm font-bold text-slate-700 leading-none">{userEmail?.split('@')[0]}</p>
