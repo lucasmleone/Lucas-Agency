@@ -13,6 +13,7 @@ import { TrendingUp, Briefcase, DollarSign, CheckCircle } from 'lucide-react';
 import { Project, ProjectStatus, FinanceRecord, PaymentStatus } from '../types';
 import { ActionCenter } from './ActionCenter';
 import { WorkloadWidget } from './WorkloadWidget';
+import { formatCurrency } from '../utils/pricing';
 
 interface DashboardProps {
     projects: Project[];
@@ -54,7 +55,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, finances, logs }
                             <TrendingUp className="w-5 h-5 text-gray-600" />
                         </div>
                     </div>
-                    <p className="text-3xl font-semibold text-gray-900">${netIncome.toLocaleString()}</p>
+                    <p className="text-3xl font-semibold text-gray-900">{formatCurrency(netIncome)}</p>
                     <p className="text-sm text-gray-500 mt-1">Ingresos Netos</p>
                 </div>
 

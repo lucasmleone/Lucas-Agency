@@ -27,7 +27,7 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
     // Filter active projects with deadlines in this month
     const monthProjects = useMemo(() => {
         return projects.filter(p => {
-            if (!p.deadline || p.status === ProjectStatus.DELIVERED || p.status === ProjectStatus.CANCELLED) return false;
+            if (!p.deadline) return false;
             const pDate = new Date(p.deadline + 'T00:00:00'); // Fix timezone issue
             return pDate.getMonth() === month && pDate.getFullYear() === year;
         });
@@ -89,9 +89,9 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
                                 title={`${p.clientName} - ${p.planType}`}
                             >
                                 <span className={`w-1.5 h-1.5 rounded-full inline-block mr-1 ${p.status === ProjectStatus.DISCOVERY ? 'bg-indigo-400' :
-                                        p.status === ProjectStatus.PROPOSAL ? 'bg-blue-400' :
-                                            p.status === ProjectStatus.WAITING_RESOURCES ? 'bg-orange-400' :
-                                                'bg-green-400'
+                                    p.status === ProjectStatus.PROPOSAL ? 'bg-blue-400' :
+                                        p.status === ProjectStatus.WAITING_RESOURCES ? 'bg-orange-400' :
+                                            'bg-green-400'
                                     }`}></span>
                                 {p.clientName}
                             </div>
