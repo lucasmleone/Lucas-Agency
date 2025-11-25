@@ -36,48 +36,48 @@ const getEmailTemplate = (type: 'PROPOSAL' | 'REVIEW', project: Project) => {
 Adjunto encontrarás la propuesta detallada para el proyecto de ${project.clientName}.
 
 ---
-**PRESUPUESTO ESTIMADO**
-**Plan Seleccionado:** ${project.planType}
-**Inversión Total:** ${price}
+PRESUPUESTO ESTIMADO
+Plan Seleccionado: ${project.planType}
+Inversión Total: ${price}
 
-**DETALLE DE SERVICIOS INCLUIDOS**
+DETALLE DE SERVICIOS INCLUIDOS
 Para garantizar un resultado profesional y de alto impacto, el servicio incluye:
-- **Desarrollo Web Optimizado:** Código limpio enfocado en velocidad de carga y posicionamiento en buscadores (SEO Técnico).
-- **Diseño Responsivo:** Visualización perfecta en celulares, tablets y computadoras.
-- **Funcionalidades Clave:** Integración con WhatsApp, formularios de contacto y mapas interactivos.
-- **Seguridad y Soporte:** Configuración de certificado SSL (candado seguro) y 2 meses de mantenimiento técnico bonificado.
+- Desarrollo Web Optimizado: Código limpio enfocado en velocidad de carga y posicionamiento en buscadores (SEO Técnico).
+- Diseño Responsivo: Visualización perfecta en celulares, tablets y computadoras.
+- Funcionalidades Clave: Integración con WhatsApp, formularios de contacto y mapas interactivos.
+- Seguridad y Soporte: Configuración de certificado SSL (candado seguro) y 2 meses de mantenimiento técnico bonificado.
 
 ---
-**TÉRMINOS Y CONDICIONES DEL SERVICIO**
+TÉRMINOS Y CONDICIONES DEL SERVICIO
 
-1. **Alcance y Exclusiones**
+1. Alcance y Exclusiones
 Este presupuesto cubre el desarrollo web y la optimización básica para buscadores (SEO).
-*Exclusiones:* NO incluye diseño de identidad corporativa (creación de logotipos, manuales de marca) ni servicios de fotografía. El Cliente deberá proporcionar estos activos en la calidad adecuada.
+Exclusiones: NO incluye diseño de identidad corporativa (creación de logotipos, manuales de marca) ni servicios de fotografía. El Cliente deberá proporcionar estos activos en la calidad adecuada.
 
-2. **Plazos de Ejecución**
+2. Plazos de Ejecución
 El tiempo estimado para la entrega de la Primera Revisión (Borrador Funcional) es de 4 semanas.
-*Inicio del cómputo:* Este plazo comenzará a contar únicamente cuando se cumplan dos condiciones:
+Inicio del cómputo: Este plazo comenzará a contar únicamente cuando se cumplan dos condiciones:
 - Recepción del comprobante de pago del anticipo (50%).
 - Entrega del 100% de la información base solicitada (Briefing).
 
-3. **Entrega de Contenidos (Textos)**
+3. Entrega de Contenidos (Textos)
 El Cliente es responsable de entregar los textos finales antes del inicio.
-*Retrasos:* Si el Cliente se demora en la entrega, podrá solicitar al Desarrollador el uso de textos provisionales (genéricos o IA) para no detener el avance visual. La revisión y corrección final de estos textos será responsabilidad del Cliente durante las rondas de revisión.
+Retrasos: Si el Cliente se demora en la entrega, podrá solicitar al Desarrollador el uso de textos provisionales (genéricos o IA) para no detener el avance visual. La revisión y corrección final de estos textos será responsabilidad del Cliente durante las rondas de revisión.
 
-4. **Vigencia del Proyecto (Inactividad)**
+4. Vigencia del Proyecto (Inactividad)
 Para garantizar el flujo de trabajo, el proyecto tiene una vigencia activa de 30 días tras cada entrega o solicitud de feedback por parte del Desarrollador.
-*Stand-by:* Si el Cliente no responde en este periodo, el proyecto pasará a estado "Inactivo" y saldrá de la agenda de producción. Su reactivación dependerá exclusivamente de la disponibilidad futura del Desarrollador.
+Stand-by: Si el Cliente no responde en este periodo, el proyecto pasará a estado "Inactivo" y saldrá de la agenda de producción. Su reactivación dependerá exclusivamente de la disponibilidad futura del Desarrollador.
 
-5. **Forma de Pago y Propiedad**
-- *Anticipo:* 50% a la firma para reservar fecha y comenzar.
-- *Saldo Final:* 50% restante contra la aprobación del sitio, antes de la publicación en el dominio final o entrega de credenciales.
-*Propiedad Intelectual:* Los derechos de uso y acceso administrativo al sitio web permanecen como propiedad del Desarrollador hasta la liquidación total de la factura.
+5. Forma de Pago y Propiedad
+- Anticipo: 50% a la firma para reservar fecha y comenzar.
+- Saldo Final: 50% restante contra la aprobación del sitio, antes de la publicación en el dominio final o entrega de credenciales.
+Propiedad Intelectual: Los derechos de uso y acceso administrativo al sitio web permanecen como propiedad del Desarrollador hasta la liquidación total de la factura.
 
-6. **Validez del Presupuesto**
+6. Validez del Presupuesto
 Esta cotización tiene una validez de 30 días naturales desde su fecha de emisión. Pasado este plazo, los precios y condiciones podrán ser modificados.
 
 ---
-**ACEPTACIÓN AUTOMÁTICA**
+ACEPTACIÓN AUTOMÁTICA
 Para aceptar esta propuesta, hacé click en el siguiente enlace:
 👉 ${window.location.origin}/accept-proposal/${project.id}
 
@@ -219,9 +219,57 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         onUpdateProject({ checklists: newCheck });
     };
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        setShowToast({ show: true, message: 'Copiado al portapapeles', type: 'success' });
+    const handleDeadlineChange = (newDeadline: string) => {
+        // Update local state
+        setGeneralData({ ...generalData, deadline: newDeadline });
+
+        // Auto-save to backend immediately
+        onUpdateProject({ deadline: newDeadline });
+        onAddLog(`Fecha de entrega actualizada: ${new Date(newDeadline).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}`);
+    };
+
+    const copyToClipboard = async (text: string) => {
+        try {
+            // Try modern Clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+                setShowToast({ show: true, message: 'Copiado al portapapeles', type: 'success' });
+                return true;
+            }
+
+            // Fallback method for older browsers or insecure contexts
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            textArea.style.top = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                if (successful) {
+                    setShowToast({ show: true, message: 'Copiado al portapapeles', type: 'success' });
+                    return true;
+                } else {
+                    throw new Error('execCommand failed');
+                }
+            } catch (err) {
+                document.body.removeChild(textArea);
+                throw err;
+            }
+        } catch (err) {
+            console.error('Error al copiar al portapapeles:', err);
+            setShowToast({
+                show: true,
+                message: 'Error al copiar. Por favor, copia manualmente.',
+                type: 'error'
+            });
+            return false;
+        }
     };
 
     const handleCopyEmail = async (type: 'PROPOSAL' | 'REVIEW') => {
@@ -231,17 +279,46 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         const template = getEmailTemplate(type, currentProject);
         const email = client?.email || '';
 
-        // Copy body to clipboard
-        navigator.clipboard.writeText(template.body);
+        // Copy body to clipboard with error handling
+        try {
+            // Try modern Clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(template.body);
+            } else {
+                // Fallback method
+                const textArea = document.createElement('textarea');
+                textArea.value = template.body;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
 
-        // Show success toast
-        setShowToast({
-            show: true,
-            message: `Email de ${type === 'PROPOSAL' ? 'propuesta' : 'revisión'} copiado al portapapeles`,
-            type: 'success'
-        });
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
 
-        onAddLog(`Copiado borrador de email (${type}) para ${email}`);
+                if (!successful) {
+                    throw new Error('Fallback copy failed');
+                }
+            }
+
+            // Show success toast
+            setShowToast({
+                show: true,
+                message: `Email de ${type === 'PROPOSAL' ? 'propuesta' : 'revisión'} copiado al portapapeles`,
+                type: 'success'
+            });
+
+            onAddLog(`Copiado borrador de email (${type}) para ${email}`);
+        } catch (err) {
+            console.error('Error al copiar email:', err);
+            setShowToast({
+                show: true,
+                message: 'Error al copiar. Intenta de nuevo o copia manualmente.',
+                type: 'error'
+            });
+        }
     };
 
     const TechnicalSheet = () => (
@@ -281,7 +358,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 {project.clientName}
                             </h3>
                             <p className="text-gray-400 text-xs mt-1">
-                                {generalData.planType} | {generalData.deadline}
+                                {generalData.planType} | {generalData.deadline ? new Date(generalData.deadline).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin fecha'}
                             </p>
                         </div>
                         <select
@@ -364,14 +441,6 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
                                                 .reduce((acc, curr) => acc + curr.amount, 0))}
                                         </p>
-                                        <span className="text-xs text-indigo-600">
-                                            de {formatCurrency(project.finalPrice || calculateFinalPrice(
-                                                project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
-                                                project.customPrice,
-                                                project.discount,
-                                                project.discountType
-                                            ))}
-                                        </span>
                                     </div>
                                     <div className="w-full bg-indigo-200 rounded-full h-1.5 mt-2">
                                         <div
@@ -394,9 +463,9 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 <div className="bg-green-50 p-4 rounded-xl border border-green-100">
                                     <p className="text-xs font-bold text-green-800 uppercase">Total Mantenimiento</p>
                                     <p className="text-2xl font-black text-green-700">
-                                        ${finances
+                                        {formatCurrency(finances
                                             .filter(f => f.type === 'Ingreso' && f.description.toLowerCase().includes('mantenimiento'))
-                                            .reduce((acc, curr) => acc + curr.amount, 0)}
+                                            .reduce((acc, curr) => acc + curr.amount, 0))}
                                     </p>
                                     <p className="text-xs text-green-600 mt-1">Ingresos por mantenimiento</p>
                                 </div>
@@ -405,7 +474,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 <div className="bg-red-50 p-4 rounded-xl border border-red-100">
                                     <p className="text-xs font-bold text-red-800 uppercase">Total Gastos</p>
                                     <p className="text-2xl font-black text-red-700">
-                                        ${finances.filter(f => f.type === 'Gasto').reduce((acc, curr) => acc + curr.amount, 0)}
+                                        {formatCurrency(finances.filter(f => f.type === 'Gasto').reduce((acc, curr) => acc + curr.amount, 0))}
                                     </p>
                                     <p className="text-xs text-red-600 mt-1">Costos del proyecto</p>
                                 </div>
@@ -493,7 +562,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Entrega</label>
-                                        <input type="date" value={generalData.deadline} onChange={e => setGeneralData({ ...generalData, deadline: e.target.value })} className="w-full border rounded p-2 text-sm" />
+                                        <input type="date" value={generalData.deadline} onChange={e => handleDeadlineChange(e.target.value)} className="w-full border rounded p-2 text-sm" />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Estado de Pago</label>
