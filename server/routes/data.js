@@ -66,10 +66,16 @@ router.get('/projects', async (req, res) => {
 router.post('/projects', async (req, res) => {
     const p = req.body;
 
-    // Helper to convert ISO date to MySQL DATE format
+    // Helper to convert date to MySQL DATE format
+    // If already in YYYY-MM-DD format, return as-is to avoid timezone issues
     const toMySQLDate = (dateStr) => {
         if (!dateStr) return null;
         try {
+            // Check if already in YYYY-MM-DD format
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                return dateStr;
+            }
+            // Otherwise convert ISO datetime to date
             return new Date(dateStr).toISOString().split('T')[0];
         } catch (e) {
             return null;
@@ -103,10 +109,16 @@ router.put('/projects/:id', async (req, res) => {
     const p = req.body;
     const { id } = req.params;
 
-    // Helper to convert ISO date to MySQL DATE format
+    // Helper to convert date to MySQL DATE format
+    // If already in YYYY-MM-DD format, return as-is to avoid timezone issues
     const toMySQLDate = (dateStr) => {
         if (!dateStr) return null;
         try {
+            // Check if already in YYYY-MM-DD format
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                return dateStr;
+            }
+            // Otherwise convert ISO datetime to date
             return new Date(dateStr).toISOString().split('T')[0];
         } catch (e) {
             return null;
