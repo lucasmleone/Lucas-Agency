@@ -25,17 +25,38 @@ import { getBasePriceForPlan, calculateFinalPrice, getPlanDisplayName, formatCur
 const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
     if (!dateStr) return 'Sin fecha';
 
-    // Parse the date parts directly to avoid timezone issues
-    const [year, month, day] = dateStr.split('-').map(Number);
+    try {
+        // Handle ISO strings (e.g. 2025-11-29T00:00:00.000Z) by taking only the date part
+        const cleanDateStr = dateStr.split('T')[0];
 
-    // Create date at local midnight (not UTC)
-    const date = new Date(year, month - 1, day);
+        // Parse the date parts directly to avoid timezone issues
+        const [year, month, day] = cleanDateStr.split('-').map(Number);
 
-    return date.toLocaleDateString(locale, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+        // Validate parts
+        if (!year || !month || !day) {
+            // Fallback for other formats
+            return new Date(dateStr).toLocaleDateString(locale, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Create date at local midnight (not UTC)
+        const date = new Date(year, month - 1, day);
+
+        // Check if valid
+        if (isNaN(date.getTime())) return 'Fecha inválida';
+
+        return date.toLocaleDateString(locale, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch (e) {
+        console.error('Error formatting date:', dateStr, e);
+        return 'Error fecha';
+    }
 };
 
 const getEmailTemplate = (type: 'PROPOSAL' | 'REVIEW', project: Project) => {
