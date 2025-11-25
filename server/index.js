@@ -24,19 +24,31 @@ import rateLimit from 'express-rate-limit';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Rate Limiting
-const limiter = rateLimit({
+// Rate Limiting Strategies
+
+// 1. Strict Limiter for Public Routes (Auth, Public Links)
+// Prevents brute force attacks and abuse of public endpoints
+const publicLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // limit each IP to 1000 requests per windowMs
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+// 2. Relaxed Limiter for Internal API (Authenticated Users)
+// Allows intensive usage (auto-refresh, dashboard) without blocking legitimate work
+const internalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5000, // High limit: ~5 requests per second sustained for 15 mins
     standardHeaders: true,
     legacyHeaders: false,
 });
 
 // Middleware
 // app.use(helmet()); // Disabled for HTTP testing
-if (process.env.NODE_ENV === 'production') {
-    app.use(limiter); // Apply rate limiting only in production
-}
+// Note: Global limiter removed in favor of route-specific limiters
+
 app.use(cors({
     origin: (origin, callback) => {
         // Allow all origins for now (testing purposes)
@@ -49,12 +61,16 @@ app.use(express.json());
 app.use(cookieParser());
 
 // API Routes
-// API Routes
-app.use('/api/public', publicRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api', dataRoutes);
-app.use('/api/config', configRoutes);
-app.use('/api/maintenance', maintenanceRoutes);
+// Apply strict limits to public/auth routes
+app.use('/api/public', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), publicRoutes);
+app.use('/api/auth', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), authRoutes);
+
+// Apply relaxed limits to internal routes
+const internalMiddleware = process.env.NODE_ENV === 'production' ? internalLimiter : (req, res, next) => next();
+
+app.use('/api', internalMiddleware, dataRoutes);
+app.use('/api/config', internalMiddleware, configRoutes);
+app.use('/api/maintenance', internalMiddleware, maintenanceRoutes);
 
 // Serve Static Files (Production)
 if (process.env.NODE_ENV === 'production') {
