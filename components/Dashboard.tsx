@@ -23,8 +23,8 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ projects, finances, logs }) => {
-    const totalIncome = finances.filter(f => f.type === 'Ingreso').reduce((a, b) => a + b.amount, 0);
-    const totalExpenses = finances.filter(f => f.type === 'Gasto').reduce((a, b) => a + b.amount, 0);
+    const totalIncome = finances.filter(f => f.type === 'Ingreso').reduce((a, b) => a + Number(b.amount), 0);
+    const totalExpenses = finances.filter(f => f.type === 'Gasto').reduce((a, b) => a + Number(b.amount), 0);
     const netIncome = totalIncome - totalExpenses;
     const activeProjects = projects.filter(p => p.status !== ProjectStatus.DELIVERED && p.status !== ProjectStatus.CANCELLED && p.status !== ProjectStatus.LOST).length;
     const pendingPayments = projects.filter(p => p.paymentStatus !== PaymentStatus.FULLY_PAID && p.status !== ProjectStatus.CANCELLED).length;
