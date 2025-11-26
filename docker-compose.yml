@@ -1,10 +1,21 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
+  nginx:
+    image: nginx:alpine
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
+    restart: always
+
+  app:
+    build: .
+    # Ports removed, only accessible via internal network (Nginx)
     volumes:
       - /app/node_modules
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
