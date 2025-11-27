@@ -40,9 +40,12 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
     const handleCreate = async () => {
         if (!newTitle.trim()) return;
 
-        const categoryToUse = isCreatingNewCategory && customCategory.trim()
+        let categoryToUse = isCreatingNewCategory && customCategory.trim()
             ? customCategory.trim()
             : newCategory;
+
+        if (entityType === 'project') categoryToUse = 'Proyectos';
+        if (entityType === 'client') categoryToUse = 'Clientes';
 
         try {
             const created = await apiService.createNote({
@@ -136,7 +139,7 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
                         className="pl-10 pr-8 py-2 border border-gray-200 rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         {categories.map((c: string) => (
-                            <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                            <option key={c} value={c}>{(c || '').charAt(0).toUpperCase() + (c || '').slice(1)}</option>
                         ))}
                     </select>
                 </div>
@@ -156,32 +159,38 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
                             autoFocus
                         />
                         <div className="flex gap-4">
-                            {isCreatingNewCategory ? (
-                                <input
-                                    type="text"
-                                    placeholder="Enter new category name"
-                                    value={customCategory}
-                                    onChange={(e) => setCustomCategory(e.target.value)}
-                                    className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                                    autoFocus
-                                />
+                            {!entityType ? (
+                                isCreatingNewCategory ? (
+                                    <input
+                                        type="text"
+                                        placeholder="Enter new category name"
+                                        value={customCategory}
+                                        onChange={(e) => setCustomCategory(e.target.value)}
+                                        className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <select
+                                        value={newCategory}
+                                        onChange={(e) => {
+                                            if (e.target.value === '__new__') {
+                                                setIsCreatingNewCategory(true);
+                                            } else {
+                                                setNewCategory(e.target.value);
+                                            }
+                                        }}
+                                        className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                    >
+                                        {categories.filter(c => c !== 'all').map(cat => (
+                                            <option key={cat} value={cat}>{(cat || '').charAt(0).toUpperCase() + (cat || '').slice(1)}</option>
+                                        ))}
+                                        <option value="__new__">+ Create New Category</option>
+                                    </select>
+                                )
                             ) : (
-                                <select
-                                    value={newCategory}
-                                    onChange={(e) => {
-                                        if (e.target.value === '__new__') {
-                                            setIsCreatingNewCategory(true);
-                                        } else {
-                                            setNewCategory(e.target.value);
-                                        }
-                                    }}
-                                    className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                                >
-                                    {categories.filter(c => c !== 'all').map(cat => (
-                                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-                                    ))}
-                                    <option value="__new__">+ Create New Category</option>
-                                </select>
+                                <div className="flex-1 p-2 border rounded bg-gray-50 text-gray-500 italic">
+                                    Categoría: {entityType === 'project' ? 'Proyectos' : 'Clientes'}
+                                </div>
                             )}
                             <div className="flex gap-2">
                                 {isCreatingNewCategory && (
