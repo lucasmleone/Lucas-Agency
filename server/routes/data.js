@@ -302,7 +302,7 @@ router.get('/finances', async (req, res) => {
             id: String(f.id),
             projectId: f.project_id ? String(f.project_id) : undefined,
             type: f.type,
-            amount: f.amount,
+            amount: Number(f.amount),
             description: f.description,
             date: f.date
         }));
@@ -318,8 +318,8 @@ router.post('/finances', async (req, res) => {
         const [result] = await pool.query(`
       INSERT INTO finance (user_id, project_id, type, amount, description, date, status)
       VALUES (?, ?, ?, ?, ?, ?, 'completed')
-    `, [req.user.id, f.projectId || null, f.type, f.amount, f.description, f.date]);
-        res.json({ id: result.insertId, ...f });
+    `, [req.user.id, f.projectId || null, f.type, Number(f.amount), f.description, f.date]);
+        res.json({ id: result.insertId, ...f, amount: Number(f.amount) });
     } catch (err) {
         res.status(500).json({ error: 'Error creating finance record' });
     }
