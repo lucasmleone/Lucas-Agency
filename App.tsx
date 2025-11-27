@@ -543,30 +543,30 @@ function App() {
                     return (
                       <div
                         key={project.id}
-                        className="group bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 overflow-hidden cursor-pointer"
+                        className="group bg-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
                         onClick={() => setSelectedProjectId(project.id)}
                       >
                         {/* Card Header */}
-                        <div className="p-5 border-b border-gray-100">
+                        <div className="px-5 py-4 border-b border-gray-50">
                           <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
                                 {project.clientName}
                               </h3>
-                              <p className="text-sm text-gray-500 mt-0.5">{project.planType}</p>
+                              <p className="text-xs text-gray-500 mt-1">{project.planType}</p>
                             </div>
-                            <div className="flex flex-col gap-2 items-end">
-                              <span className={`px-2.5 py-1 text-xs font-medium rounded-lg ${project.status === ProjectStatus.DELIVERED
-                                ? 'bg-gray-100 text-gray-700'
-                                : project.status === ProjectStatus.WAITING_RESOURCES
-                                  ? 'bg-orange-100 text-orange-700'
-                                  : 'bg-blue-50 text-blue-700'
+                            <div className="flex flex-col gap-2 items-end ml-3">
+                              <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap ${project.status === ProjectStatus.DELIVERED
+                                  ? 'bg-gray-50 text-gray-700 border border-gray-200'
+                                  : project.status === ProjectStatus.WAITING_RESOURCES
+                                    ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                                    : 'bg-blue-50 text-blue-700 border border-blue-200'
                                 }`}>
                                 {project.status.split('.')[1] || project.status}
                               </span>
                               {/* Show acceptance badge if in WAITING_RESOURCES */}
                               {project.status === ProjectStatus.WAITING_RESOURCES && (
-                                <span className="px-2.5 py-1 text-xs font-medium rounded-lg bg-green-100 text-green-700 flex items-center gap-1">
+                                <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-green-50 text-green-700 border border-green-200 flex items-center gap-1">
                                   ✓ Presupuesto Aceptado
                                 </span>
                               )}
@@ -575,51 +575,60 @@ function App() {
 
                           {/* Urgency Badge */}
                           {project.blockedStatus ? (
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg">
-                              <Lock className="w-4 h-4 text-red-600" />
-                              <span className="text-xs font-medium text-red-700">
+                            <div className="flex items-center gap-2 px-2.5 py-1 bg-red-50 border border-red-200 rounded-lg">
+                              <Lock className="w-3 h-3 text-red-600" />
+                              <span className="text-[11px] font-semibold text-red-700">
                                 Bloqueado · {Math.floor((Date.now() - new Date(project.blockedSince!).getTime()) / (1000 * 60 * 60 * 24))} días
                               </span>
                             </div>
                           ) : (
-                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium ${urgencyClass}`}>
+                            <div className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${urgencyClass}`}>
+                              <Calendar className="w-3 h-3 mr-1.5" />
                               {getUrgencyLabel(daysLeft, project.status)}
-                            </span>
+                            </div>
                           )}
                         </div>
 
-                        {/* Card Body - Finances */}
-                        <div className="p-5 bg-gray-50/50">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">Ingresos</p>
-                              <p className="text-lg font-semibold text-green-600">{formatCurrency(income)}</p>
+                        {/* Card Body - Finance Stats */}
+                        <div className="px-5 py-4 bg-gray-50">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Ingresos</p>
+                              <p className="text-lg font-bold text-green-600">{formatCurrency(income)}</p>
                             </div>
-                            <div className="text-right">
-                              <p className="text-xs text-gray-500 mb-1">Gastos</p>
-                              <p className="text-lg font-semibold text-red-600">{formatCurrency(expenses)}</p>
+                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">Gastos</p>
+                              <p className="text-lg font-bold text-red-600">{formatCurrency(expenses)}</p>
                             </div>
                           </div>
 
                           {/* Maintenance Badge */}
                           {project.status === ProjectStatus.DELIVERED && project.nextMaintenanceDate && (
-                            <div className={`mt-3 flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg ${getDaysRemaining(project.nextMaintenanceDate) < 0
-                              ? 'bg-red-50 text-red-700'
+                            <div className={`mt-3 flex items-center gap-2 text-[10px] font-semibold px-3 py-2 rounded-lg border ${getDaysRemaining(project.nextMaintenanceDate) < 0
+                              ? 'bg-red-50 text-red-700 border-red-100'
                               : getDaysRemaining(project.nextMaintenanceDate) <= 7
-                                ? 'bg-orange-50 text-orange-700'
-                                : 'bg-gray-100 text-gray-700'
+                                ? 'bg-orange-50 text-orange-700 border-orange-100'
+                                : 'bg-white text-gray-600 border-gray-200'
                               }`}>
-                              <Wrench className="w-3.5 h-3.5" />
-                              Mantenimiento: {new Date(project.nextMaintenanceDate).toLocaleDateString('es-ES')}
+                              <Wrench className="w-3 h-3" />
+                              Mantenimiento: {new Date(project.nextMaintenanceDate).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}
                             </div>
                           )}
                         </div>
 
                         {/* Card Footer */}
-                        <div className="px-5 py-3 bg-white border-t border-gray-100">
-                          <button className="w-full text-sm font-medium text-blue-600 hover:text-blue-700 py-2 rounded-lg hover:bg-blue-50 transition-colors">
-                            Ver detalles →
-                          </button>
+                        <div className="px-5 py-3 bg-white border-t border-gray-50 flex items-center justify-between">
+                          <span className="text-xs text-gray-400">
+                            {project.status === ProjectStatus.DELIVERED && project.nextMaintenanceDate
+                              ? `Próximo mantenimiento: ${new Date(project.nextMaintenanceDate).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`
+                              : `Entrega: ${new Date(project.deadline).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`}
+                          </span>
+                          <span className="text-xs font-medium text-blue-600 group-hover:text-blue-700 flex items-center gap-1">
+                            Ver detalles
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </span>
                         </div>
                       </div>
                     );
