@@ -242,7 +242,11 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             discount: pricingData.discount > 0 ? pricingData.discount : undefined,
             discountType: pricingData.discount > 0 ? pricingData.discountType : undefined,
             finalPrice: finalPrice,
-            pricingNotes: pricingData.pricingNotes || undefined
+            pricingNotes: pricingData.pricingNotes || undefined,
+            // Ensure portal data is preserved
+            portalToken: project.portalToken,
+            portalPin: project.portalPin,
+            portalEnabled: project.portalEnabled
         });
         onAddLog('Datos del proyecto actualizados (Edición Manual).');
         setShowToast({ show: true, message: 'Cambios guardados correctamente.', type: 'success' });

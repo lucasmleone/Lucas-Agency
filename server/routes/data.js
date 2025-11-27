@@ -161,7 +161,9 @@ router.put('/projects/:id', async (req, res) => {
         discount_type = ?,
         final_price = ?,
         pricing_notes = ?,
-        proposal_token = ?
+        portal_token = ?,
+        portal_pin = ?,
+        portal_enabled = ?
       WHERE id = ? AND user_id = ?
     `, [
             p.status,
@@ -182,7 +184,9 @@ router.put('/projects/:id', async (req, res) => {
             p.discountType,
             p.finalPrice,
             p.pricingNotes,
-            p.proposalToken, // Add token
+            p.portalToken, // Use correct field
+            p.portalPin,
+            p.portalEnabled,
             id,
             req.user.id
         ]);
