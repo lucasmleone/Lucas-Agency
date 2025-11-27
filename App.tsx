@@ -29,6 +29,7 @@ import { RegisterPage } from './components/RegisterPage';
 import { ProposalAccepted } from './components/ProposalAccepted';
 import { Dashboard } from './components/Dashboard';
 import { ProjectDetail } from './components/ProjectDetail';
+import { ClientDetail } from './components/ClientDetail';
 import { PricingConfigModal } from './components/PricingConfigModal';
 import NotesBoard from './components/Notes/NotesBoard';
 import { Toast } from './components/Toast';
