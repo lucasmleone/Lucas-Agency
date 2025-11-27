@@ -418,45 +418,43 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 <div className="bg-gray-100 px-6 py-2 flex gap-2 overflow-x-auto border-b border-gray-200 shrink-0">
                     <button onClick={() => setActiveTab('workflow')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg ${activeTab === 'workflow' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
                         Flujo de Trabajo
-                        {['workflow', 'data', 'logs', 'finance', 'notes'].map((tabKey) => {
-                            let label = '';
-                            let icon = null;
-                            switch (tabKey) {
-                                case 'workflow':
-                                    label = 'Flujo de Trabajo';
-                                    break;
-                                case 'data':
-                                    label = 'Datos y Edición';
-                                    icon = <Settings className="w-4 h-4 mr-2" />;
-                                    break;
-                                case 'logs':
-                                    label = 'Bitácora';
-                                    break;
-                                case 'finance':
-                                    label = 'Finanzas';
-                                    break;
-                                case 'notes':
-                                    label = 'Notas';
-                                    break;
-                                default:
-                                    label = tabKey;
-                            }
+                    </button>
+                    {['data', 'logs', 'finance', 'notes'].map((tabKey) => {
+                        let label = '';
+                        let icon = null;
+                        switch (tabKey) {
+                            case 'data':
+                                label = 'Datos y Edición';
+                                icon = <Settings className="w-4 h-4 mr-2" />;
+                                break;
+                            case 'logs':
+                                label = 'Bitácora';
+                                break;
+                            case 'finance':
+                                label = 'Finanzas';
+                                break;
+                            case 'notes':
+                                label = 'Notas';
+                                break;
+                            default:
+                                label = tabKey;
+                        }
 
-                            return (
-                                <button
-                                    key={tabKey}
-                                    onClick={() => setActiveTab(tabKey)}
-                                    className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg ${activeTab === tabKey ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'} ${icon ? 'flex items-center' : ''}`}
-                                >
-                                    {icon} {label}
-                                </button>
-                            );
-                        })}
-                        {project.status === ProjectStatus.DELIVERED && (
-                            <button onClick={() => setActiveTab('maintenance')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'maintenance' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
-                                <Shield className="w-4 h-4 mr-2" /> Mantenimiento
+                        return (
+                            <button
+                                key={tabKey}
+                                onClick={() => setActiveTab(tabKey)}
+                                className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg ${activeTab === tabKey ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'} ${icon ? 'flex items-center' : ''}`}
+                            >
+                                {icon} {label}
                             </button>
-                        )}
+                        );
+                    })}
+                    {project.status === ProjectStatus.DELIVERED && (
+                        <button onClick={() => setActiveTab('maintenance')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'maintenance' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
+                            <Shield className="w-4 h-4 mr-2" /> Mantenimiento
+                        </button>
+                    )}
                 </div>
 
                 {/* Main Content */}
@@ -1145,13 +1143,14 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             <MaintenanceView project={project} />
                         </div>
                     )}
+
+                    {activeTab === 'notes' && (
+                        <div className="bg-gray-50 rounded-xl border border-gray-200 min-h-[400px]">
+                            <NotesBoard entityType="project" entityId={project.id} />
+                        </div>
+                    )}
                 </div>
             </div>
-            {activeTab === 'Notas' && (
-                <div className="bg-gray-50 rounded-xl border border-gray-200 min-h-[400px]">
-                    <NotesBoard entityType="project" entityId={project.id} />
-                </div>
-            )}
         </div>
     );
 };
