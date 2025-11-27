@@ -6,11 +6,21 @@ const router = express.Router();
 
 router.use(verifyToken);
 
-// Get all notes
+// Get all notes for the authenticated user
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM notes ORDER BY position ASC, created_at DESC');
-        res.json(rows);
+        const [rows] = await pool.query(
+            'SELECT * FROM notes WHERE user_id = ? ORDER BY position ASC, created_at DESC',
+            [req.user.id]
+        );
+
+        // Parse JSON items field
+        const notes = rows.map(note => ({
+            ...note,
+            items: typeof note.items === 'string' ? JSON.parse(note.items) : note.items
+        }));
+
+        res.json(notes);
     } catch (error) {
         console.error('Error fetching notes:', error);
         res.status(500).json({ error: 'Failed to fetch notes' });
@@ -19,15 +29,20 @@ router.get('/', async (req, res) => {
 
 // Create a new note
 router.post('/', async (req, res) => {
-    const { title, content, category, is_pinned } = req.body;
+    const { title, category, items, is_pinned } = req.body;
     try {
         const [result] = await pool.query(
-            'INSERT INTO notes (title, content, category, is_pinned) VALUES (?, ?, ?, ?)',
-            [title, content, category || 'general', is_pinned || false]
+            'INSERT INTO notes (user_id, title, category, items, is_pinned) VALUES (?, ?, ?, ?, ?)',
+            [req.user.id, title, category || 'general', JSON.stringify(items || []), is_pinned || false]
         );
         const newNoteId = result.insertId;
         const [newNote] = await pool.query('SELECT * FROM notes WHERE id = ?', [newNoteId]);
-        res.status(201).json(newNote[0]);
+
+        const note = newNote[0];
+        res.status(201).json({
+            ...note,
+            items: typeof note.items === 'string' ? JSON.parse(note.items) : note.items
+        });
     } catch (error) {
         console.error('Error creating note:', error);
         res.status(500).json({ error: 'Failed to create note' });
@@ -37,16 +52,15 @@ router.post('/', async (req, res) => {
 // Update a note
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { title, content, category, is_pinned, position } = req.body;
+    const { title, category, items, is_pinned, position } = req.body;
 
     try {
-        // Build query dynamically based on provided fields
         const fields = [];
         const values = [];
 
         if (title !== undefined) { fields.push('title = ?'); values.push(title); }
-        if (content !== undefined) { fields.push('content = ?'); values.push(content); }
         if (category !== undefined) { fields.push('category = ?'); values.push(category); }
+        if (items !== undefined) { fields.push('items = ?'); values.push(JSON.stringify(items)); }
         if (is_pinned !== undefined) { fields.push('is_pinned = ?'); values.push(is_pinned); }
         if (position !== undefined) { fields.push('position = ?'); values.push(position); }
 
@@ -55,19 +69,24 @@ router.put('/:id', async (req, res) => {
         }
 
         values.push(id);
+        values.push(req.user.id);
 
         await pool.query(
-            `UPDATE notes SET ${fields.join(', ')} WHERE id = ?`,
+            `UPDATE notes SET ${fields.join(', ')} WHERE id = ? AND user_id = ?`,
             values
         );
 
-        const [updatedNote] = await pool.query('SELECT * FROM notes WHERE id = ?', [id]);
+        const [updatedNote] = await pool.query('SELECT * FROM notes WHERE id = ? AND user_id = ?', [id, req.user.id]);
 
         if (updatedNote.length === 0) {
             return res.status(404).json({ error: 'Note not found' });
         }
 
-        res.json(updatedNote[0]);
+        const note = updatedNote[0];
+        res.json({
+            ...note,
+            items: typeof note.items === 'string' ? JSON.parse(note.items) : note.items
+        });
     } catch (error) {
         console.error('Error updating note:', error);
         res.status(500).json({ error: 'Failed to update note' });
@@ -78,7 +97,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const [result] = await pool.query('DELETE FROM notes WHERE id = ?', [id]);
+        const [result] = await pool.query('DELETE FROM notes WHERE id = ? AND user_id = ?', [id, req.user.id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Note not found' });
         }

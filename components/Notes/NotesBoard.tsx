@@ -9,12 +9,10 @@ const NotesBoard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
-    const [draggedId, setDraggedId] = useState<number | null>(null);
 
     // New Note State
     const [isCreating, setIsCreating] = useState(false);
     const [newTitle, setNewTitle] = useState('');
-    const [newContent, setNewContent] = useState('');
     const [newCategory, setNewCategory] = useState('general');
 
     useEffect(() => {
@@ -37,17 +35,17 @@ const NotesBoard: React.FC = () => {
         try {
             const created = await apiService.createNote({
                 title: newTitle,
-                content: newContent,
                 category: newCategory,
+                items: [],
                 is_pinned: false
             });
             setNotes([created, ...notes]);
             setIsCreating(false);
             setNewTitle('');
-            setNewContent('');
             setNewCategory('general');
         } catch (error) {
             console.error('Failed to create note', error);
+            alert('Error creating note. Please try again.');
         }
     };
 
@@ -58,68 +56,26 @@ const NotesBoard: React.FC = () => {
             await apiService.updateNote(id, updates);
         } catch (error) {
             console.error('Failed to update note', error);
+            alert('Error updating note. Please try again.');
             fetchNotes(); // Revert on error
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure?')) return;
+        if (!window.confirm('Delete this note?')) return;
         try {
             setNotes(notes.filter(n => n.id !== id));
             await apiService.deleteNote(id);
         } catch (error) {
             console.error('Failed to delete note', error);
+            alert('Error deleting note. Please try again.');
             fetchNotes();
         }
     };
 
-    // Drag and Drop Logic
-    const onDragStart = (e: React.DragEvent, id: number) => {
-        setDraggedId(id);
-        e.dataTransfer.effectAllowed = 'move';
-    };
-
-    const onDragOver = (e: React.DragEvent, id: number) => {
-        e.preventDefault();
-    };
-
-    const onDrop = async (e: React.DragEvent, targetId: number) => {
-        e.preventDefault();
-        if (draggedId === null || draggedId === targetId) return;
-
-        const draggedNote = notes.find(n => n.id === draggedId);
-        const targetNote = notes.find(n => n.id === targetId);
-
-        if (!draggedNote || !targetNote) return;
-
-        // Reorder locally
-        const newNotes = [...notes];
-        const draggedIndex = newNotes.findIndex(n => n.id === draggedId);
-        const targetIndex = newNotes.findIndex(n => n.id === targetId);
-
-        newNotes.splice(draggedIndex, 1);
-        newNotes.splice(targetIndex, 0, draggedNote);
-
-        setNotes(newNotes);
-        setDraggedId(null);
-
-        // Persist order (simple implementation: update position of moved item to match target)
-        // For a robust implementation, we would update all positions, but for now let's just swap or update one.
-        // Actually, let's just update the position field if we had one that mattered strictly.
-        // Since we sort by position ASC, we can update the position of the dragged item.
-        // But to keep it simple without complex re-indexing backend logic, we will just rely on the local state for now
-        // or implement a simple "swap" or "insert" logic if the backend supported bulk updates.
-        // Given the constraints, I'll skip complex backend reordering for this iteration and just update the UI.
-        // If persistence is needed, we'd need a bulk update endpoint or loop through updates.
-
-        // Let's try to update the position of the dragged note to be close to the target.
-        // A simple trick is to take the average of surrounding items, but integers make that hard.
-        // We will just leave it as UI-only for this session unless user complains, or try to update just the moved one.
-    };
-
     const filteredNotes = notes.filter(note => {
         const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            note.content.toLowerCase().includes(searchTerm.toLowerCase());
+            (note.items || []).some(item => item.content.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesCategory = selectedCategory === 'all' || note.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
@@ -167,24 +123,18 @@ const NotesBoard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Create Modal / Inline Form */}
+            {/* Create Modal */}
             {isCreating && (
-                <div className="mb-8 bg-white p-6 rounded-xl shadow-lg border border-blue-100 animate-in fade-in slide-in-from-top-4">
+                <div className="mb-8 bg-white p-6 rounded-xl shadow-lg border border-blue-100">
                     <h3 className="text-lg font-semibold mb-4">Add New Note</h3>
                     <div className="grid gap-4">
                         <input
                             type="text"
-                            placeholder="Title (e.g., Heatmap Tool)"
+                            placeholder="Title (e.g., Useful Tools)"
                             value={newTitle}
                             onChange={(e) => setNewTitle(e.target.value)}
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
                             autoFocus
-                        />
-                        <textarea
-                            placeholder="Description or URL..."
-                            value={newContent}
-                            onChange={(e) => setNewContent(e.target.value)}
-                            className="w-full p-2 border rounded h-24 focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                         <div className="flex gap-4">
                             <input
@@ -196,9 +146,10 @@ const NotesBoard: React.FC = () => {
                             />
                             <div className="flex gap-2">
                                 <button onClick={() => setIsCreating(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
-                                <button onClick={handleCreate} className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Save Note</button>
+                                <button onClick={handleCreate} className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Create</button>
                             </div>
                         </div>
+                        <p className="text-xs text-gray-500">You can add items (links, text) after creating the note.</p>
                     </div>
                 </div>
             )}
@@ -214,9 +165,6 @@ const NotesBoard: React.FC = () => {
                             note={note}
                             onDelete={handleDelete}
                             onUpdate={handleUpdate}
-                            onDragStart={onDragStart}
-                            onDragOver={onDragOver}
-                            onDrop={onDrop}
                         />
                     ))}
                 </div>

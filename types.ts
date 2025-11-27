@@ -160,13 +160,20 @@ export const MAINTENANCE_CHECKLIST: Omit<ChecklistItem, 'completed' | 'notes'>[]
 ];
 
 
+export interface NoteItem {
+  id: string;
+  type: 'link' | 'text';
+  content: string;
+}
+
 export interface Note {
   id: number;
   title: string;
-  content: string;
   category: string;
+  items: NoteItem[];
   is_pinned: boolean;
   position: number;
   created_at: string;
   updated_at: string;
 }
+
