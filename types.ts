@@ -168,13 +168,14 @@ export interface NoteItem {
 }
 
 export interface Note {
-  id: number;
+  id: string;
   title: string;
   category: string;
   items: NoteItem[];
   is_pinned: boolean;
   position: number;
   created_at: string;
+  linkedEntityType?: 'client' | 'project';
+  linkedEntityId?: string;
   updated_at: string;
 }
-

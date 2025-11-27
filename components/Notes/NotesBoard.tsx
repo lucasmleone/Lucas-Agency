@@ -4,7 +4,12 @@ import { Note } from '../../types';
 import NoteCard from './NoteCard';
 import { Plus, Search, Filter } from 'lucide-react';
 
-const NotesBoard: React.FC = () => {
+interface NotesBoardProps {
+    entityType?: 'client' | 'project';
+    entityId?: string;
+}
+
+const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
     const [notes, setNotes] = useState<Note[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -19,11 +24,11 @@ const NotesBoard: React.FC = () => {
 
     useEffect(() => {
         fetchNotes();
-    }, []);
+    }, [entityType, entityId]);
 
     const fetchNotes = async () => {
         try {
-            const data = await apiService.getNotes();
+            const data = await apiService.getNotes(entityType, entityId);
             setNotes(data);
         } catch (error) {
             console.error('Failed to fetch notes', error);
@@ -44,7 +49,9 @@ const NotesBoard: React.FC = () => {
                 title: newTitle,
                 category: categoryToUse,
                 items: [],
-                is_pinned: false
+                is_pinned: false,
+                linkedEntityType: entityType,
+                linkedEntityId: entityId
             });
             setNotes([created, ...notes]);
             setIsCreating(false);

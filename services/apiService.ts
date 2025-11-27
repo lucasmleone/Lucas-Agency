@@ -219,8 +219,12 @@ export const apiService = {
 
   // Notes
   // Notes
-  getNotes: async (): Promise<Note[]> => {
-    const res = await fetch(`${DATA_URL}/notes`, { credentials: 'include' });
+  async getNotes(entityType?: string, entityId?: string): Promise<Note[]> {
+    const params = new URLSearchParams();
+    if (entityType) params.append('entityType', entityType);
+    if (entityId) params.append('entityId', entityId);
+
+    const res = await fetch(`${DATA_URL}/notes?${params.toString()}`, { credentials: 'include' });
     if (!res.ok) return [];
     return res.json();
   },
