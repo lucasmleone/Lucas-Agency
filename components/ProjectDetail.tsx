@@ -17,7 +17,22 @@ import {
 } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import NotesBoard from './Notes/NotesBoard';
-import { MaintenanceView } from './MaintenanceView';
+import { PortalAdmin } from './PortalAdmin';
+
+// ... inside component ...
+
+<button onClick={() => setActiveTab('portal')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'portal' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
+    <Shield className="w-4 h-4 mr-2" />
+    Portal Cliente
+</button>
+
+// ... inside content area ...
+
+{
+    activeTab === 'portal' && (
+        <PortalAdmin project={project} onUpdateProject={onClose} />
+    )
+}
 import { Toast } from './Toast';
 import { usePricingConfig } from '../hooks/usePricingConfig';
 import { Project, ProjectStatus, PlanType, ProjectLog, Client, PaymentStatus, FinanceRecord } from '../types';

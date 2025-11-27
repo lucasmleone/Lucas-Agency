@@ -88,6 +88,22 @@ export interface Project {
   finalPrice?: number; // Calculated final price
   pricingNotes?: string; // Notes about pricing/quote
   nextMaintenanceDate?: string; // Next scheduled maintenance task date
+
+  // Portal Fields
+  portalToken?: string;
+  portalPin?: string;
+  portalEnabled?: boolean;
+  portalExpiresAt?: string;
+  driveLink?: string;
+  requirements?: string[];
+}
+
+export interface Milestone {
+  id: number;
+  projectId: number;
+  title: string;
+  status: 'pending' | 'active' | 'completed';
+  sortOrder: number;
 }
 
 export interface ProjectLog {

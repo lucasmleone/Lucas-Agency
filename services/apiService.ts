@@ -254,5 +254,71 @@ export const apiService = {
       method: 'DELETE',
       credentials: 'include'
     });
+  },
+
+  // --- Portal Methods ---
+  generatePortal: async (projectId: string) => {
+    const res = await fetch(`${DATA_URL}/projects/${projectId}/portal/generate`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to generate portal');
+    return res.json();
+  },
+
+  revokePortal: async (projectId: string) => {
+    const res = await fetch(`${DATA_URL}/projects/${projectId}/portal/revoke`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to revoke portal');
+    return res.json();
+  },
+
+  updatePortalConfig: async (projectId: string, config: { driveLink: string; requirements: string[] }) => {
+    const res = await fetch(`${DATA_URL}/projects/${projectId}/portal/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to update portal config');
+    return res.json();
+  },
+
+  getMilestones: async (projectId: string) => {
+    const res = await fetch(`${DATA_URL}/projects/${projectId}/milestones`, { credentials: 'include' });
+    if (!res.ok) throw new Error('Failed to fetch milestones');
+    return res.json();
+  },
+
+  addMilestone: async (projectId: string, milestone: { title: string }) => {
+    const res = await fetch(`${DATA_URL}/projects/${projectId}/milestones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(milestone),
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to add milestone');
+    return res.json();
+  },
+
+  updateMilestone: async (projectId: string, milestoneId: number, updates: any) => {
+    const res = await fetch(`${DATA_URL}/projects/${projectId}/milestones/${milestoneId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to update milestone');
+    return res.json();
+  },
+
+  deleteMilestone: async (projectId: string, milestoneId: number) => {
+    const res = await fetch(`${DATA_URL}/projects/${projectId}/milestones/${milestoneId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!res.ok) throw new Error('Failed to delete milestone');
   }
 };
