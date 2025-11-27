@@ -176,7 +176,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const [activeTab, setActiveTab] = useState<'workflow' | 'data' | 'logs' | 'finance' | 'maintenance' | 'notes' | 'portal'>('workflow');
     const [status, setStatus] = useState(project.status);
     const [discoveryData, setDiscoveryData] = useState(project.discoveryData || {
-        buyerPersona: '', competitors: '', references: '', materialStatus: '', currentUrl: '', objective: ''
+        buyerPersona: '', competitors: '', references: '', materialStatus: '', currentUrl: '', objective: '', materials: ''
     });
     const [checklists, setChecklists] = useState(project.checklists || {
         depositPaid: false, infoReceived: false, fillerAccepted: false, finalPaymentPaid: false
@@ -369,7 +369,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             <div><span className="font-bold text-gray-600 block">Buyer Persona:</span> {discoveryData.buyerPersona || '-'}</div>
             <div><span className="font-bold text-gray-600 block">Competencia:</span> {discoveryData.competitors || '-'}</div>
             <div><span className="font-bold text-gray-600 block">Referencias:</span> {discoveryData.references || '-'}</div>
-            <div><span className="font-bold text-gray-600 block">Materiales:</span> {discoveryData.materialStatus || '-'}</div>
+            <div><span className="font-bold text-gray-600 block">Materiales (Estado):</span> {discoveryData.materialStatus || '-'}</div>
+            <div><span className="font-bold text-gray-600 block">Materiales a Solicitar:</span> {discoveryData.materials || '-'}</div>
             <div><span className="font-bold text-gray-600 block">Otros Comentarios:</span> {discoveryData.otherComments || '-'}</div>
             <div className="pt-2 border-t border-gray-200">
                 <span className="font-bold text-gray-600 block mb-1">URL Desarrollo:</span>
@@ -984,6 +985,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-700 mb-1">Estado Materiales (Logo/Texto)</label>
                                                 <input className="w-full border-gray-300 rounded text-sm p-2" value={discoveryData.materialStatus} onChange={e => setDiscoveryData({ ...discoveryData, materialStatus: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Materiales a Solicitar</label>
+                                                <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={3} value={discoveryData.materials || ''} onChange={e => setDiscoveryData({ ...discoveryData, materials: e.target.value })} placeholder="Lista de materiales necesarios..." />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-700 mb-1">Otros Comentarios</label>

@@ -46,6 +46,7 @@ export interface DiscoveryData {
   materialStatus: string;
   currentUrl: string;
   objective: string;
+  materials?: string;
   otherComments?: string;
 }
 
