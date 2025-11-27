@@ -51,6 +51,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
             <main className="max-w-3xl mx-auto px-4 py-12">
 
                 {/* STAGE 1: PROPOSAL */}
+                {/* STAGE 1: PROPOSAL */}
                 {isProposal && (
                     <div className="space-y-8 animate-fade-in">
                         <div className="text-center space-y-4">
@@ -64,35 +65,91 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                         </div>
 
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div className="p-8 space-y-6">
-                                <div className="flex justify-between items-end border-b border-gray-100 pb-6">
+                            <div className="p-8 space-y-8">
+                                {/* Budget Header */}
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-gray-100 pb-8 gap-4">
                                     <div>
-                                        <p className="text-sm text-gray-500 uppercase font-bold">Inversión Total</p>
-                                        <p className="text-4xl font-bold text-gray-900">${project.finalPrice?.toLocaleString()}</p>
+                                        <p className="text-sm text-gray-500 uppercase font-bold tracking-wider mb-1">Inversión Total</p>
+                                        <p className="text-5xl font-bold text-gray-900 tracking-tight">
+                                            ${project.finalPrice?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </p>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-gray-500">Plan Seleccionado</p>
-                                        <p className="font-medium text-gray-900">{project.planType}</p>
+                                    <div className="text-left md:text-right bg-gray-50 px-4 py-2 rounded-lg">
+                                        <p className="text-xs text-gray-500 uppercase font-bold mb-1">Plan Seleccionado</p>
+                                        <p className="font-bold text-gray-900 text-lg">{project.planType}</p>
                                     </div>
                                 </div>
 
-                                <div className="prose prose-blue max-w-none">
-                                    <h3 className="text-lg font-bold text-gray-900">Alcance del Trabajo</h3>
-                                    <p className="text-gray-600">
-                                        {project.description || 'Desarrollo web completo optimizado para conversión y SEO.'}
-                                    </p>
-                                    {/* Add more proposal details here if available */}
+                                {/* Services Detail */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                        <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
+                                        DETALLE DE SERVICIOS INCLUIDOS
+                                    </h3>
+                                    <p className="text-gray-600 mb-4">Para garantizar un resultado profesional y de alto impacto, el servicio incluye:</p>
+                                    <ul className="grid gap-4 sm:grid-cols-2">
+                                        {[
+                                            { title: 'Desarrollo Web Optimizado', desc: 'Código limpio enfocado en velocidad de carga y posicionamiento en buscadores (SEO Técnico).' },
+                                            { title: 'Diseño Responsivo', desc: 'Visualización perfecta en celulares, tablets y computadoras.' },
+                                            { title: 'Funcionalidades Clave', desc: 'Integración con WhatsApp, formularios de contacto y mapas interactivos.' },
+                                            { title: 'Seguridad y Soporte', desc: 'Configuración de certificado SSL (candado seguro) y 2 meses de mantenimiento técnico bonificado.' }
+                                        ].map((item, i) => (
+                                            <li key={i} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                <strong className="block text-gray-900 mb-1">{item.title}</strong>
+                                                <span className="text-sm text-gray-600">{item.desc}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Terms & Conditions */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                        <span className="w-1 h-6 bg-gray-300 rounded-full mr-3"></span>
+                                        TÉRMINOS Y CONDICIONES
+                                    </h3>
+                                    <div className="space-y-4 text-sm text-gray-600 bg-gray-50 p-6 rounded-xl border border-gray-100 h-64 overflow-y-auto custom-scrollbar">
+                                        <div className="space-y-2">
+                                            <strong className="text-gray-900 block">1. Alcance y Exclusiones</strong>
+                                            <p>Este presupuesto cubre el desarrollo web y la optimización básica para buscadores (SEO). Exclusiones: NO incluye diseño de identidad corporativa (creación de logotipos, manuales de marca) ni servicios de fotografía. El Cliente deberá proporcionar estos activos en la calidad adecuada.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <strong className="text-gray-900 block">2. Plazos de Ejecución</strong>
+                                            <p>El tiempo estimado para la entrega de la Primera Revisión (Borrador Funcional) es de 4 semanas. Inicio del cómputo: Este plazo comenzará a contar únicamente cuando se cumplan dos condiciones: Recepción del comprobante de pago del anticipo (50%) y Entrega del 100% de la información base solicitada (Briefing).</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <strong className="text-gray-900 block">3. Entrega de Contenidos (Textos)</strong>
+                                            <p>El Cliente es responsable de entregar los textos finales antes del inicio. Retrasos: Si el Cliente se demora en la entrega, podrá solicitar al Desarrollador el uso de textos provisionales (genéricos o IA) para no detener el avance visual.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <strong className="text-gray-900 block">4. Vigencia del Proyecto (Inactividad)</strong>
+                                            <p>Para garantizar el flujo de trabajo, el proyecto tiene una vigencia activa de 30 días tras cada entrega o solicitud de feedback. Stand-by: Si el Cliente no responde en este periodo, el proyecto pasará a estado "Inactivo".</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <strong className="text-gray-900 block">5. Forma de Pago y Propiedad</strong>
+                                            <p>Anticipo: 50% a la firma. Saldo Final: 50% restante contra aprobación. Propiedad Intelectual: Los derechos permanecen como propiedad del Desarrollador hasta la liquidación total.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <strong className="text-gray-900 block">6. Validez del Presupuesto</strong>
+                                            <p>Esta cotización tiene una validez de 30 días naturales desde su fecha de emisión.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="bg-gray-50 p-8 border-t border-gray-100 flex justify-end">
+
+                            <div className="bg-gray-900 p-8 flex flex-col sm:flex-row items-center justify-between gap-6 text-white">
+                                <div>
+                                    <p className="font-bold text-lg">¿Listo para comenzar?</p>
+                                    <p className="text-gray-400 text-sm">Al aprobar, aceptas los términos y condiciones detallados arriba.</p>
+                                </div>
                                 <button
                                     onClick={() => handleAction('approve_proposal')}
                                     disabled={loading}
-                                    className="bg-black text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl flex items-center gap-3"
+                                    className="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-white/10 flex items-center justify-center gap-3"
                                 >
                                     {loading ? 'Procesando...' : (
                                         <>
-                                            Aprobar Propuesta <ChevronRight />
+                                            Aprobar Propuesta <ChevronRight size={20} />
                                         </>
                                     )}
                                 </button>

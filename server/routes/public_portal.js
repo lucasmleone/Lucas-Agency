@@ -101,7 +101,8 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
         const [projects] = await pool.query(`
             SELECT p.id, p.name, p.description, p.status, p.start_date, p.end_date, 
                    p.drive_link, p.requirements, p.portal_expires_at,
-                   p.base_price, p.custom_price, p.discount, p.discount_type, p.final_price, p.plan
+                   p.base_price, p.custom_price, p.discount, p.discount_type, 
+                   p.final_price as finalPrice, p.plan as planType
             FROM projects p 
             WHERE p.portal_token = ?
         `, [token]);
