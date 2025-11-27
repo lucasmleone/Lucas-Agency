@@ -133,6 +133,14 @@ router.put('/projects/:id', async (req, res) => {
     }
 
     try {
+        // Auto-expiry logic: Set portal expiration when project becomes "7. Entregado"
+        let portalExpiresAt = null;
+        if (p.status === '7. Entregado' || p.status === ProjectStatus?.DELIVERED) {
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 10); // 10 days from now
+            portalExpiresAt = expiryDate.toISOString().slice(0, 19).replace('T', ' '); // MySQL DATETIME format
+        }
+
         await pool.query(`
       UPDATE projects SET 
         status = ?, 
@@ -153,7 +161,8 @@ router.put('/projects/:id', async (req, res) => {
         discount_type = ?,
         final_price = ?,
         pricing_notes = ?,
-        proposal_token = ?
+        proposal_token = ?,
+        portal_expires_at = COALESCE(?, portal_expires_at)
       WHERE id = ? AND user_id = ?
     `, [
             p.status,
@@ -175,6 +184,7 @@ router.put('/projects/:id', async (req, res) => {
             p.finalPrice,
             p.pricingNotes,
             p.proposalToken, // Add token
+            portalExpiresAt, // Auto-expiry for portal
             id,
             req.user.id
         ]);
