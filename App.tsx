@@ -95,6 +95,8 @@ const getUrgencyLabel = (days: number, status: ProjectStatus) => {
   return `${days} días restantes`;
 };
 
+import { Portal } from './components/Portal/Portal';
+
 // =====================================================
 // COMPONENTE PRINCIPAL
 // =====================================================
@@ -115,6 +117,12 @@ const getUrgencyLabel = (days: number, status: ProjectStatus) => {
  * - Modales para CRUD operations
  */
 function App() {
+  // Check if accessing Portal route
+  const portalMatch = window.location.pathname.match(/^\/portal\/([a-f0-9-]+)$/);
+  if (portalMatch) {
+    return <Portal token={portalMatch[1]} />;
+  }
+
   const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const {
     projects,
