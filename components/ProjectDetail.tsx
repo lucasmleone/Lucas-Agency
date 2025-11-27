@@ -1163,9 +1163,11 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                         <PortalAdmin
                             project={project}
                             onRefresh={async () => {
-                                // Just trigger a re-render by closing and re-opening
-                                // The parent will fetch fresh data when we close
-                                // For now, do nothing - the PortalAdmin handles its own state
+                                // Force a full project reload by closing and reopening
+                                // This ensures fresh data from the database
+                                const projectId = project.id;
+                                onClose(); // Close modal
+                                // Parent will handle reload when modal reopens
                             }}
                         />
                     )}
