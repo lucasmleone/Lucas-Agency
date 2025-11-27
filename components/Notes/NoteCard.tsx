@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Note, NoteItem } from '../../types';
-import { Trash2, Edit2, Pin, Copy, Plus, X } from 'lucide-react';
+import { Trash2, Edit2, Pin, Copy, Plus, X, Link as LinkIcon, FileText } from 'lucide-react';
 
 interface NoteCardProps {
     note: Note;
@@ -13,7 +13,15 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
     const [editedTitle, setEditedTitle] = useState(note.title);
     const [editedItems, setEditedItems] = useState<NoteItem[]>(note.items || []);
     const [newItemContent, setNewItemContent] = useState('');
-    const [newItemType, setNewItemType] = useState<'text' | 'link'>('text');
+
+    const isValidUrl = (string: string): boolean => {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    };
 
     const handleSave = () => {
         onUpdate(note.id, { title: editedTitle, items: editedItems });
@@ -22,10 +30,11 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
 
     const handleAddItem = () => {
         if (!newItemContent.trim()) return;
+        const itemType: 'link' | 'text' = isValidUrl(newItemContent) ? 'link' : 'text';
         const newItem: NoteItem = {
             id: Date.now().toString(),
-            type: newItemType,
-            content: newItemContent
+            type: itemType,
+            content: newItemContent.trim()
         };
         setEditedItems([...editedItems, newItem]);
         setNewItemContent('');
@@ -35,143 +44,173 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
         setEditedItems(editedItems.filter(item => item.id !== itemId));
     };
 
-    const handleCopyItem = (content: string) => {
-        navigator.clipboard.writeText(content);
+    const handleCopyItem = async (content: string) => {
+        try {
+            await navigator.clipboard.writeText(content);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
     };
 
     return (
-        <div className={`bg-white p-4 rounded-lg shadow-md border-l-4 ${note.is_pinned ? 'border-yellow-400' : 'border-blue-500'
-            } hover:shadow-lg transition-shadow relative group`}>
-            {/* Actions */}
-            <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                    onClick={() => onUpdate(note.id, { is_pinned: !note.is_pinned })}
-                    className={`p-1 rounded hover:bg-gray-100 ${note.is_pinned ? 'text-yellow-500' : 'text-gray-400'}`}
-                    title={note.is_pinned ? "Unpin" : "Pin"}
-                >
-                    <Pin size={16} fill={note.is_pinned ? "currentColor" : "none"} />
-                </button>
-                <button
-                    onClick={() => setIsEditing(!isEditing)}
-                    className="p-1 text-gray-400 hover:text-blue-500 rounded hover:bg-gray-100"
-                    title="Edit"
-                >
-                    <Edit2 size={16} />
-                </button>
-                <button
-                    onClick={() => onDelete(note.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 rounded hover:bg-gray-100"
-                    title="Delete"
-                >
-                    <Trash2 size={16} />
-                </button>
+        <div className={`bg-white rounded-2xl shadow-sm border ${note.is_pinned ? 'border-blue-200 ring-1 ring-blue-100' : 'border-gray-100'
+            } overflow-hidden transition-all hover:shadow-md`}>
+            {/* Header */}
+            <div className="px-4 py-3 flex items-center justify-between border-b border-gray-50">
+                <h3 className="font-semibold text-gray-900 text-sm truncate flex-1">{note.title}</h3>
+                <div className="flex items-center gap-1 ml-2">
+                    <button
+                        onClick={() => onUpdate(note.id, { is_pinned: !note.is_pinned })}
+                        className={`p-1.5 rounded-lg transition-colors ${note.is_pinned
+                                ? 'bg-blue-50 text-blue-600'
+                                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+                            }`}
+                        title={note.is_pinned ? "Unpin" : "Pin"}
+                    >
+                        <Pin size={14} fill={note.is_pinned ? "currentColor" : "none"} />
+                    </button>
+                    <button
+                        onClick={() => setIsEditing(!isEditing)}
+                        className="p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-lg transition-colors"
+                        title="Edit"
+                    >
+                        <Edit2 size={14} />
+                    </button>
+                    <button
+                        onClick={() => onDelete(note.id)}
+                        className="p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                        title="Delete"
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                </div>
             </div>
 
             {/* Content */}
-            {isEditing ? (
-                <div className="space-y-3">
-                    <input
-                        type="text"
-                        value={editedTitle}
-                        onChange={(e) => setEditedTitle(e.target.value)}
-                        className="w-full p-2 border rounded font-semibold text-sm"
-                        placeholder="Title"
-                    />
+            <div className="p-4">
+                {isEditing ? (
+                    <div className="space-y-3">
+                        {/* Title Edit */}
+                        <input
+                            type="text"
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Note title"
+                        />
 
-                    {/* Items List */}
-                    <div className="space-y-2">
-                        {editedItems.map((item) => (
-                            <div key={item.id} className="flex items-start gap-2 p-2 bg-gray-50 rounded">
-                                <div className="flex-1">
-                                    <span className="text-xs text-gray-500">{item.type === 'link' ? '🔗' : '📝'}</span>
-                                    <p className="text-sm break-words">{item.content}</p>
+                        {/* Items List */}
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {editedItems.map((item) => (
+                                <div key={item.id} className="group flex items-start gap-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div className="p-1 bg-white rounded shadow-sm">
+                                        {item.type === 'link' ? (
+                                            <LinkIcon size={12} className="text-blue-500" />
+                                        ) : (
+                                            <FileText size={12} className="text-gray-500" />
+                                        )}
+                                    </div>
+                                    <p className="flex-1 text-xs text-gray-700 break-all leading-relaxed pt-0.5">{item.content}</p>
+                                    <button
+                                        onClick={() => handleDeleteItem(item.id)}
+                                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                                    >
+                                        <X size={12} />
+                                    </button>
                                 </div>
+                            ))}
+                        </div>
+
+                        {/* Add Item */}
+                        <div className="pt-2 border-t border-gray-100">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newItemContent}
+                                    onChange={(e) => setNewItemContent(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
+                                    placeholder="Paste link or add text..."
+                                    className="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                                 <button
-                                    onClick={() => handleDeleteItem(item.id)}
-                                    className="text-red-500 hover:text-red-700"
+                                    onClick={handleAddItem}
+                                    disabled={!newItemContent.trim()}
+                                    className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    <X size={14} />
+                                    <Plus size={14} />
                                 </button>
                             </div>
-                        ))}
-                    </div>
+                        </div>
 
-                    {/* Add Item */}
-                    <div className="space-y-2 pt-2 border-t">
-                        <div className="flex gap-2">
-                            <select
-                                value={newItemType}
-                                onChange={(e) => setNewItemType(e.target.value as 'text' | 'link')}
-                                className="p-1 border rounded text-sm"
-                            >
-                                <option value="text">Text</option>
-                                <option value="link">Link</option>
-                            </select>
-                            <input
-                                type="text"
-                                value={newItemContent}
-                                onChange={(e) => setNewItemContent(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
-                                placeholder="Add item..."
-                                className="flex-1 p-1 border rounded text-sm"
-                            />
+                        {/* Actions */}
+                        <div className="flex justify-end gap-2 pt-2">
                             <button
-                                onClick={handleAddItem}
-                                className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                onClick={() => {
+                                    setIsEditing(false);
+                                    setEditedTitle(note.title);
+                                    setEditedItems(note.items || []);
+                                    setNewItemContent('');
+                                }}
+                                className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                <Plus size={16} />
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="px-4 py-1.5 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
+                            >
+                                Save
                             </button>
                         </div>
                     </div>
-
-                    <div className="flex justify-end space-x-2 pt-2">
-                        <button onClick={() => setIsEditing(false)} className="text-xs text-gray-500 hover:underline">Cancel</button>
-                        <button onClick={handleSave} className="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Save</button>
-                    </div>
-                </div>
-            ) : (
-                <div>
-                    <h3 className="font-semibold text-gray-800 pr-16 truncate mb-3">{note.title}</h3>
-
-                    {/* Items Display */}
+                ) : (
                     <div className="space-y-2">
-                        {(note.items || []).map((item) => (
-                            <div key={item.id} className="flex items-start gap-2 group/item">
-                                <div className="flex-1 p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
-                                    {item.type === 'link' ? (
-                                        <a
-                                            href={item.content}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline text-sm flex items-center gap-1"
+                        {/* Items Display */}
+                        {(note.items || []).length > 0 ? (
+                            <div className="space-y-2 max-h-64 overflow-y-auto">
+                                {(note.items || []).map((item) => (
+                                    <div key={item.id} className="group flex items-start gap-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <div className="p-1 bg-white rounded shadow-sm flex-shrink-0">
+                                            {item.type === 'link' ? (
+                                                <LinkIcon size={12} className="text-blue-500" />
+                                            ) : (
+                                                <FileText size={12} className="text-gray-500" />
+                                            )}
+                                        </div>
+                                        {item.type === 'link' ? (
+                                            <a
+                                                href={item.content}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex-1 text-xs text-blue-600 hover:text-blue-700 hover:underline break-all leading-relaxed pt-0.5"
+                                            >
+                                                {item.content}
+                                            </a>
+                                        ) : (
+                                            <p className="flex-1 text-xs text-gray-700 break-all leading-relaxed pt-0.5">{item.content}</p>
+                                        )}
+                                        <button
+                                            onClick={() => handleCopyItem(item.content)}
+                                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-500 transition-all flex-shrink-0"
+                                            title="Copy"
                                         >
-                                            🔗 {item.content}
-                                        </a>
-                                    ) : (
-                                        <p className="text-sm text-gray-700">📝 {item.content}</p>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={() => handleCopyItem(item.content)}
-                                    className="opacity-0 group-hover/item:opacity-100 p-1 text-gray-400 hover:text-blue-500 transition-opacity"
-                                    title="Copy"
-                                >
-                                    <Copy size={14} />
-                                </button>
+                                            <Copy size={12} />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        ) : (
+                            <p className="text-xs text-gray-400 italic text-center py-4">No items yet</p>
+                        )}
 
-                    {(note.items || []).length === 0 && (
-                        <p className="text-xs text-gray-400 italic">No items yet</p>
-                    )}
-
-                    <div className="mt-3 flex justify-between items-center">
-                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{note.category}</span>
-                        <span className="text-xs text-gray-300">{new Date(note.updated_at).toLocaleDateString()}</span>
+                        {/* Footer */}
+                        <div className="flex justify-between items-center pt-2 mt-2 border-t border-gray-50">
+                            <span className="text-xs text-gray-400 px-2 py-0.5 bg-gray-50 rounded-full">{note.category}</span>
+                            <span className="text-xs text-gray-300">{new Date(note.updated_at).toLocaleDateString()}</span>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
