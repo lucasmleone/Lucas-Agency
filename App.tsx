@@ -543,7 +543,7 @@ function App() {
                     return (
                       <div
                         key={project.id}
-                        className="group bg-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
+                        className="group bg-white rounded-xl border border-gray-200 hover:border-blue-200 hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
                         onClick={() => setSelectedProjectId(project.id)}
                       >
                         {/* Card Header */}
@@ -557,10 +557,10 @@ function App() {
                             </div>
                             <div className="flex flex-col gap-2 items-end ml-3">
                               <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap ${project.status === ProjectStatus.DELIVERED
-                                  ? 'bg-gray-50 text-gray-700 border border-gray-200'
-                                  : project.status === ProjectStatus.WAITING_RESOURCES
-                                    ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                                    : 'bg-blue-50 text-blue-700 border border-blue-200'
+                                ? 'bg-gray-50 text-gray-700 border border-gray-200'
+                                : project.status === ProjectStatus.WAITING_RESOURCES
+                                  ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                                  : 'bg-blue-50 text-blue-700 border border-blue-200'
                                 }`}>
                                 {project.status.split('.')[1] || project.status}
                               </span>
