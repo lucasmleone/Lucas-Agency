@@ -80,7 +80,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
 
     return (
         <div className={`bg-white rounded-2xl shadow-sm border ${note.is_pinned ? 'border-blue-200 ring-1 ring-blue-100' : 'border-gray-100'
-            } overflow-hidden transition-all hover:shadow-md`}>
+            } overflow-hidden transition-all hover:shadow-md min-w-0`}>
             {/* Header */}
             <div className="px-4 py-3 flex items-center justify-between border-b border-gray-50">
                 {isEditing ? (
@@ -98,8 +98,8 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
                     <button
                         onClick={() => onUpdate(note.id, { is_pinned: !note.is_pinned })}
                         className={`p-1.5 rounded-lg transition-colors ${note.is_pinned
-                                ? 'bg-blue-50 text-blue-600'
-                                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
                             }`}
                         title={note.is_pinned ? "Unpin" : "Pin"}
                     >
@@ -285,12 +285,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
                                                     href={item.content}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 text-xs text-blue-600 hover:text-blue-700 hover:underline break-words whitespace-pre-wrap leading-relaxed pt-0.5"
+                                                    className="flex-1 text-xs text-blue-600 hover:text-blue-700 hover:underline break-all whitespace-pre-wrap leading-relaxed pt-0.5 overflow-wrap-anywhere"
                                                 >
                                                     {item.content}
                                                 </a>
                                             ) : (
-                                                <p className="flex-1 text-xs text-gray-700 break-words whitespace-pre-wrap leading-relaxed pt-0.5">
+                                                <p className="flex-1 text-xs text-gray-700 break-words whitespace-pre-wrap leading-relaxed pt-0.5 overflow-wrap-anywhere">
                                                     {item.content}
                                                 </p>
                                             )}
