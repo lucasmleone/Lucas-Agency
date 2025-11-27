@@ -240,49 +240,40 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
                     /* View Mode */
                     <div className="space-y-3">
                         {(note.items || []).length > 0 ? (
-                            (note.items || []).map((item) => (
-                                <div key={item.id} className="group flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all">
-                                    <div className="mt-1 shrink-0">
-                                        {item.type === 'link' ? (
-                                            <div className="w-6 h-6 rounded bg-blue-50 flex items-center justify-center text-blue-600">
-                                                <LinkIcon size={14} />
-                                            </div>
-                                        ) : (
-                                            <div className="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-gray-500">
-                                                <FileText size={14} />
-                                            </div>
-                                        )}
+                            <div className="space-y-3 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                                {(note.items || []).map((item) => (
+                                    <div key={item.id} className="group flex items-start gap-2 p-2 rounded hover:bg-gray-50 transition-all">
+                                        <div className="flex-1 min-w-0">
+                                            {item.title && (
+                                                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                                                    {item.title}
+                                                </div>
+                                            )}
+                                            {item.type === 'link' ? (
+                                                <a
+                                                    href={item.content}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline break-all block"
+                                                >
+                                                    {item.content} <ExternalLink size={10} className="inline ml-0.5" />
+                                                </a>
+                                            ) : (
+                                                <p className="text-sm text-gray-700 whitespace-pre-wrap break-words leading-relaxed">
+                                                    {item.content}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => handleCopyItem(item.content)}
+                                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-600 transition-all shrink-0"
+                                            title="Copiar"
+                                        >
+                                            <Copy size={14} />
+                                        </button>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        {item.title && (
-                                            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                                                {item.title}
-                                            </div>
-                                        )}
-                                        {item.type === 'link' ? (
-                                            <a
-                                                href={item.content}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm text-blue-600 hover:text-blue-800 hover:underline break-all block"
-                                            >
-                                                {item.content} <ExternalLink size={10} className="inline ml-0.5" />
-                                            </a>
-                                        ) : (
-                                            <p className="text-sm text-gray-700 whitespace-pre-wrap break-words leading-relaxed">
-                                                {item.content}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <button
-                                        onClick={() => handleCopyItem(item.content)}
-                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all shrink-0"
-                                        title="Copiar"
-                                    >
-                                        <Copy size={14} />
-                                    </button>
-                                </div>
-                            ))
+                                ))}
+                            </div>
                         ) : (
                             <div className="text-center py-8 px-4 border-2 border-dashed border-gray-100 rounded-xl">
                                 <p className="text-sm text-gray-400">Esta nota está vacía.</p>
