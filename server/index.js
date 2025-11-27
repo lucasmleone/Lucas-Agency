@@ -10,8 +10,6 @@ import authRoutes from './routes/auth.js';
 import dataRoutes from './routes/data.js';
 import configRoutes from './routes/config.js';
 import maintenanceRoutes from './routes/maintenance.js';
-import configRoutes from './routes/config.js';
-import maintenanceRoutes from './routes/maintenance.js';
 import publicRoutes from './routes/public.js';
 import notesRoutes from './routes/notes.js';
 
