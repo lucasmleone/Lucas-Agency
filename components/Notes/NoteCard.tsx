@@ -171,14 +171,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
                                                 </div>
                                             )}
                                             <div className="flex items-start gap-2">
-                                                <div className="p-1 bg-white rounded shadow-sm flex-shrink-0">
-                                                    {item.type === 'link' ? (
-                                                        <LinkIcon size={12} className="text-blue-500" />
-                                                    ) : (
-                                                        <FileText size={12} className="text-gray-500" />
-                                                    )}
-                                                </div>
-                                                <p className="flex-1 text-xs text-gray-700 break-words whitespace-pre-wrap leading-relaxed pt-0.5">
+                                                <p className="flex-1 text-xs text-gray-700 break-words whitespace-pre-wrap leading-relaxed">
                                                     {item.content}
                                                 </p>
                                                 <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -273,24 +266,17 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onDelete, onUpdate }) => {
                                             </div>
                                         )}
                                         <div className="flex items-start gap-2 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                            <div className="p-1 bg-white rounded shadow-sm flex-shrink-0">
-                                                {item.type === 'link' ? (
-                                                    <LinkIcon size={12} className="text-blue-500" />
-                                                ) : (
-                                                    <FileText size={12} className="text-gray-500" />
-                                                )}
-                                            </div>
                                             {item.type === 'link' ? (
                                                 <a
                                                     href={item.content}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 text-xs text-blue-600 hover:text-blue-700 hover:underline break-all whitespace-pre-wrap leading-relaxed pt-0.5 overflow-wrap-anywhere"
+                                                    className="flex-1 text-xs text-blue-600 hover:text-blue-700 hover:underline break-all whitespace-pre-wrap leading-relaxed overflow-wrap-anywhere"
                                                 >
                                                     {item.content}
                                                 </a>
                                             ) : (
-                                                <p className="flex-1 text-xs text-gray-700 break-words whitespace-pre-wrap leading-relaxed pt-0.5 overflow-wrap-anywhere">
+                                                <p className="flex-1 text-xs text-gray-700 break-words whitespace-pre-wrap leading-relaxed overflow-wrap-anywhere">
                                                     {item.content}
                                                 </p>
                                             )}
