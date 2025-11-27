@@ -297,7 +297,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                     ))}
                 </div>
 
-                <form onSubmit={handleAddMilestone} className="flex gap-2">
+                <form onSubmit={handleAddMilestone} className="flex gap-2 mb-6">
                     <input
                         type="text"
                         value={newMilestone}
@@ -309,6 +309,62 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                         <Plus size={16} /> Agregar
                     </button>
                 </form>
+
+                {/* Milestone Library */}
+                <div className="border-t border-gray-100 pt-4">
+                    <p className="text-xs font-bold text-gray-500 uppercase mb-3">Sugerencias (Clic para agregar)</p>
+                    <div className="flex flex-wrap gap-2">
+                        {[
+                            'Investigación',
+                            'Diseño UI',
+                            'Desarrollo',
+                            'QA / Testing',
+                            'Revisión Cliente',
+                            'Informe Final'
+                        ].map(suggestion => (
+                            <button
+                                key={suggestion}
+                                onClick={async () => {
+                                    try {
+                                        await apiService.addMilestone(project.id, { title: suggestion });
+                                        fetchMilestones();
+                                        setToast({ type: 'success', message: 'Hito agregado' });
+                                    } catch (error) {
+                                        console.error('Error adding suggestion:', error);
+                                    }
+                                }}
+                                className="px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                            >
+                                + {suggestion}
+                            </button>
+                        ))}
+                        <div className="w-full mt-2">
+                            <button
+                                onClick={async () => {
+                                    setLoading(true);
+                                    try {
+                                        const suggestions = ['Investigación', 'Diseño UI', 'Desarrollo', 'QA / Testing', 'Revisión Cliente', 'Informe Final'];
+                                        for (const title of suggestions) {
+                                            // Check if already exists to avoid duplicates
+                                            if (!milestones.some(m => m.title === title)) {
+                                                await apiService.addMilestone(project.id, { title });
+                                            }
+                                        }
+                                        fetchMilestones();
+                                        setToast({ type: 'success', message: 'Hitos sugeridos agregados' });
+                                    } catch (error) {
+                                        console.error('Error adding all suggestions:', error);
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }}
+                                className="text-xs text-blue-600 hover:underline font-medium"
+                            >
+                                Agregar todos los sugeridos
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {toast && (
