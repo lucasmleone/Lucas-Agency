@@ -6,7 +6,7 @@ import { Toast } from './Toast';
 
 interface PortalAdminProps {
     project: Project;
-    onRefresh: () => Promise<void>;
+    onRefresh: (updates?: Partial<Project>) => Promise<void>;
 }
 
 export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProject, onRefresh }) => {
@@ -18,11 +18,15 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
         requirements: (project.requirements || []).join('\n')
     });
     const [newMilestone, setNewMilestone] = useState('');
-    const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-    const [confirmModal, setConfirmModal] = useState<{ action: 'generate' | 'revoke' | 'delete', milestoneId?: number } | null>(null);
+    const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ action: 'generate' | 'revoke' | 'delete_milestone', id?: number } | null>(null);
 
     useEffect(() => {
         setProject(initialProject);
+        setConfig({
+            driveLink: initialProject.driveLink || '',
+            requirements: (initialProject.requirements || []).join('\n')
+        });
     }, [initialProject]);
 
     useEffect(() => {
@@ -48,13 +52,13 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
         try {
             const response = await apiService.generatePortal(project.id);
             // Update local project state with new token and pin
-            setProject(prev => ({
-                ...prev,
+            const updates = {
                 portalToken: response.token,
                 portalPin: response.pin,
                 portalEnabled: response.enabled
-            }));
-            await onRefresh(); // Refresh parent
+            };
+            setProject(prev => ({ ...prev, ...updates }));
+            await onRefresh(updates); // Refresh parent with updates
             setToast({ type: 'success', message: 'Acceso generado correctamente' });
         } catch (error) {
             console.error('Error generating portal:', error);

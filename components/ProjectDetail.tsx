@@ -1167,9 +1167,12 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     {activeTab === 'portal' && (
                         <PortalAdmin
                             project={project}
-                            onRefresh={async () => {
-                                // PortalAdmin manages its own state
-                                // No need to close modal or refresh - component handles updates locally
+                            onRefresh={async (updates) => {
+                                if (updates) {
+                                    // Update parent state with new portal data so it persists
+                                    // and doesn't get overwritten by stale data on next save
+                                    onUpdateProject(updates);
+                                }
                             }}
                         />
                     )}
