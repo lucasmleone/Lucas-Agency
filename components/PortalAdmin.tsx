@@ -18,6 +18,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
     });
     const [newMilestone, setNewMilestone] = useState('');
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{ action: 'generate' | 'revoke' | 'delete', milestoneId?: number } | null>(null);
 
     useEffect(() => {
         fetchMilestones();
@@ -33,8 +34,12 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
     };
 
     const handleGeneratePortal = async () => {
-        if (!confirm('¿Generar nuevo acceso? Esto invalidará el enlace anterior.')) return;
+        setConfirmModal({ action: 'generate' });
+    };
+
+    const confirmGeneratePortal = async () => {
         setLoading(true);
+        setConfirmModal(null);
         try {
             await apiService.generatePortal(project.id);
             await onRefresh();
@@ -48,8 +53,12 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
     };
 
     const handleRevokePortal = async () => {
-        if (!confirm('¿Revocar acceso? El cliente ya no podrá entrar.')) return;
+        setConfirmModal({ action: 'revoke' });
+    };
+
+    const confirmRevokePortal = async () => {
         setLoading(true);
+        setConfirmModal(null);
         try {
             await apiService.revokePortal(project.id);
             await onRefresh();
@@ -101,7 +110,13 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
     };
 
     const handleDeleteMilestone = async (id: number) => {
-        if (!confirm('¿Eliminar hito?')) return;
+        setConfirmModal({ action: 'delete', milestoneId: id });
+    };
+
+    const confirmDeleteMilestone = async () => {
+        if (!confirmModal || !confirmModal.milestoneId) return;
+        const id = confirmModal.milestoneId;
+        setConfirmModal(null);
         try {
             await apiService.deleteMilestone(project.id, id);
             fetchMilestones();
@@ -275,6 +290,27 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
                     type={toast.type}
                     message={toast.message}
                     onCancel={() => setToast(null)}
+                />
+            )}
+
+            {confirmModal && (
+                <Toast
+                    type="confirm"
+                    message={
+                        confirmModal.action === 'generate'
+                            ? '¿Generar nuevo acceso? Esto invalidará el enlace anterior.'
+                            : confirmModal.action === 'revoke'
+                                ? '¿Revocar acceso? El cliente ya no podrá entrar.'
+                                : '¿Eliminar este hito?'
+                    }
+                    onConfirm={
+                        confirmModal.action === 'generate'
+                            ? confirmGeneratePortal
+                            : confirmModal.action === 'revoke'
+                                ? confirmRevokePortal
+                                : confirmDeleteMilestone
+                    }
+                    onCancel={() => setConfirmModal(null)}
                 />
             )}
         </div>
