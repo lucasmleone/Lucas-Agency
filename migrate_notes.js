@@ -1,4 +1,4 @@
-import pool from '../server/db.js';
+import pool from './server/db.js';
 
 async function migrate() {
     try {
