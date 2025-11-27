@@ -159,3 +159,14 @@ export const MAINTENANCE_CHECKLIST: Omit<ChecklistItem, 'completed' | 'notes'>[]
   { id: '7', text: 'Test visual en incógnito y prueba de formularios' }
 ];
 
+
+export interface Note {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  is_pinned: boolean;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}

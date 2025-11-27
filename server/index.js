@@ -10,7 +10,10 @@ import authRoutes from './routes/auth.js';
 import dataRoutes from './routes/data.js';
 import configRoutes from './routes/config.js';
 import maintenanceRoutes from './routes/maintenance.js';
+import configRoutes from './routes/config.js';
+import maintenanceRoutes from './routes/maintenance.js';
 import publicRoutes from './routes/public.js';
+import notesRoutes from './routes/notes.js';
 
 dotenv.config();
 
@@ -70,7 +73,9 @@ const internalMiddleware = process.env.NODE_ENV === 'production' ? internalLimit
 
 app.use('/api', internalMiddleware, dataRoutes);
 app.use('/api/config', internalMiddleware, configRoutes);
+app.use('/api/config', internalMiddleware, configRoutes);
 app.use('/api/maintenance', internalMiddleware, maintenanceRoutes);
+app.use('/api/notes', internalMiddleware, notesRoutes);
 
 // Serve Static Files (Production)
 if (process.env.NODE_ENV === 'production') {

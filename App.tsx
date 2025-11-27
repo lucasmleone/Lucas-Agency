@@ -17,7 +17,8 @@ import {
   Wrench,
   Edit2,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  StickyNote
 } from 'lucide-react';
 import { Project, ProjectStatus, PlanType, ProjectLog, FinanceRecord } from './types';
 import { useAuth } from './context/AuthContext';
@@ -28,6 +29,7 @@ import { ProposalAccepted } from './components/ProposalAccepted';
 import { Dashboard } from './components/Dashboard';
 import { ProjectDetail } from './components/ProjectDetail';
 import { PricingConfigModal } from './components/PricingConfigModal';
+import NotesBoard from './components/Notes/NotesBoard';
 import { Toast } from './components/Toast';
 import { useProjects } from './hooks/useProjects';
 import { formatCurrency } from './utils/pricing';
@@ -116,7 +118,7 @@ function App() {
   } = useProjects();
 
   // --- Estados ---
-  const [view, setView] = useState<'public' | 'dashboard' | 'projects' | 'finance' | 'clients'>('dashboard');
+  const [view, setView] = useState<'public' | 'dashboard' | 'projects' | 'finance' | 'clients' | 'notes'>('dashboard');
   const [showPricingConfig, setShowPricingConfig] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [projectSortBy, setProjectSortBy] = useState<'deadline' | 'client'>('deadline');
@@ -218,7 +220,8 @@ function App() {
     const viewFromPath = path === '/' ? 'dashboard' :
       path === '/projects' ? 'projects' :
         path === '/clients' ? 'clients' :
-          path === '/finance' ? 'finance' : 'dashboard';
+          path === '/finance' ? 'finance' :
+            path === '/notes' ? 'notes' : 'dashboard';
     setView(viewFromPath as typeof view);
 
     // Handle browser back/forward buttons
@@ -227,7 +230,8 @@ function App() {
       const currentView = currentPath === '/' ? 'dashboard' :
         currentPath === '/projects' ? 'projects' :
           currentPath === '/clients' ? 'clients' :
-            currentPath === '/finance' ? 'finance' : 'dashboard';
+            currentPath === '/finance' ? 'finance' :
+              currentPath === '/notes' ? 'notes' : 'dashboard';
       setView(currentView as typeof view);
     };
 
@@ -300,6 +304,13 @@ function App() {
             <DollarSign className="mr-3 h-5 w-5" />
             Finanzas
           </button>
+          <button
+            onClick={() => handleViewChange('notes')}
+            className={`flex items-center w-full px-4 py-3 text-sm font-bold rounded-lg transition-colors ${view === 'notes' ? 'bg-white text-gray-900 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+          >
+            <StickyNote className="mr-3 h-5 w-5" />
+            Notas
+          </button>
         </nav>
         <div className="p-4 border-t border-gray-800">
           <button onClick={logout} className="flex items-center w-full px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
@@ -349,6 +360,13 @@ function App() {
               >
                 <DollarSign className="mr-3 h-5 w-5" />
                 Finanzas
+              </button>
+              <button
+                onClick={() => handleViewChange('notes')}
+                className={`flex items-center w-full px-4 py-3 text-sm font-bold rounded-lg transition-colors ${view === 'notes' ? 'bg-white text-gray-900 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+              >
+                <StickyNote className="mr-3 h-5 w-5" />
+                Notas
               </button>
             </nav>
             <div className="p-4 border-t border-gray-800">
@@ -784,6 +802,10 @@ function App() {
                 </div>
               </div>
             </div>
+          )}
+
+          {view === 'notes' && (
+            <NotesBoard />
           )}
         </main>
       </div>

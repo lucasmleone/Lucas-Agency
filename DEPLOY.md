@@ -62,18 +62,39 @@ sudo docker-compose up -d
 
 ## Mantenimiento
 
-### Actualizar la Aplicación
+### Actualizar la Aplicación (Método Seguro)
 
-**IMPORTANTE**: Después de hacer cambios en el código, debes **reconstruir la imagen de Docker**:
+Hemos creado un script que automatiza el proceso de actualización y realiza un backup de la base de datos antes de aplicar cambios.
+
+1. Conéctate a tu instancia EC2.
+2. Ejecuta el script de despliegue seguro:
 
 ```bash
 cd ~/Lucas-Agency
-git pull
-sudo docker-compose build app  # ← IMPORTANTE: rebuild después de cambios
-sudo docker-compose up -d
+./scripts/safe-deploy.sh
 ```
 
-⚠️ **No olvides el `build`** - simplemente reiniciar (`restart`) no carga nuevos cambios.
+Este script hará lo siguiente:
+1. Creará un backup de la base de datos en `./backups/`.
+2. Descargará los últimos cambios de GitHub (`git pull`).
+3. Reconstruirá los contenedores (`docker-compose build`).
+4. Reiniciará los servicios (`docker-compose up -d`).
+
+### Rollback (Revertir Cambios)
+
+Si algo sale mal después de un despliegue, puedes revertir al código anterior:
+
+```bash
+./scripts/rollback.sh
+```
+
+**Nota**: El rollback de código no restaura automáticamente la base de datos. Si necesitas restaurar datos, busca el archivo más reciente en la carpeta `backups` y restáuralo manualmente:
+
+```bash
+# Ejemplo de restauración manual (CUIDADO: Sobrescribe datos actuales)
+cat backups/db_backup_FECHA.sql | sudo docker-compose exec -T db mysql -uuser -ppassword agency_db
+```
+
 
 ### Ver Logs
 

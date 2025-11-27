@@ -1,4 +1,4 @@
-import { Project, Client, FinanceRecord, ProjectLog, MaintenanceTask } from '../types';
+import { Project, Client, FinanceRecord, ProjectLog, MaintenanceTask, Note } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const DATA_URL = BASE_URL;
@@ -215,5 +215,40 @@ export const apiService = {
   async getUserInfo() {
     // Merged into checkAuth or login response usually, but keeping for compatibility
     return this.checkAuth().then(res => res?.user || null);
+  },
+
+  // Notes
+  // Notes
+  getNotes: async (): Promise<Note[]> => {
+    const res = await fetch(`${DATA_URL}/notes`, { credentials: 'include' });
+    if (!res.ok) return [];
+    return res.json();
+  },
+
+  createNote: async (note: Partial<Note>): Promise<Note> => {
+    const res = await fetch(`${DATA_URL}/notes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(note),
+      credentials: 'include'
+    });
+    return res.json();
+  },
+
+  updateNote: async (id: number, note: Partial<Note>): Promise<Note> => {
+    const res = await fetch(`${DATA_URL}/notes/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(note),
+      credentials: 'include'
+    });
+    return res.json();
+  },
+
+  deleteNote: async (id: number): Promise<void> => {
+    await fetch(`${DATA_URL}/notes/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
   }
 };
