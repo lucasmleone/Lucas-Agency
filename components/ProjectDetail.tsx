@@ -388,7 +388,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 />
             )}
             <div className="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity" onClick={onClose}></div>
-            <div className="relative bg-white rounded-t-xl sm:rounded-xl text-left overflow-hidden shadow-2xl transform transition-all w-full sm:max-w-6xl h-[95vh] flex flex-col">
+            <div className="relative bg-white rounded-t-xl sm:rounded-xl text-left overflow-hidden shadow-2xl transform transition-all w-full max-w-7xl h-[95vh] flex flex-col">
 
                 {/* Header */}
                 <div className="bg-gray-900 px-4 sm:px-6 py-4 flex justify-between items-center shrink-0">
@@ -914,7 +914,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 {/* Block Modal */}
                                 {showBlockModal && (
                                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+                                        <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
                                             <h3 className="text-lg font-bold mb-4">Bloquear Proyecto</h3>
                                             <div className="space-y-4">
                                                 <div>
