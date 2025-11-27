@@ -18,7 +18,8 @@ import {
   Edit2,
   Trash2,
   RefreshCw,
-  StickyNote
+  StickyNote,
+  Search
 } from 'lucide-react';
 import { Project, ProjectStatus, PlanType, ProjectLog, FinanceRecord } from './types';
 import { useAuth } from './context/AuthContext';
@@ -135,6 +136,10 @@ function App() {
   // Modal agregar Proyecto
   const [showAddProject, setShowAddProject] = useState(false);
   const [newProjectData, setNewProjectData] = useState({ clientId: '', plan: PlanType.SINGLE, deadline: '' });
+
+  // Search states
+  const [projectSearchTerm, setProjectSearchTerm] = useState('');
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
 
   // Check URL params for public view routing
   useEffect(() => {
@@ -434,10 +439,21 @@ function App() {
                     {projectSortBy === 'deadline' ? '📅 Por Vencimiento' : '👤 Por Cliente'}
                   </button>
                   <button onClick={() => setShowAddProject(true)} className="bg-gray-900 text-white px-4 py-2.5 rounded-lg flex items-center text-sm font-medium hover:bg-black shadow-lg">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear
+                    <Plus className="w-4 h-4 mr-2" /> Nuevo Proyecto
                   </button>
                 </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Buscar proyectos por cliente, plan o estado..."
+                  value={projectSearchTerm}
+                  onChange={(e) => setProjectSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
               </div>
 
               {/* Modal Agregar Proyecto */}
@@ -496,6 +512,15 @@ function App() {
               {/* Projects Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...projects]
+                  .filter((project) => {
+                    if (!projectSearchTerm) return true;
+                    const searchLower = projectSearchTerm.toLowerCase();
+                    return (
+                      project.clientName.toLowerCase().includes(searchLower) ||
+                      project.planType.toLowerCase().includes(searchLower) ||
+                      project.status.toLowerCase().includes(searchLower)
+                    );
+                  })
                   .sort((a, b) => {
                     if (projectSortBy === 'deadline') {
                       const dateA = a.status === ProjectStatus.DELIVERED && a.nextMaintenanceDate
@@ -636,6 +661,18 @@ function App() {
                 </div>
               )}
 
+              {/* Search Bar */}
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Buscar clientes por nombre, empresa o email..."
+                  value={clientSearchTerm}
+                  onChange={(e) => setClientSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+              </div>
+
               <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -647,65 +684,75 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-100">
-                    {clients.map((client) => (
-                      <tr key={client.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
-                              {client.name?.charAt(0).toUpperCase() || '?'}
-                            </div>
-                            <div>
-                              <div className="text-sm font-semibold text-gray-900">{client.name}</div>
-                              <div className="text-xs text-gray-500">{client.company || 'Sin empresa'}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center text-sm text-gray-700">
-                              <Mail className="w-3.5 h-3.5 mr-2 text-gray-400" />
-                              {client.email}
-                            </div>
-                            {client.phone && (
-                              <div className="flex items-center text-sm text-gray-600">
-                                <Phone className="w-3.5 h-3.5 mr-2 text-gray-400" />
-                                {client.phone}
+                    {clients
+                      .filter((client) => {
+                        if (!clientSearchTerm) return true;
+                        const searchLower = clientSearchTerm.toLowerCase();
+                        return (
+                          client.name.toLowerCase().includes(searchLower) ||
+                          client.company.toLowerCase().includes(searchLower) ||
+                          client.email.toLowerCase().includes(searchLower)
+                        );
+                      })
+                      .map((client) => (
+                        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
+                                {client.name?.charAt(0).toUpperCase() || '?'}
                               </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-gray-600">{client.registeredAt}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => {
-                                setNewClient({ ...client, phone: client.phone || '' });
-                                setShowAddClient(true);
-                              }}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Editar cliente"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setDeleteClientConfirm({
-                                  show: true,
-                                  clientId: client.id,
-                                  clientName: client.name
-                                });
-                              }}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Eliminar cliente"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              <div>
+                                <div className="text-sm font-semibold text-gray-900">{client.name}</div>
+                                <div className="text-xs text-gray-500">{client.company || 'Sin empresa'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col gap-1.5">
+                              <div className="flex items-center text-sm text-gray-700">
+                                <Mail className="w-3.5 h-3.5 mr-2 text-gray-400" />
+                                {client.email}
+                              </div>
+                              {client.phone && (
+                                <div className="flex items-center text-sm text-gray-600">
+                                  <Phone className="w-3.5 h-3.5 mr-2 text-gray-400" />
+                                  {client.phone}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm text-gray-600">{client.registeredAt}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => {
+                                  setNewClient({ ...client, phone: client.phone || '' });
+                                  setShowAddClient(true);
+                                }}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Editar cliente"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDeleteClientConfirm({
+                                    show: true,
+                                    clientId: client.id,
+                                    clientName: client.name
+                                  });
+                                }}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Eliminar cliente"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
