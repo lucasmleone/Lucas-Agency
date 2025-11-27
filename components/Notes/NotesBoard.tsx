@@ -3,6 +3,7 @@ import { apiService } from '../../services/apiService';
 import { Note } from '../../types';
 import NoteCard from './NoteCard';
 import { Plus, Search, Filter } from 'lucide-react';
+import NoteDetailModal from './NoteDetailModal';
 
 interface NotesBoardProps {
     entityType?: 'client' | 'project';
@@ -14,6 +15,7 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
     // New Note State
     const [isCreating, setIsCreating] = useState(false);
@@ -72,6 +74,10 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
         try {
             // Optimistic update
             setNotes(notes.map(n => n.id === id ? { ...n, ...updates } : n));
+            // If the updated note is the one currently selected, update the modal's state too
+            if (selectedNote && selectedNote.id === id) {
+                setSelectedNote(prev => prev ? { ...prev, ...updates } : null);
+            }
             await apiService.updateNote(id, updates);
         } catch (error) {
             console.error('Failed to update note', error);
@@ -84,6 +90,9 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
         if (!window.confirm('Delete this note?')) return;
         try {
             setNotes(notes.filter(n => n.id !== id));
+            if (selectedNote && selectedNote.id === id) {
+                setSelectedNote(null); // Close modal if the deleted note was open
+            }
             await apiService.deleteNote(id);
         } catch (error) {
             console.error('Failed to delete note', error);
@@ -226,17 +235,29 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
                         <NoteCard
                             key={note.id}
                             note={note}
-                            onDelete={handleDelete}
-                            onUpdate={handleUpdate}
+                            onClick={() => setSelectedNote(note)}
+                            onPin={(e) => {
+                                e.stopPropagation();
+                                handleUpdate(note.id, { is_pinned: !note.is_pinned });
+                            }}
                         />
                     ))}
+                    {filteredNotes.length === 0 && (
+                        <div className="col-span-full text-center py-20 text-gray-400">
+                            No notes found. Create your first one!
+                        </div>
+                    )}
                 </div>
             )}
 
-            {!loading && filteredNotes.length === 0 && (
-                <div className="text-center py-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <p className="text-gray-500">No notes found. Create your first one!</p>
-                </div>
+            {/* Detail Modal */}
+            {selectedNote && (
+                <NoteDetailModal
+                    note={selectedNote}
+                    onClose={() => setSelectedNote(null)}
+                    onUpdate={handleUpdate}
+                    onDelete={handleDelete}
+                />
             )}
         </div>
     );
