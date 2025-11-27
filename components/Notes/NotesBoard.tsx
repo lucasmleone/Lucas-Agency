@@ -74,8 +74,8 @@ const NotesBoard: React.FC = () => {
     };
 
     const filteredNotes = notes.filter(note => {
-        const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (note.items || []).some(item => item.content.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesSearch = note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (note.items || []).some(item => item?.content?.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesCategory = selectedCategory === 'all' || note.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
