@@ -253,6 +253,124 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                 </div>
             </div>
 
+            {/* Delivery Data */}
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Datos de Entrega (Credenciales)</h3>
+                <p className="text-sm text-gray-500 mb-4">Estos datos se mostrarán al cliente en la etapa "Cierre y Entrega" solo si el pago está completo.</p>
+                <div className="space-y-6">
+                    {/* Web Credentials */}
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h4 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                            <Lock size={16} /> Credenciales Web (WordPress/Admin)
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">URL Acceso</label>
+                                <input
+                                    type="text"
+                                    value={project.deliveryData?.webUrl || ''}
+                                    onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, webUrl: e.target.value } })}
+                                    placeholder="https://midominio.com/wp-admin"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Usuario</label>
+                                <input
+                                    type="text"
+                                    value={project.deliveryData?.webUser || ''}
+                                    onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, webUser: e.target.value } })}
+                                    placeholder="admin"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Contraseña</label>
+                                <input
+                                    type="text"
+                                    value={project.deliveryData?.webPass || ''}
+                                    onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, webPass: e.target.value } })}
+                                    placeholder="********"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Email Credentials */}
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h4 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                            <Lock size={16} /> Credenciales Email Corporativo
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">URL Webmail</label>
+                                <input
+                                    type="text"
+                                    value={project.deliveryData?.emailUrl || ''}
+                                    onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, emailUrl: e.target.value } })}
+                                    placeholder="https://webmail.midominio.com"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                                <input
+                                    type="text"
+                                    value={project.deliveryData?.emailUser || ''}
+                                    onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, emailUser: e.target.value } })}
+                                    placeholder="info@midominio.com"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Contraseña</label>
+                                <input
+                                    type="text"
+                                    value={project.deliveryData?.emailPass || ''}
+                                    onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, emailPass: e.target.value } })}
+                                    placeholder="********"
+                                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Report Link */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Enlace a Informe Final (Drive/PDF)</label>
+                        <input
+                            type="url"
+                            value={project.deliveryData?.reportLink || ''}
+                            onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, reportLink: e.target.value } })}
+                            placeholder="https://drive.google.com/file/d/..."
+                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                    </div>
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={async () => {
+                                setLoading(true);
+                                try {
+                                    await onRefresh({ deliveryData: project.deliveryData });
+                                    setToast({ type: 'success', message: 'Datos de entrega guardados' });
+                                } catch (error) {
+                                    console.error(error);
+                                    setToast({ type: 'error', message: 'Error al guardar' });
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}
+                            disabled={loading}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 flex items-center gap-2"
+                        >
+                            <Save size={16} /> Guardar Datos de Entrega
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {/* Milestones (Fog of War) */}
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-center mb-6">

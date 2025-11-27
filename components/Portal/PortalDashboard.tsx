@@ -46,7 +46,8 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
     // Simplified mapping for the 4 requested views
     const isProposal = project.status === '2. Propuesta'; // Or '1. Discovery'
     const isWaitingResources = project.status === '3. Espera Recursos';
-    const isProduction = project.status === '4. Producción' || project.status === '5. Cierre y Entrega';
+    const isProduction = project.status === '4. Producción';
+    const isDelivery = project.status === '5. Cierre y Entrega';
     const isFinished = project.status === '7. Entregado';
 
     return (
@@ -323,6 +324,131 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                 </div>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* STAGE 5: DELIVERY & CLOSURE */}
+                {isDelivery && (
+                    <div className="space-y-8 animate-fade-in">
+                        <div className="text-center space-y-4">
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 text-green-600 rounded-full mb-4">
+                                <CheckCircle size={32} />
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-900">Cierre y Entrega</h2>
+                            <p className="text-lg text-gray-600 max-w-xl mx-auto">
+                                ¡Tu proyecto está listo! {project.paymentStatus === 'Pagado (100%)' ? 'Aquí tienes tus accesos.' : 'Completa el pago final para acceder a tus credenciales.'}
+                            </p>
+                        </div>
+
+                        {project.paymentStatus !== 'Pagado (100%)' ? (
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center max-w-lg mx-auto">
+                                <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Lock size={32} />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Esperando Confirmación de Saldo</h3>
+                                <p className="text-gray-600 mb-6">
+                                    Para liberar las credenciales de acceso y el informe final, es necesario registrar el pago del saldo restante.
+                                </p>
+                                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-500">
+                                    Si ya realizaste el pago, por favor avísanos para actualizar el estado.
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-6 max-w-4xl mx-auto">
+                                {/* Warning */}
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
+                                    <div className="text-yellow-600 mt-0.5"><Lock size={20} /></div>
+                                    <div>
+                                        <h4 className="font-bold text-yellow-800">Importante: Copia estos datos ahora</h4>
+                                        <p className="text-sm text-yellow-700 mt-1">
+                                            Por seguridad, el acceso a este portal se cerrará en unos días. Asegúrate de copiar y guardar todas tus contraseñas en un lugar seguro.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Web Credentials */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                                <ExternalLink size={18} className="text-blue-600" /> Credenciales Web
+                                            </h3>
+                                        </div>
+                                        <div className="p-6 space-y-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-500 uppercase block mb-1">URL de Acceso</label>
+                                                <div className="flex gap-2">
+                                                    <input readOnly value={project.deliveryData?.webUrl || ''} className="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                    <a href={project.deliveryData?.webUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded"><ExternalLink size={18} /></a>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Usuario</label>
+                                                    <div className="relative">
+                                                        <input readOnly value={project.deliveryData?.webUser || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Contraseña</label>
+                                                    <div className="relative">
+                                                        <input readOnly value={project.deliveryData?.webPass || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Email Credentials */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                                <Send size={18} className="text-blue-600" /> Email Corporativo
+                                            </h3>
+                                        </div>
+                                        <div className="p-6 space-y-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Webmail URL</label>
+                                                <div className="flex gap-2">
+                                                    <input readOnly value={project.deliveryData?.emailUrl || ''} className="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                    <a href={project.deliveryData?.emailUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded"><ExternalLink size={18} /></a>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Email</label>
+                                                    <div className="relative">
+                                                        <input readOnly value={project.deliveryData?.emailUser || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Contraseña</label>
+                                                    <div className="relative">
+                                                        <input readOnly value={project.deliveryData?.emailPass || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Final Report */}
+                                <div className="bg-blue-600 rounded-xl shadow-lg p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+                                    <div>
+                                        <h3 className="text-2xl font-bold mb-2">Informe Final de Proyecto</h3>
+                                        <p className="text-blue-100">Descarga el reporte completo con métricas, capturas y detalles técnicos de tu nueva web.</p>
+                                    </div>
+                                    <a
+                                        href={project.deliveryData?.reportLink || '#'}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition-colors flex items-center gap-2 whitespace-nowrap"
+                                    >
+                                        <Download size={20} /> Descargar Informe
+                                    </a>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
