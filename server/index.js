@@ -12,6 +12,8 @@ import configRoutes from './routes/config.js';
 import maintenanceRoutes from './routes/maintenance.js';
 import publicRoutes from './routes/public.js';
 import notesRoutes from './routes/notes.js';
+import portalRoutes from './routes/portal.js';
+import publicPortalRoutes from './routes/public_portal.js';
 
 dotenv.config();
 
@@ -65,6 +67,7 @@ app.use(cookieParser());
 // Apply strict limits to public/auth routes
 app.use('/api/public', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), publicRoutes);
 app.use('/api/auth', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), authRoutes);
+app.use('/api/portal', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), publicPortalRoutes);
 
 // Apply relaxed limits to internal routes
 const internalMiddleware = process.env.NODE_ENV === 'production' ? internalLimiter : (req, res, next) => next();
@@ -74,6 +77,7 @@ app.use('/api/config', internalMiddleware, configRoutes);
 app.use('/api/config', internalMiddleware, configRoutes);
 app.use('/api/maintenance', internalMiddleware, maintenanceRoutes);
 app.use('/api/notes', internalMiddleware, notesRoutes);
+app.use('/api', internalMiddleware, portalRoutes);
 
 // Serve Static Files (Production)
 if (process.env.NODE_ENV === 'production') {
