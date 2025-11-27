@@ -18,21 +18,7 @@ import {
 import { apiService } from '../services/apiService';
 import NotesBoard from './Notes/NotesBoard';
 import { PortalAdmin } from './PortalAdmin';
-
-// ... inside component ...
-
-<button onClick={() => setActiveTab('portal')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'portal' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
-    <Shield className="w-4 h-4 mr-2" />
-    Portal Cliente
-</button>
-
-// ... inside content area ...
-
-{
-    activeTab === 'portal' && (
-        <PortalAdmin project={project} onUpdateProject={onClose} />
-    )
-}
+import { MaintenanceView } from './MaintenanceView';
 import { Toast } from './Toast';
 import { usePricingConfig } from '../hooks/usePricingConfig';
 import { Project, ProjectStatus, PlanType, ProjectLog, Client, PaymentStatus, FinanceRecord } from '../types';
@@ -187,7 +173,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
     const { config: pricingConfig } = usePricingConfig();
 
-    const [activeTab, setActiveTab] = useState<'workflow' | 'data' | 'logs' | 'finance' | 'maintenance'>('workflow');
+    const [activeTab, setActiveTab] = useState<'workflow' | 'data' | 'logs' | 'finance' | 'maintenance' | 'notes' | 'portal'>('workflow');
     const [status, setStatus] = useState(project.status);
     const [discoveryData, setDiscoveryData] = useState(project.discoveryData || {
         buyerPersona: '', competitors: '', references: '', materialStatus: '', currentUrl: '', objective: ''
@@ -467,9 +453,14 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     })}
                     {project.status === ProjectStatus.DELIVERED && (
                         <button onClick={() => setActiveTab('maintenance')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'maintenance' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
-                            <Shield className="w-4 h-4 mr-2" /> Mantenimiento
+                            <Settings className="w-4 h-4 mr-2" />
+                            Mantenimiento
                         </button>
                     )}
+                    <button onClick={() => setActiveTab('portal')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'portal' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
+                        <Shield className="w-4 h-4 mr-2" />
+                        Portal Cliente
+                    </button>
                 </div>
 
                 {/* Main Content */}
@@ -1163,6 +1154,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                         <div className="bg-gray-50 rounded-xl border border-gray-200 min-h-[400px]">
                             <NotesBoard entityType="project" entityId={String(project.id)} />
                         </div>
+                    )}
+
+                    {activeTab === 'portal' && (
+                        <PortalAdmin project={project} onUpdateProject={onClose} />
                     )}
                 </div>
             </div>
