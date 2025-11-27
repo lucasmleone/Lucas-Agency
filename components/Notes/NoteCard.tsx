@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Note, NoteItem } from '../../types';
-import { Trash2, Edit2, Pin, Copy, Plus, X, Link as LinkIcon, Check, ExternalLink } from 'lucide-react';
+import { Trash2, Edit2, Pin, Copy, Plus, X, Link as LinkIcon, Check, ExternalLink, FileText } from 'lucide-react';
 
 interface NoteCardProps {
     note: Note;
