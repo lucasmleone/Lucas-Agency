@@ -31,6 +31,7 @@ router.get('/projects', async (req, res) => {
             alertNeeds: p.alert_needs,
             description: p.description,
             discoveryData: typeof p.discovery_data === 'string' ? JSON.parse(p.discovery_data) : p.discovery_data,
+            deliveryData: typeof p.delivery_data === 'string' ? JSON.parse(p.delivery_data) : p.delivery_data,
             checklists: typeof p.checklists === 'string' ? JSON.parse(p.checklists) : p.checklists,
             devUrl: p.dev_url,
             blockedStatus: p.blocked_status,
@@ -159,6 +160,7 @@ router.put('/projects/:id', async (req, res) => {
         addUpdate('maintenance_status', p.maintenanceStatus);
         addUpdate('checklists', p.checklists, true);
         addUpdate('discovery_data', p.discoveryData, true);
+        addUpdate('delivery_data', p.deliveryData, true); // Add delivery_data
         addUpdate('end_date', p.deadline || p.endDate, false, true);
         addUpdate('plan', p.planType || p.plan);
         addUpdate('dev_url', p.devUrl);

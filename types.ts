@@ -57,6 +57,16 @@ export interface ProjectChecklists {
   finalPaymentPaid: boolean;
 }
 
+export interface DeliveryData {
+  webUrl?: string;
+  webUser?: string;
+  webPass?: string;
+  emailUrl?: string;
+  emailUser?: string;
+  emailPass?: string;
+  reportLink?: string;
+}
+
 export interface Project {
   id: string;
   clientId: string;
@@ -97,6 +107,9 @@ export interface Project {
   portalExpiresAt?: string;
   driveLink?: string;
   requirements?: string[];
+
+  // Delivery Fields
+  deliveryData?: DeliveryData;
 }
 
 export interface Milestone {
