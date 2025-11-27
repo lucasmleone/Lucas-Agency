@@ -9,10 +9,23 @@ router.use(verifyToken);
 // Get all notes for the authenticated user
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await pool.query(
-            'SELECT * FROM notes WHERE user_id = ? ORDER BY position ASC, created_at DESC',
-            [req.user.id]
-        );
+        const { entityType, entityId } = req.query;
+        let query = 'SELECT * FROM notes WHERE user_id = ?';
+        const params = [req.user.id];
+
+        if (entityType && entityId) {
+            query += ' AND linked_entity_type = ? AND linked_entity_id = ?';
+            params.push(entityType, entityId);
+        } else {
+            // If no filter, show only general notes (or all? let's show all for now, or maybe only unlinked ones in main board?)
+            // For now, let's return all notes if no filter is provided, to keep backward compatibility
+            // OR: maybe we want to filter out linked notes from the main board?
+            // Let's keep it simple: return all if no filter.
+        }
+
+        query += ' ORDER BY position ASC, created_at DESC';
+
+        const [rows] = await pool.query(query, params);
 
         // Parse JSON items field
         const notes = rows.map(note => ({
@@ -29,11 +42,11 @@ router.get('/', async (req, res) => {
 
 // Create a new note
 router.post('/', async (req, res) => {
-    const { title, category, items, is_pinned } = req.body;
+    const { title, category, items, is_pinned, linkedEntityType, linkedEntityId } = req.body;
     try {
         const [result] = await pool.query(
-            'INSERT INTO notes (user_id, title, category, items, is_pinned) VALUES (?, ?, ?, ?, ?)',
-            [req.user.id, title, category || 'general', JSON.stringify(items || []), is_pinned || false]
+            'INSERT INTO notes (user_id, title, category, items, is_pinned, linked_entity_type, linked_entity_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [req.user.id, title, category || 'general', JSON.stringify(items || []), is_pinned || false, linkedEntityType || null, linkedEntityId || null]
         );
         const newNoteId = result.insertId;
         const [newNote] = await pool.query('SELECT * FROM notes WHERE id = ?', [newNoteId]);

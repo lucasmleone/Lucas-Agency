@@ -16,9 +16,11 @@ CREATE TABLE IF NOT EXISTS notes (
   items JSON DEFAULT '[]',
   is_pinned BOOLEAN DEFAULT FALSE,
   position INT DEFAULT 0,
+  linked_entity_type VARCHAR(50) DEFAULT NULL, -- 'client', 'project'
+  linked_entity_id VARCHAR(50) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
