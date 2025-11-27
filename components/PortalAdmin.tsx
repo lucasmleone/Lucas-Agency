@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Project, Milestone } from '../types';
 import { apiService } from '../services/apiService';
 import { Lock, Unlock, RefreshCw, Save, Plus, Trash2, GripVertical, CheckCircle, Circle, PlayCircle, ExternalLink, Copy } from 'lucide-react';
+import { Toast } from './Toast';
 
 interface PortalAdminProps {
     project: Project;
-    onUpdateProject: () => void;
+    onRefresh: () => Promise<void>;
 }
 
-export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onUpdateProject }) => {
+export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) => {
     const [milestones, setMilestones] = useState<Milestone[]>([]);
     const [loading, setLoading] = useState(false);
     const [config, setConfig] = useState({
@@ -16,6 +17,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onUpdateProje
         requirements: (project.requirements || []).join('\n')
     });
     const [newMilestone, setNewMilestone] = useState('');
+    const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     useEffect(() => {
         fetchMilestones();
@@ -35,10 +37,11 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onUpdateProje
         setLoading(true);
         try {
             await apiService.generatePortal(project.id);
-            onUpdateProject();
+            await onRefresh();
+            setToast({ type: 'success', message: 'Acceso generado correctamente' });
         } catch (error) {
             console.error('Error generating portal:', error);
-            alert('Error al generar el portal');
+            setToast({ type: 'error', message: 'Error al generar el portal' });
         } finally {
             setLoading(false);
         }
@@ -49,10 +52,11 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onUpdateProje
         setLoading(true);
         try {
             await apiService.revokePortal(project.id);
-            onUpdateProject();
+            await onRefresh();
+            setToast({ type: 'success', message: 'Acceso revocado' });
         } catch (error) {
             console.error('Error revoking portal:', error);
-            alert('Error al revocar el portal');
+            setToast({ type: 'error', message: 'Error al revocar' });
         } finally {
             setLoading(false);
         }
@@ -65,11 +69,11 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onUpdateProje
                 driveLink: config.driveLink,
                 requirements: config.requirements.split('\n').filter(r => r.trim())
             });
-            onUpdateProject();
-            alert('Configuración guardada');
+            await onRefresh();
+            setToast({ type: 'success', message: 'Configuración guardada' });
         } catch (error) {
             console.error('Error saving config:', error);
-            alert('Error al guardar configuración');
+            setToast({ type: 'error', message: 'Error al guardar' });
         } finally {
             setLoading(false);
         }
@@ -108,7 +112,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onUpdateProje
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        alert('Copiado al portapapeles');
+        setToast({ type: 'success', message: 'Copiado al portapapeles' });
     };
 
     const portalUrl = `${window.location.origin}/portal/${project.portalToken}`;
@@ -265,6 +269,14 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onUpdateProje
                     </button>
                 </form>
             </div>
+
+            {toast && (
+                <Toast
+                    type={toast.type}
+                    message={toast.message}
+                    onCancel={() => setToast(null)}
+                />
+            )}
         </div>
     );
 };

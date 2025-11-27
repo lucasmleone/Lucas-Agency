@@ -1157,7 +1157,13 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     )}
 
                     {activeTab === 'portal' && (
-                        <PortalAdmin project={project} onUpdateProject={onClose} />
+                        <PortalAdmin
+                            project={project}
+                            onRefresh={async () => {
+                                // Refresh project data without closing modal
+                                await onUpdateProject({});
+                            }}
+                        />
                     )}
                 </div>
             </div>
