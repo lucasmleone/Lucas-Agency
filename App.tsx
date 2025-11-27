@@ -122,6 +122,8 @@ function App() {
   const [view, setView] = useState<'public' | 'dashboard' | 'projects' | 'finance' | 'clients' | 'notes'>('dashboard');
   const [showPricingConfig, setShowPricingConfig] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  // Selected Client State
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [projectSortBy, setProjectSortBy] = useState<'deadline' | 'client'>('deadline');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -704,7 +706,11 @@ function App() {
                         );
                       })
                       .map((client) => (
-                        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                        <tr
+                          key={client.id}
+                          className="hover:bg-gray-50 transition-colors cursor-pointer"
+                          onClick={() => setSelectedClientId(client.id)}
+                        >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-sm">
@@ -736,7 +742,8 @@ function App() {
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setNewClient({ ...client, phone: client.phone || '' });
                                   setShowAddClient(true);
                                 }}
@@ -746,7 +753,8 @@ function App() {
                                 <Edit2 className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setDeleteClientConfirm({
                                     show: true,
                                     clientId: client.id,
@@ -898,6 +906,20 @@ function App() {
           }}
           onCancel={() => setDeleteClientConfirm({ show: false, clientId: null, clientName: '' })}
         />
+      )}
+
+      {/* Client Detail Modal */}
+      {selectedClientId && (
+        (() => {
+          const client = clients.find(c => c.id === selectedClientId);
+          if (!client) return null;
+          return (
+            <ClientDetail
+              client={client}
+              onClose={() => setSelectedClientId(null)}
+            />
+          );
+        })()
       )}
 
       {/* Delete Confirmation Toast */}
