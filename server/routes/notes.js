@@ -1,7 +1,10 @@
 import express from 'express';
-import { pool } from '../index.js';
+import pool from '../db.js';
+import { verifyToken } from './auth.js';
 
 const router = express.Router();
+
+router.use(verifyToken);
 
 // Get all notes
 router.get('/', async (req, res) => {
