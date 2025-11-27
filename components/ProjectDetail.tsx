@@ -1146,7 +1146,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
                     {activeTab === 'notes' && (
                         <div className="bg-gray-50 rounded-xl border border-gray-200 min-h-[400px]">
-                            <NotesBoard entityType="project" entityId={project.id} />
+                            <NotesBoard entityType="project" entityId={String(project.id)} />
                         </div>
                     )}
                 </div>

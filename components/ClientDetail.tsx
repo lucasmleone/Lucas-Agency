@@ -97,7 +97,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({ client, onClose }) =
 
                     {activeTab === 'notes' && (
                         <div className="bg-gray-50 rounded-xl border border-gray-200 min-h-[400px]">
-                            <NotesBoard entityType="client" entityId={client.id} />
+                            <NotesBoard entityType="client" entityId={String(client.id)} />
                         </div>
                     )}
                 </div>
