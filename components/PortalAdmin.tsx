@@ -315,12 +315,17 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                     <p className="text-xs font-bold text-gray-500 uppercase mb-3">Sugerencias (Clic para agregar)</p>
                     <div className="flex flex-wrap gap-2">
                         {[
-                            'Investigación',
-                            'Diseño UI',
+                            'Inicio del Proyecto',
+                            'Investigación y Estrategia',
+                            'Diseño Visual',
                             'Desarrollo',
-                            'QA / Testing',
-                            'Revisión Cliente',
-                            'Informe Final'
+                            'Carga e Integración de Contenidos',
+                            'Pruebas de Calidad (TESTING)',
+                            'Revisión con Cliente',
+                            'Aplicación de Feedback',
+                            'Ajustes Finales',
+                            'Creación de Informe',
+                            'Lanzamiento y Entrega'
                         ].map(suggestion => (
                             <button
                                 key={suggestion}
@@ -343,7 +348,19 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                                 onClick={async () => {
                                     setLoading(true);
                                     try {
-                                        const suggestions = ['Investigación', 'Diseño UI', 'Desarrollo', 'QA / Testing', 'Revisión Cliente', 'Informe Final'];
+                                        const suggestions = [
+                                            'Inicio del Proyecto',
+                                            'Investigación y Estrategia',
+                                            'Diseño Visual',
+                                            'Desarrollo',
+                                            'Carga e Integración de Contenidos',
+                                            'Pruebas de Calidad (TESTING)',
+                                            'Revisión con Cliente',
+                                            'Aplicación de Feedback',
+                                            'Ajustes Finales',
+                                            'Creación de Informe',
+                                            'Lanzamiento y Entrega'
+                                        ];
                                         for (const title of suggestions) {
                                             // Check if already exists to avoid duplicates
                                             if (!milestones.some(m => m.title === title)) {
