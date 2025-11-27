@@ -14,6 +14,8 @@ const NotesBoard: React.FC = () => {
     const [isCreating, setIsCreating] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newCategory, setNewCategory] = useState('general');
+    const [isCreatingNewCategory, setIsCreatingNewCategory] = useState(false);
+    const [customCategory, setCustomCategory] = useState('');
 
     useEffect(() => {
         fetchNotes();
@@ -32,10 +34,15 @@ const NotesBoard: React.FC = () => {
 
     const handleCreate = async () => {
         if (!newTitle.trim()) return;
+
+        const categoryToUse = isCreatingNewCategory && customCategory.trim()
+            ? customCategory.trim()
+            : newCategory;
+
         try {
             const created = await apiService.createNote({
                 title: newTitle,
-                category: newCategory,
+                category: categoryToUse,
                 items: [],
                 is_pinned: false
             });
@@ -43,6 +50,8 @@ const NotesBoard: React.FC = () => {
             setIsCreating(false);
             setNewTitle('');
             setNewCategory('general');
+            setIsCreatingNewCategory(false);
+            setCustomCategory('');
         } catch (error) {
             console.error('Failed to create note', error);
             alert('Error creating note. Please try again.');
@@ -75,7 +84,10 @@ const NotesBoard: React.FC = () => {
 
     const filteredNotes = notes.filter(note => {
         const matchesSearch = note.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (note.items || []).some(item => item?.content?.toLowerCase().includes(searchTerm.toLowerCase()));
+            (note.items || []).some(item =>
+                item?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item?.content?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
         const matchesCategory = selectedCategory === 'all' || note.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
@@ -137,15 +149,50 @@ const NotesBoard: React.FC = () => {
                             autoFocus
                         />
                         <div className="flex gap-4">
-                            <input
-                                type="text"
-                                placeholder="Category (e.g., tools, design)"
-                                value={newCategory}
-                                onChange={(e) => setNewCategory(e.target.value)}
-                                className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
+                            {isCreatingNewCategory ? (
+                                <input
+                                    type="text"
+                                    placeholder="Enter new category name"
+                                    value={customCategory}
+                                    onChange={(e) => setCustomCategory(e.target.value)}
+                                    className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                    autoFocus
+                                />
+                            ) : (
+                                <select
+                                    value={newCategory}
+                                    onChange={(e) => {
+                                        if (e.target.value === '__new__') {
+                                            setIsCreatingNewCategory(true);
+                                        } else {
+                                            setNewCategory(e.target.value);
+                                        }
+                                    }}
+                                    className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                                >
+                                    {categories.filter(c => c !== 'all').map(cat => (
+                                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                                    ))}
+                                    <option value="__new__">+ Create New Category</option>
+                                </select>
+                            )}
                             <div className="flex gap-2">
-                                <button onClick={() => setIsCreating(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
+                                {isCreatingNewCategory && (
+                                    <button
+                                        onClick={() => {
+                                            setIsCreatingNewCategory(false);
+                                            setCustomCategory('');
+                                        }}
+                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                    >
+                                        Back
+                                    </button>
+                                )}
+                                <button onClick={() => {
+                                    setIsCreating(false);
+                                    setIsCreatingNewCategory(false);
+                                    setCustomCategory('');
+                                }} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancel</button>
                                 <button onClick={handleCreate} className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Create</button>
                             </div>
                         </div>

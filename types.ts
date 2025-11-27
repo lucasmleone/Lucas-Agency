@@ -163,6 +163,7 @@ export const MAINTENANCE_CHECKLIST: Omit<ChecklistItem, 'completed' | 'notes'>[]
 export interface NoteItem {
   id: string;
   type: 'link' | 'text';
+  title?: string; // Optional title for the item
   content: string;
 }
 
