@@ -477,7 +477,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 project.discountType
                                             )) - finances
                                                 .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
-                                                .reduce((acc, curr) => acc + curr.amount, 0))}
+                                                .reduce((acc, curr) => acc + Number(curr.amount), 0))}
                                         </p>
                                     </div>
                                     <div className="w-full bg-indigo-200 rounded-full h-1.5 mt-2">
@@ -486,7 +486,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             style={{
                                                 width: `${Math.min(100, (finances
                                                     .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
-                                                    .reduce((acc, curr) => acc + curr.amount, 0) / (project.finalPrice || calculateFinalPrice(
+                                                    .reduce((acc, curr) => acc + Number(curr.amount), 0) / (project.finalPrice || calculateFinalPrice(
                                                         project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
                                                         project.customPrice,
                                                         project.discount,
@@ -503,7 +503,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     <p className="text-2xl font-black text-green-700">
                                         {formatCurrency(finances
                                             .filter(f => f.type === 'Ingreso' && f.description.toLowerCase().includes('mantenimiento'))
-                                            .reduce((acc, curr) => acc + curr.amount, 0))}
+                                            .reduce((acc, curr) => acc + Number(curr.amount), 0))}
                                     </p>
                                     <p className="text-xs text-green-600 mt-1">Ingresos por mantenimiento</p>
                                 </div>
@@ -512,7 +512,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 <div className="bg-red-50 p-4 rounded-xl border border-red-100">
                                     <p className="text-xs font-bold text-red-800 uppercase">Total Gastos</p>
                                     <p className="text-2xl font-black text-red-700">
-                                        {formatCurrency(finances.filter(f => f.type === 'Gasto').reduce((acc, curr) => acc + curr.amount, 0))}
+                                        {formatCurrency(finances.filter(f => f.type === 'Gasto').reduce((acc, curr) => acc + Number(curr.amount), 0))}
                                     </p>
                                     <p className="text-xs text-red-600 mt-1">Costos del proyecto</p>
                                 </div>
