@@ -36,6 +36,22 @@ import { Toast } from './components/Toast';
 import { useProjects } from './hooks/useProjects';
 import { formatCurrency } from './utils/pricing';
 
+// Helper to format date from YYYY-MM-DD without timezone conversion
+const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
+  if (!dateStr) return 'Sin fecha';
+  try {
+    const cleanDateStr = dateStr.split('T')[0];
+    const [year, month, day] = cleanDateStr.split('-').map(Number);
+    if (!year || !month || !day) {
+      return new Date(dateStr).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+  } catch (e) {
+    return dateStr;
+  }
+};
+
 // =====================================================
 // UTILITY FUNCTIONS
 // =====================================================
@@ -841,23 +857,6 @@ function App() {
                               </span>
                             )}
                           </div>
-// Helper to format date from YYYY-MM-DD without timezone conversion
-const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
-    if (!dateStr) return 'Sin fecha';
-                          try {
-        const cleanDateStr = dateStr.split('T')[0];
-                          const [year, month, day] = cleanDateStr.split('-').map(Number);
-                          if (!year || !month || !day) {
-            return new Date(dateStr).toLocaleDateString(locale, {year: 'numeric', month: 'long', day: 'numeric' });
-        }
-                          const date = new Date(year, month - 1, day);
-                          return date.toLocaleDateString(locale, {year: 'numeric', month: 'long', day: 'numeric' });
-    } catch (e) {
-        return dateStr;
-    }
-};
-
-                          // ... inside App component ...
                           <p className="text-xs text-gray-500">{formatDateForDisplay(record.date)}</p>
                         </div>
                       </div>
