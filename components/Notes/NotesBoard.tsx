@@ -68,7 +68,7 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
         }
     };
 
-    const handleUpdate = async (id: number, updates: Partial<Note>) => {
+    const handleUpdate = async (id: string, updates: Partial<Note>) => {
         try {
             // Optimistic update
             setNotes(notes.map(n => n.id === id ? { ...n, ...updates } : n));
@@ -80,7 +80,7 @@ const NotesBoard: React.FC<NotesBoardProps> = ({ entityType, entityId }) => {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         if (!window.confirm('Delete this note?')) return;
         try {
             setNotes(notes.filter(n => n.id !== id));
