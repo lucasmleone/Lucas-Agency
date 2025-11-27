@@ -457,10 +457,13 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             Mantenimiento
                         </button>
                     )}
-                    <button onClick={() => setActiveTab('portal')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'portal' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
-                        <Shield className="w-4 h-4 mr-2" />
-                        Portal Cliente
-                    </button>
+                    {/* Show Portal tab only from Propuesta (stage 2) onwards */}
+                    {project.status !== '1. Discovery' && (
+                        <button onClick={() => setActiveTab('portal')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg flex items-center ${activeTab === 'portal' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
+                            <Shield className="w-4 h-4 mr-2" />
+                            Portal Cliente
+                        </button>
+                    )}
                 </div>
 
                 {/* Main Content */}

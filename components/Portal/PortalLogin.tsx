@@ -28,6 +28,8 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ clientName, projectNam
         }
     };
 
+    console.log('[PortalLogin] Rendering with client:', clientName, 'project:', projectName);
+
     return (
         <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
