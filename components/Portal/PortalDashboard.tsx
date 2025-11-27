@@ -11,14 +11,32 @@ interface PortalDashboardProps {
 export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, milestones, onAction }) => {
     const [loading, setLoading] = useState(false);
 
-    const handleAction = async (action: string) => {
-        if (!confirm('¿Estás seguro de realizar esta acción?')) return;
+    const [confirmModal, setConfirmModal] = useState<{ show: boolean; action: string; title: string; message: string } | null>(null);
+
+    const handleActionClick = (action: string) => {
+        let title = '¿Estás seguro?';
+        let message = 'Esta acción no se puede deshacer.';
+
+        if (action === 'approve_proposal') {
+            title = 'Aprobar Propuesta';
+            message = 'Al aprobar, confirmas que estás de acuerdo con el presupuesto y los términos detallados. Se notificará al equipo para comenzar.';
+        } else if (action === 'confirm_resources') {
+            title = 'Confirmar Envío de Recursos';
+            message = '¿Confirmas que has subido todos los archivos necesarios a la carpeta compartida?';
+        }
+
+        setConfirmModal({ show: true, action, title, message });
+    };
+
+    const confirmAction = async () => {
+        if (!confirmModal) return;
         setLoading(true);
+        setConfirmModal(null);
         try {
-            await onAction(action);
+            await onAction(confirmModal.action);
         } catch (error) {
             console.error('Error:', error);
-            alert('Ocurrió un error');
+            alert('Ocurrió un error al procesar la solicitud.');
         } finally {
             setLoading(false);
         }
@@ -32,7 +50,31 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
     const isFinished = project.status === '7. Entregado';
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen bg-gray-50 font-sans relative">
+            {/* Custom Modal */}
+            {confirmModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">{confirmModal.title}</h3>
+                        <p className="text-gray-600 mb-6">{confirmModal.message}</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setConfirmModal(null)}
+                                className="px-4 py-2 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmAction}
+                                className="px-4 py-2 rounded-lg bg-black text-white font-bold hover:bg-gray-800 transition-colors"
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -50,7 +92,6 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
 
             <main className="max-w-3xl mx-auto px-4 py-12">
 
-                {/* STAGE 1: PROPOSAL */}
                 {/* STAGE 1: PROPOSAL */}
                 {isProposal && (
                     <div className="space-y-8 animate-fade-in">
@@ -143,7 +184,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                     <p className="text-gray-400 text-sm">Al aprobar, aceptas los términos y condiciones detallados arriba.</p>
                                 </div>
                                 <button
-                                    onClick={() => handleAction('approve_proposal')}
+                                    onClick={() => handleActionClick('approve_proposal')}
                                     disabled={loading}
                                     className="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-white/10 flex items-center justify-center gap-3"
                                 >
@@ -210,7 +251,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                             </div>
                             <div className="bg-gray-50 p-8 border-t border-gray-100 flex justify-end">
                                 <button
-                                    onClick={() => handleAction('confirm_resources')}
+                                    onClick={() => handleActionClick('confirm_resources')}
                                     disabled={loading}
                                     className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 flex items-center gap-3"
                                 >
