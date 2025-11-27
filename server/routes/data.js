@@ -141,55 +141,47 @@ router.put('/projects/:id', async (req, res) => {
         //     portalExpiresAt = expiryDate.toISOString().slice(0, 19).replace('T', ' '); // MySQL DATETIME format
         // }
 
-        await pool.query(`
-      UPDATE projects SET 
-        status = ?, 
-        payment_status = ?,
-        maintenance_status = ?,
-        checklists = ?, 
-        discovery_data = ?,
-        end_date = ?,
-        plan = ?,
-        dev_url = ?,
-        description = ?,
-        blocked_status = ?,
-        blocked_reason = ?,
-        blocked_since = ?,
-        base_price = ?,
-        custom_price = ?,
-        discount = ?,
-        discount_type = ?,
-        final_price = ?,
-        pricing_notes = ?,
-        portal_token = ?,
-        portal_pin = ?,
-        portal_enabled = ?
-      WHERE id = ? AND user_id = ?
-    `, [
-            p.status,
-            p.paymentStatus,
-            p.maintenanceStatus,
-            JSON.stringify(p.checklists),
-            JSON.stringify(p.discoveryData),
-            toMySQLDate(p.deadline || p.endDate), // Fix: Frontend sends deadline
-            p.planType || p.plan,    // Fix: Frontend sends planType
-            p.devUrl,
-            p.description,
-            p.blockedStatus,
-            p.blockedReason,
-            toMySQLDate(p.blockedSince), // ALSO CONVERT THIS DATE
-            p.basePrice,
-            p.customPrice,
-            p.discount,
-            p.discountType,
-            p.finalPrice,
-            p.pricingNotes,
-            p.portalToken, // Use correct field
-            p.portalPin,
-            p.portalEnabled,
-            id,
-            req.user.id
-        ]);
+        // Dynamic Update Query Builder
+        const updates = [];
+        const values = [];
+
+        const addUpdate = (field, value, isJson = false, isDate = false) => {
+            if (value !== undefined) {
+                updates.push(`${field} = ?`);
+                if (isJson) values.push(JSON.stringify(value));
+                else if (isDate) values.push(toMySQLDate(value));
+                else values.push(value);
+            }
+        };
+
+        addUpdate('status', p.status);
+        addUpdate('payment_status', p.paymentStatus);
+        addUpdate('maintenance_status', p.maintenanceStatus);
+        addUpdate('checklists', p.checklists, true);
+        addUpdate('discovery_data', p.discoveryData, true);
+        addUpdate('end_date', p.deadline || p.endDate, false, true);
+        addUpdate('plan', p.planType || p.plan);
+        addUpdate('dev_url', p.devUrl);
+        addUpdate('description', p.description);
+        addUpdate('blocked_status', p.blockedStatus);
+        addUpdate('blocked_reason', p.blockedReason);
+        addUpdate('blocked_since', p.blockedSince, false, true);
+        addUpdate('base_price', p.basePrice);
+        addUpdate('custom_price', p.customPrice);
+        addUpdate('discount', p.discount);
+        addUpdate('discount_type', p.discountType);
+        addUpdate('final_price', p.finalPrice);
+        addUpdate('pricing_notes', p.pricingNotes);
+        addUpdate('portal_token', p.portalToken);
+        addUpdate('portal_pin', p.portalPin);
+        addUpdate('portal_enabled', p.portalEnabled);
+
+        if (updates.length === 0) return res.json({ success: true, message: 'No updates provided' });
+
+        values.push(id);
+        values.push(req.user.id);
+
+        await pool.query(`UPDATE projects SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`, values);
 
         // Trigger Maintenance Task Creation if Delivered
         if (p.status === '7. Entregado') {

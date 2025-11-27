@@ -115,11 +115,14 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
         e.preventDefault();
         if (!newMilestone.trim()) return;
         try {
+            console.log('Adding milestone:', newMilestone, 'to project:', project.id);
             await apiService.addMilestone(project.id, { title: newMilestone });
             setNewMilestone('');
             fetchMilestones();
+            setToast({ type: 'success', message: 'Hito agregado' });
         } catch (error) {
             console.error('Error adding milestone:', error);
+            setToast({ type: 'error', message: 'Error al agregar hito' });
         }
     };
 
