@@ -537,8 +537,8 @@ function App() {
                   .map((project) => {
                     const daysLeft = getDaysRemaining(project.deadline);
                     const urgencyClass = getUrgencyColor(daysLeft, project.status);
-                    const income = finances.filter(f => f.projectId === project.id && f.type === 'Ingreso').reduce((a, b) => a + b.amount, 0);
-                    const expenses = finances.filter(f => f.projectId === project.id && f.type === 'Gasto').reduce((a, b) => a + b.amount, 0);
+                    const income = finances.filter(f => f.projectId === project.id && f.type === 'Ingreso').reduce((a, b) => a + Number(b.amount), 0);
+                    const expenses = finances.filter(f => f.projectId === project.id && f.type === 'Gasto').reduce((a, b) => a + Number(b.amount), 0);
 
                     return (
                       <div
