@@ -587,7 +587,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                         <div key={f.id} className="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-100">
                                             <div>
                                                 <p className="text-sm font-bold text-gray-900">{f.description}</p>
-                                                <p className="text-xs text-gray-500">{f.date} - {f.type}</p>
+                                                <p className="text-xs text-gray-500">{formatDateForDisplay(f.date)} - {f.type}</p>
                                             </div>
                                             <span className={`font-bold ${f.type === 'Ingreso' ? 'text-green-600' : 'text-red-600'}`}>
                                                 {f.type === 'Ingreso' ? '+' : '-'}${f.amount}
