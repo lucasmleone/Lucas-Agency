@@ -133,13 +133,13 @@ router.put('/projects/:id', async (req, res) => {
     }
 
     try {
-        // Auto-expiry logic: Set portal expiration when project becomes "7. Entregado"
-        let portalExpiresAt = null;
-        if (p.status === '7. Entregado' || p.status === ProjectStatus?.DELIVERED) {
-            const expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + 10); // 10 days from now
-            portalExpiresAt = expiryDate.toISOString().slice(0, 19).replace('T', ' '); // MySQL DATETIME format
-        }
+        // Auto-expiry logic temporarily disabled to fix 500 error
+        // let portalExpiresAt = null;
+        // if (p.status === '7. Entregado' || p.status === ProjectStatus?.DELIVERED) {
+        //     const expiryDate = new Date();
+        //     expiryDate.setDate(expiryDate.getDate() + 10); // 10 days from now
+        //     portalExpiresAt = expiryDate.toISOString().slice(0, 19).replace('T', ' '); // MySQL DATETIME format
+        // }
 
         await pool.query(`
       UPDATE projects SET 
@@ -161,8 +161,7 @@ router.put('/projects/:id', async (req, res) => {
         discount_type = ?,
         final_price = ?,
         pricing_notes = ?,
-        proposal_token = ?,
-        portal_expires_at = COALESCE(?, portal_expires_at)
+        proposal_token = ?
       WHERE id = ? AND user_id = ?
     `, [
             p.status,
@@ -176,7 +175,7 @@ router.put('/projects/:id', async (req, res) => {
             p.description,
             p.blockedStatus,
             p.blockedReason,
-            p.blockedSince,
+            toMySQLDate(p.blockedSince), // ALSO CONVERT THIS DATE
             p.basePrice,
             p.customPrice,
             p.discount,
@@ -184,7 +183,6 @@ router.put('/projects/:id', async (req, res) => {
             p.finalPrice,
             p.pricingNotes,
             p.proposalToken, // Add token
-            portalExpiresAt, // Auto-expiry for portal
             id,
             req.user.id
         ]);
