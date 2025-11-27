@@ -9,7 +9,8 @@ interface PortalAdminProps {
     onRefresh: () => Promise<void>;
 }
 
-export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) => {
+export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProject, onRefresh }) => {
+    const [project, setProject] = useState<Project>(initialProject);
     const [milestones, setMilestones] = useState<Milestone[]>([]);
     const [loading, setLoading] = useState(false);
     const [config, setConfig] = useState({
@@ -19,6 +20,10 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
     const [newMilestone, setNewMilestone] = useState('');
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ action: 'generate' | 'revoke' | 'delete', milestoneId?: number } | null>(null);
+
+    useEffect(() => {
+        setProject(initialProject);
+    }, [initialProject]);
 
     useEffect(() => {
         fetchMilestones();
@@ -41,8 +46,15 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
         setLoading(true);
         setConfirmModal(null);
         try {
-            await apiService.generatePortal(project.id);
-            await onRefresh();
+            const response = await apiService.generatePortal(project.id);
+            // Update local project state with new token and pin
+            setProject(prev => ({
+                ...prev,
+                portalToken: response.token,
+                portalPin: response.pin,
+                portalEnabled: response.enabled
+            }));
+            await onRefresh(); // Refresh parent
             setToast({ type: 'success', message: 'Acceso generado correctamente' });
         } catch (error) {
             console.error('Error generating portal:', error);
@@ -61,7 +73,14 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project, onRefresh }) 
         setConfirmModal(null);
         try {
             await apiService.revokePortal(project.id);
-            await onRefresh();
+            // Update local project state
+            setProject(prev => ({
+                ...prev,
+                portalToken: undefined,
+                portalPin: undefined,
+                portalEnabled: false
+            }));
+            await onRefresh(); // Refresh parent
             setToast({ type: 'success', message: 'Acceso revocado' });
         } catch (error) {
             console.error('Error revoking portal:', error);
