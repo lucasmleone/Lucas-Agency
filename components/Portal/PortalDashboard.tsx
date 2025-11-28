@@ -1,6 +1,7 @@
+```
 import React, { useState } from 'react';
 import { Project, Milestone } from '../../types';
-import { CheckCircle, Clock, FileText, Download, ExternalLink, Send, ChevronRight, Lock } from 'lucide-react';
+import { CheckCircle, Clock, FileText, Download, ExternalLink, Send, ChevronRight, Lock, Globe, Mail } from 'lucide-react';
 
 interface PortalDashboardProps {
     project: Project;
@@ -288,19 +289,21 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                 {milestones.map((milestone, index) => (
                                     <div key={milestone.id} className="flex gap-6 relative">
                                         {/* Icon */}
-                                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 z-10 border-4 border-gray-50 shadow-sm transition-all
-                                            ${milestone.status === 'completed' ? 'bg-green-500 text-white' :
-                                                milestone.status === 'active' ? 'bg-white border-blue-100 text-blue-600 ring-4 ring-blue-50' :
-                                                    'bg-gray-100 text-gray-400'}
-                                        `}>
+                                        <div className={`w - 16 h - 16 rounded - 2xl flex items - center justify - center flex - shrink - 0 z - 10 border - 4 border - gray - 50 shadow - sm transition - all
+                                            ${
+    milestone.status === 'completed' ? 'bg-green-500 text-white' :
+    milestone.status === 'active' ? 'bg-white border-blue-100 text-blue-600 ring-4 ring-blue-50' :
+        'bg-gray-100 text-gray-400'
+}
+`}>
                                             {milestone.status === 'completed' ? <CheckCircle size={24} /> :
                                                 milestone.status === 'active' ? <div className="w-3 h-3 bg-blue-600 rounded-full animate-ping" /> :
                                                     <div className="w-3 h-3 bg-gray-300 rounded-full" />}
                                         </div>
 
                                         {/* Content */}
-                                        <div className={`flex-1 pt-3 ${milestone.status === 'active' ? 'opacity-100' : 'opacity-80'}`}>
-                                            <h3 className={`text-lg font-bold ${milestone.status === 'active' ? 'text-blue-600' : 'text-gray-900'}`}>
+                                        <div className={`flex - 1 pt - 3 ${ milestone.status === 'active' ? 'opacity-100' : 'opacity-80' } `}>
+                                            <h3 className={`text - lg font - bold ${ milestone.status === 'active' ? 'text-blue-600' : 'text-gray-900' } `}>
                                                 {milestone.title}
                                             </h3>
                                             <p className="text-sm text-gray-500 mt-1">
@@ -541,7 +544,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                             <button
                                 onClick={() => {
                                     // Fallback to mailto since we don't have an invoice URL field yet
-                                    window.location.href = `mailto:admin@agency.com?subject=Solicitud Factura Final - ${project.clientName}`;
+                                    window.location.href = `mailto:admin @agency.com?subject = Solicitud Factura Final - ${ project.clientName } `;
                                 }}
                                 className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
                             >
