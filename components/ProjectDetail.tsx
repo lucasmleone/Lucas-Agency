@@ -174,6 +174,17 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     // Local state for project to track updates
     const [project, setProject] = useState(initialProject);
 
+    // CRITICAL: Sync local state when parent refreshes data
+    useEffect(() => {
+        console.log('[ProjectDetail] initialProject changed, syncing local state');
+        console.log('[ProjectDetail] New portal data from parent:', {
+            portalToken: initialProject.portalToken,
+            portalPin: initialProject.portalPin,
+            portalEnabled: initialProject.portalEnabled
+        });
+        setProject(initialProject);
+    }, [initialProject]);
+
     const { config: pricingConfig } = usePricingConfig();
 
     const [activeTab, setActiveTab] = useState<'workflow' | 'data' | 'logs' | 'finance' | 'maintenance' | 'notes' | 'portal'>('workflow');
