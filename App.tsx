@@ -614,26 +614,47 @@ function App() {
                               <p className="text-xs text-gray-500 mt-1">{project.planType}</p>
                             </div>
                             <div className="flex flex-col gap-2 items-end ml-3">
-                              <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap ${project.status === ProjectStatus.DELIVERED
-                                ? 'bg-gray-50 text-gray-700 border border-gray-200'
-                                : project.status === ProjectStatus.WAITING_RESOURCES
-                                  ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                                  : 'bg-blue-50 text-blue-700 border border-blue-200'
+                              <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap ${project.status === ProjectStatus.WAITING_RESOURCES && logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal')
+                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                  : project.status === ProjectStatus.DELIVERED
+                                    ? 'bg-gray-50 text-gray-700 border border-gray-200'
+                                    : project.status === ProjectStatus.WAITING_RESOURCES
+                                      ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                                      : 'bg-blue-50 text-blue-700 border border-blue-200'
                                 }`}>
-                                {project.status.split('.')[1] || project.status}
+                                {project.status === ProjectStatus.WAITING_RESOURCES && logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal')
+                                  ? 'Recursos Recibidos'
+                                  : project.status.split('.')[1] || project.status}
                               </span>
                               {/* Show acceptance badge if in WAITING_RESOURCES */}
                               {project.status === ProjectStatus.WAITING_RESOURCES && (
-                                <>
-                                  <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-green-50 text-green-700 border border-green-200 flex items-center gap-1">
-                                    ✓ Presupuesto Aceptado
-                                  </span>
-                                  {logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal') && (
-                                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1 animate-pulse">
-                                      ✓ Recursos Enviados
-                                    </span>
-                                  )}
-                                </>
+                                <div className="flex flex-col gap-1 items-end">
+                                  {(() => {
+                                    const proposalLog = logs.find(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente aprobó propuesta desde el Portal');
+                                    const resourcesLog = logs.find(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal');
+
+                                    const getTimeAgo = (dateStr: string) => {
+                                      const diff = Date.now() - new Date(dateStr).getTime();
+                                      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                      if (days === 0) return 'Hoy';
+                                      if (days === 1) return 'Ayer';
+                                      return `hace ${days}d`;
+                                    };
+
+                                    return (
+                                      <>
+                                        <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-green-50 text-green-700 border border-green-200 flex items-center gap-1">
+                                          ✓ Presupuesto Aceptado {proposalLog && <span className="opacity-75 font-normal">({getTimeAgo(proposalLog.createdAt)})</span>}
+                                        </span>
+                                        {resourcesLog && (
+                                          <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1 animate-pulse">
+                                            ✓ Recursos Enviados {<span className="opacity-75 font-normal">({getTimeAgo(resourcesLog.createdAt)})</span>}
+                                          </span>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
+                                </div>
                               )}
                             </div>
                           </div>
