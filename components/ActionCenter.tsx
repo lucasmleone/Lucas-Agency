@@ -1,9 +1,10 @@
 import React from 'react';
-import { AlertCircle, Lock } from 'lucide-react';
-import { Project, ProjectStatus } from '../types';
+import { AlertCircle, Lock, CheckCircle } from 'lucide-react';
+import { Project, ProjectStatus, ProjectLog } from '../types';
 
 interface ActionCenterProps {
     projects: Project[];
+    logs?: ProjectLog[];
 }
 
 const getDaysRemaining = (deadline: string) => {
@@ -28,7 +29,7 @@ const getUrgencyLabel = (days: number, status: ProjectStatus) => {
     return `${days} días restantes`;
 };
 
-export const ActionCenter: React.FC<ActionCenterProps> = ({ projects }) => {
+export const ActionCenter: React.FC<ActionCenterProps> = ({ projects, logs = [] }) => {
     const urgentProjects = projects
         .filter(p => p.status !== ProjectStatus.DELIVERED && p.status !== ProjectStatus.CANCELLED && p.status !== ProjectStatus.LOST)
         .map(p => ({ ...p, daysLeft: getDaysRemaining(p.deadline) }))
@@ -46,6 +47,13 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({ projects }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {urgentProjects.map(p => {
                     const urgencyClass = getUrgencyColor(p.daysLeft, p.status);
+
+                    // Check if resources are confirmed
+                    const hasConfirmedResources = logs.some(l =>
+                        String(l.projectId) === String(p.id) &&
+                        l.message === 'Cliente confirmó envío de recursos y pago desde el Portal'
+                    );
+
                     return (
                         <div key={p.id} className={`p-4 rounded-lg border shadow-sm bg-white flex flex-col justify-between`}>
                             <div>
@@ -56,11 +64,18 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({ projects }) => {
                                     </span>
                                 </div>
                                 <p className="text-xs text-gray-500 mb-2 font-medium uppercase">{p.status}</p>
+
                                 {/* Blocking Status Alerts */}
                                 {p.status === ProjectStatus.WAITING_RESOURCES && (
-                                    <div className="text-[10px] bg-orange-100 text-orange-800 px-2 py-1 rounded flex items-center">
-                                        <Lock className="w-3 h-3 mr-1" /> Bloqueado: Falta Info/Pago
-                                    </div>
+                                    hasConfirmedResources ? (
+                                        <div className="text-[10px] bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center font-bold animate-pulse">
+                                            <CheckCircle className="w-3 h-3 mr-1" /> Recursos Enviados
+                                        </div>
+                                    ) : (
+                                        <div className="text-[10px] bg-orange-100 text-orange-800 px-2 py-1 rounded flex items-center">
+                                            <Lock className="w-3 h-3 mr-1" /> Bloqueado: Falta Info/Pago
+                                        </div>
+                                    )
                                 )}
                             </div>
                         </div>

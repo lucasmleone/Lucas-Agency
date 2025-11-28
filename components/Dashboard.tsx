@@ -39,7 +39,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, finances, logs }
             </div>
 
             {/* Action Center */}
-            <ActionCenter projects={projects} />
+            <ActionCenter projects={projects} logs={logs} />
 
             {/* Workload Calendar */}
             <div className="mb-8">
