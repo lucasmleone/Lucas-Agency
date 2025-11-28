@@ -295,8 +295,8 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                         <div className={`w - 16 h - 16 rounded - 2xl flex items - center justify - center flex - shrink - 0 z - 10 border - 4 border - gray - 50 shadow - sm transition - all
                                             ${
     milestone.status === 'completed' ? 'bg-green-500 text-white' :
-    milestone.status === 'active' ? 'bg-white border-blue-100 text-blue-600 ring-4 ring-blue-50' :
-        'bg-gray-100 text-gray-400'
+        milestone.status === 'active' ? 'bg-white border-blue-100 text-blue-600 ring-4 ring-blue-50' :
+            'bg-gray-100 text-gray-400'
 }
 `}>
                                             {milestone.status === 'completed' ? <CheckCircle size={24} /> :
@@ -537,37 +537,66 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                                 </div>
                                             )}
                                         </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto mt-8">
-                                            <h3 className="font-bold text-gray-900 mb-4">Acciones</h3>
-                                            <button
-                                                onClick={() => {
-                                                    const data = [
-                                                        '--- CREDENCIALES DEL PROYECTO ---',
-                                                        '',
-                                                        project.deliveryData?.webUrl ? `[ACCESO WEB]\nURL: ${ project.deliveryData.webUrl } \nUsuario: ${ project.deliveryData.webUser || '' } \nContraseña: ${ project.deliveryData.webPass || '' } ` : '',
-                                                        '',
-                                                        project.deliveryData?.emailUrl ? `[ACCESO CORREO]\nURL: ${ project.deliveryData.emailUrl } \nUsuario: ${ project.deliveryData.emailUser || '' } \nContraseña: ${ project.deliveryData.emailPass || '' } ` : '',
-                                                        '',
-                                                        project.deliveryData?.reportLink ? `[INFORME FINAL]\nLink: ${ project.deliveryData.reportLink } ` : ''
-                                                    ].filter(Boolean).join('\n');
-
-                                                    navigator.clipboard.writeText(data).then(() => {
-                                                        alert('Datos copiados al portapapeles');
-                                                    });
-                                                }}
-                                                className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
-                                            >
-                                                <Copy size={20} /> Copiar Todos los Datos
-                                            </button>
+                        {/* Drive/Report Link */}
+                        {project.deliveryData?.reportLink && (
+                            <div className="max-w-4xl mx-auto mt-6 text-left">
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 text-green-600">
+                                        <FileText size={24} />
+                                        <div>
+                                            <h3 className="font-bold text-gray-900">Informe Final / Entregables</h3>
+                                            <p className="text-sm text-gray-500">Enlace a Google Drive o PDF</p>
                                         </div>
+                                    </div>
+                                    <a 
+                                        href={project.deliveryData.reportLink} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium hover:bg-green-100 transition-colors flex items-center gap-2"
+                                    >
+                                        <ExternalLink size={18} /> Abrir
+                                    </a>
+                                </div>
+                            </div>
+                        )}
 
-                                        <div className="bg-yellow-50 p-4 rounded-xl inline-block text-yellow-800 text-sm max-w-md">
-                                            <strong>Nota:</strong> Este enlace de acceso caducará automáticamente en 10 días por seguridad.
-                                        </div>
+                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto mt-8">
+                            <h3 className="font-bold text-gray-900 mb-4">Acciones</h3>
+                            <button 
+                                onClick={() => {
+                                    const data = [
+                                        '--- CREDENCIALES DEL PROYECTO ---',
+                                        '',
+                                        project.deliveryData?.webUrl ? `[ACCESO WEB]\nURL: ${ project.deliveryData.webUrl } \nUsuario: ${ project.deliveryData.webUser || '' } \nContraseña: ${ project.deliveryData.webPass || '' } ` : '',
+                                        '',
+                                        project.deliveryData?.emailUrl ? `[ACCESO CORREO]\nURL: ${ project.deliveryData.emailUrl } \nUsuario: ${ project.deliveryData.emailUser || '' } \nContraseña: ${ project.deliveryData.emailPass || '' } ` : '',
+                                        '',
+                                        project.deliveryData?.reportLink ? `[INFORME FINAL]\nLink: ${ project.deliveryData.reportLink } ` : ''
+                                    ].filter(Boolean).join('\n');
+
+                                    navigator.clipboard.writeText(data).then(() => {
+                                        alert('Datos copiados al portapapeles');
+                                    });
+                                }}
+                                className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                            >
+                                <Copy size={20} /> Copiar Todos los Datos
+                            </button>
+                        </div>
+
+                        <div className="bg-yellow-50 p-4 rounded-xl inline-block text-yellow-800 text-sm max-w-md">
+                            <strong>Nota:</strong> Este enlace de acceso caducará automáticamente en 10 días por seguridad.
+                        </div>
+                    </div>
                 )}
 
-                                    </main>
+            </main>
         </div>
-                        );
+    );
+};                    );
 };
