@@ -177,6 +177,8 @@ router.put('/projects/:id', async (req, res) => {
         addUpdate('portal_token', p.portalToken);
         addUpdate('portal_pin', p.portalPin);
         addUpdate('portal_enabled', p.portalEnabled);
+        addUpdate('drive_link', p.driveLink);
+        addUpdate('requirements', p.requirements, true); // JSON field
 
         if (updates.length === 0) return res.json({ success: true, message: 'No updates provided' });
 
