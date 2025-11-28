@@ -254,7 +254,13 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
     const handleStageChange = (newStage: ProjectStatus) => {
         setStatus(newStage);
-        onUpdateProject({ status: newStage });
+        // CRITICAL: Include portal fields to prevent them from being lost
+        onUpdateProject({
+            status: newStage,
+            portalToken: project.portalToken,
+            portalPin: project.portalPin,
+            portalEnabled: project.portalEnabled
+        });
         onAddLog(`Estado cambiado a: ${newStage}`);
     };
 
