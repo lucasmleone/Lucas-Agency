@@ -220,7 +220,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const [showToast, setShowToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
 
     // Helper to safely update project while preserving critical fields
-    const safeUpdateProject = (updates: Partial<Project>) => {
+    const safeUpdateProject = async (updates: Partial<Project>) => {
         const mergedUpdates = {
             ...updates,
             // CRITICAL: Always preserve portal fields
@@ -237,7 +237,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             portalEnabled: project.portalEnabled
         });
 
-        onUpdateProject(mergedUpdates);
+        await onUpdateProject(mergedUpdates);
+        console.log('[ProjectDetail] safe UpdateProject - onUpdateProject COMPLETED');
     };
 
     const handleStatusChange = (newStatus: ProjectStatus) => {
@@ -1205,7 +1206,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 if (updates) {
                                     console.log('[ProjectDetail] onRefresh called with:', updates);
                                     // CRITICAL: Use safeUpdateProject to preserve portal fields
-                                    safeUpdateProject(updates);
+                                    await safeUpdateProject(updates); // ← WAIT for save to complete!
                                     // CRITICAL: Refresh all data from DB to sync React state
                                     if (onRefreshData) {
                                         console.log('[ProjectDetail] Calling onRefreshData to sync state...');
