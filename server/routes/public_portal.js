@@ -133,6 +133,7 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
         res.json({
             project: {
                 ...project,
+                driveLink: project.drive_link,  // Convert to camelCase
                 requirements: typeof project.requirements === 'string' ? JSON.parse(project.requirements) : project.requirements,
                 deliveryData: typeof project.delivery_data === 'string' ? JSON.parse(project.delivery_data) : project.delivery_data
             },
