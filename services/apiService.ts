@@ -27,12 +27,31 @@ export const apiService = {
   },
 
   async updateProject(project: Project) {
-    await fetch(`${DATA_URL}/projects/${project.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(project),
-      credentials: 'include'
-    });
+    console.log('[apiService] updateProject called with project ID:', project.id);
+    console.log('[apiService] Full project object:', project);
+    console.log('[apiService] About to PUT to:', `${DATA_URL}/projects/${project.id}`);
+
+    try {
+      const response = await fetch(`${DATA_URL}/projects/${project.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(project),
+        credentials: 'include'
+      });
+
+      console.log('[apiService] PUT response status:', response.status);
+
+      if (!response.ok) {
+        console.error('[apiService] PUT failed with status:', response.status);
+        const errorText = await response.text();
+        console.error('[apiService] Error response:', errorText);
+      } else {
+        console.log('[apiService] PUT succeeded');
+      }
+    } catch (error) {
+      console.error('[apiService] PUT request failed with error:', error);
+      throw error;
+    }
   },
 
   async deleteProject(id: string) {
