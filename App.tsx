@@ -147,6 +147,21 @@ function App() {
   }
 
   const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+
+  // Notification State - Track read resource confirmations
+  const [readNotifications, setReadNotifications] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('agency_read_notifications');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+
+  const handleMarkAsRead = (projectId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newSet = new Set(readNotifications);
+    newSet.add(projectId);
+    setReadNotifications(newSet);
+    localStorage.setItem('agency_read_notifications', JSON.stringify(Array.from(newSet)));
+  };
+
   const {
     projects,
     finances,
@@ -614,18 +629,42 @@ function App() {
                               <p className="text-xs text-gray-500 mt-1">{project.planType}</p>
                             </div>
                             <div className="flex flex-col gap-2 items-end ml-3">
-                              <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap ${project.status === ProjectStatus.WAITING_RESOURCES && logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal')
-                                ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                                : project.status === ProjectStatus.DELIVERED
-                                  ? 'bg-gray-50 text-gray-700 border border-gray-200'
-                                  : project.status === ProjectStatus.WAITING_RESOURCES
-                                    ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                                    : 'bg-blue-50 text-blue-700 border border-blue-200'
-                                }`}>
-                                {project.status === ProjectStatus.WAITING_RESOURCES && logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal')
-                                  ? 'Recursos Recibidos'
-                                  : project.status.split('.')[1] || project.status}
-                              </span>
+                              {(() => {
+                                const resourcesLog = logs.find(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal');
+                                const isResourcesReceived = project.status === ProjectStatus.WAITING_RESOURCES && !!resourcesLog;
+                                const isUnread = isResourcesReceived && !readNotifications.has(project.id);
+
+                                const getTimeAgo = (dateStr: string) => {
+                                  const diff = Date.now() - new Date(dateStr).getTime();
+                                  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                  if (days === 0) return 'Hoy';
+                                  if (days === 1) return 'Ayer';
+                                  if (days > 5) return '+5d';
+                                  return `hace ${days}d`;
+                                };
+
+                                return (
+                                  <span
+                                    onClick={(e) => isUnread ? handleMarkAsRead(project.id, e) : undefined}
+                                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap flex items-center gap-1.5 ${isResourcesReceived
+                                        ? 'bg-purple-50 text-purple-700 border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors'
+                                        : project.status === ProjectStatus.DELIVERED
+                                          ? 'bg-gray-50 text-gray-700 border border-gray-200'
+                                          : project.status === ProjectStatus.WAITING_RESOURCES
+                                            ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                                            : 'bg-blue-50 text-blue-700 border border-blue-200'
+                                      }`}
+                                  >
+                                    {isUnread && (
+                                      <span className="w-2 h-2 bg-red-500 rounded-full inline-block animate-pulse"></span>
+                                    )}
+                                    {isResourcesReceived ? 'Recursos Recibidos' : project.status.split('.')[1] || project.status}
+                                    {isResourcesReceived && resourcesLog && (
+                                      <span className="opacity-75 font-normal">({getTimeAgo(resourcesLog.createdAt)})</span>
+                                    )}
+                                  </span>
+                                );
+                              })()}
                               {/* Show acceptance badge if in WAITING_RESOURCES */}
                               {project.status === ProjectStatus.WAITING_RESOURCES && (
                                 <div className="flex flex-col gap-1 items-end">
@@ -638,17 +677,8 @@ function App() {
                                       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                                       if (days === 0) return 'Hoy';
                                       if (days === 1) return 'Ayer';
-                                      if (days > 10) return '+10d';
+                                      if (days > 5) return '+5d';
                                       return `hace ${days}d`;
-                                    };
-
-                                    const getResourceStyle = (dateStr: string) => {
-                                      const diff = Date.now() - new Date(dateStr).getTime();
-                                      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-                                      if (days >= 7) return 'bg-red-50 text-red-700 border-red-200'; // Critical (> 1 week)
-                                      if (days >= 3) return 'bg-orange-50 text-orange-700 border-orange-200'; // Warning (> 3 days)
-                                      return 'bg-purple-50 text-purple-700 border-purple-200'; // Fresh
                                     };
 
                                     return (
@@ -656,11 +686,6 @@ function App() {
                                         <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-green-50 text-green-700 border border-green-200 flex items-center gap-1">
                                           ✓ Presupuesto Aceptado {proposalLog && <span className="opacity-75 font-normal">({getTimeAgo(proposalLog.createdAt)})</span>}
                                         </span>
-                                        {resourcesLog && (
-                                          <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md border flex items-center gap-1 ${getResourceStyle(resourcesLog.createdAt)}`}>
-                                            ✓ Recursos Enviados {<span className="opacity-75 font-normal">({getTimeAgo(resourcesLog.createdAt)})</span>}
-                                          </span>
-                                        )}
                                       </>
                                     );
                                   })()}
