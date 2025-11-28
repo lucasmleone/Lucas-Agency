@@ -102,91 +102,92 @@ export const useProjects = () => {
             await apiService.updateProject(updatedProject);
             setProjects(prev => prev.map(p => p.id === id ? updatedProject : p));
         }
-
-        const deleteProject = async (id: string) => {
-            await apiService.deleteProject(id);
-            setProjects(prev => prev.filter(p => p.id !== id));
-        };
-
-        const addLog = async (projectId: string, text: string) => {
-            const newLog: any = {
-                projectId,
-                author: 'Admin',
-                comment: text,
-                createdAt: new Date().toISOString().split('T')[0]
-            };
-            const savedLog = await apiService.addLog(newLog);
-            savedLog.id = String(savedLog.id);
-            setLogs(prev => [savedLog, ...prev]);
-        };
-
-        const updateLog = async (logId: string, text: string) => {
-            const log = logs.find(l => l.id === logId);
-            if (log) {
-                const updatedLog = { ...log, comment: text };
-                await apiService.updateLog(updatedLog);
-                setLogs(prev => prev.map(l => l.id === logId ? updatedLog : l));
-            }
-        };
-
-        const addClient = async (clientData: any) => {
-            const client: any = {
-                ...clientData,
-                registeredAt: new Date().toISOString().split('T')[0]
-            };
-            const savedClient = await apiService.addClient(client);
-            savedClient.id = String(savedClient.id);
-            setClients(prev => [...prev, savedClient]);
-        };
-
-        const updateClient = async (id: string, clientData: any) => {
-            const client = clients.find(c => c.id === id);
-            if (client) {
-                const updatedClient = { ...client, ...clientData };
-                await apiService.updateClient(updatedClient);
-                setClients(prev => prev.map(c => c.id === id ? updatedClient : c));
-            }
-        };
-
-        const deleteClient = async (id: string) => {
-            await apiService.deleteClient(id);
-            setClients(prev => prev.filter(c => c.id !== id));
-        };
-
-        const addFinance = async (financeData: any) => {
-            const newRecord: any = {
-                projectId: financeData.projectId,
-                type: financeData.type,
-                description: financeData.description,
-                amount: Number(financeData.amount),
-                date: new Date().toISOString().split('T')[0]
-            };
-            const savedRecord = await apiService.addFinance(newRecord);
-            savedRecord.id = String(savedRecord.id);
-            setFinances(prev => [...prev, savedRecord]);
-        };
-
-        const deleteFinance = async (id: string) => {
-            await apiService.deleteFinance(id);
-            setFinances(prev => prev.filter(f => f.id !== id));
-        };
-
-        return {
-            projects,
-            finances,
-            logs,
-            clients,
-            loading,
-            refreshData: loadData,
-            addProject,
-            updateProject,
-            deleteProject,
-            addLog,
-            updateLog,
-            addClient,
-            updateClient,
-            deleteClient,
-            addFinance,
-            deleteFinance
-        };
     };
+
+    const deleteProject = async (id: string) => {
+        await apiService.deleteProject(id);
+        setProjects(prev => prev.filter(p => p.id !== id));
+    };
+
+    const addLog = async (projectId: string, text: string) => {
+        const newLog: any = {
+            projectId,
+            author: 'Admin',
+            comment: text,
+            createdAt: new Date().toISOString().split('T')[0]
+        };
+        const savedLog = await apiService.addLog(newLog);
+        savedLog.id = String(savedLog.id);
+        setLogs(prev => [savedLog, ...prev]);
+    };
+
+    const updateLog = async (logId: string, text: string) => {
+        const log = logs.find(l => l.id === logId);
+        if (log) {
+            const updatedLog = { ...log, comment: text };
+            await apiService.updateLog(updatedLog);
+            setLogs(prev => prev.map(l => l.id === logId ? updatedLog : l));
+        }
+    };
+
+    const addClient = async (clientData: any) => {
+        const client: any = {
+            ...clientData,
+            registeredAt: new Date().toISOString().split('T')[0]
+        };
+        const savedClient = await apiService.addClient(client);
+        savedClient.id = String(savedClient.id);
+        setClients(prev => [...prev, savedClient]);
+    };
+
+    const updateClient = async (id: string, clientData: any) => {
+        const client = clients.find(c => c.id === id);
+        if (client) {
+            const updatedClient = { ...client, ...clientData };
+            await apiService.updateClient(updatedClient);
+            setClients(prev => prev.map(c => c.id === id ? updatedClient : c));
+        }
+    };
+
+    const deleteClient = async (id: string) => {
+        await apiService.deleteClient(id);
+        setClients(prev => prev.filter(c => c.id !== id));
+    };
+
+    const addFinance = async (financeData: any) => {
+        const newRecord: any = {
+            projectId: financeData.projectId,
+            type: financeData.type,
+            description: financeData.description,
+            amount: Number(financeData.amount),
+            date: new Date().toISOString().split('T')[0]
+        };
+        const savedRecord = await apiService.addFinance(newRecord);
+        savedRecord.id = String(savedRecord.id);
+        setFinances(prev => [...prev, savedRecord]);
+    };
+
+    const deleteFinance = async (id: string) => {
+        await apiService.deleteFinance(id);
+        setFinances(prev => prev.filter(f => f.id !== id));
+    };
+
+    return {
+        projects,
+        finances,
+        logs,
+        clients,
+        loading,
+        refreshData: loadData,
+        addProject,
+        updateProject,
+        deleteProject,
+        addLog,
+        updateLog,
+        addClient,
+        updateClient,
+        deleteClient,
+        addFinance,
+        deleteFinance
+    };
+};
