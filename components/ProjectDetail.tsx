@@ -1190,9 +1190,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             project={project}
                             onRefresh={async (updates) => {
                                 if (updates) {
-                                    // Update parent state with new portal data so it persists
-                                    // and doesn't get overwritten by stale data on next save
-                                    onUpdateProject(updates);
+                                    // CRITICAL: Use safeUpdateProject to preserve portal fields
+                                    safeUpdateProject(updates);
                                 }
                             }}
                         />
