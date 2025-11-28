@@ -4,7 +4,8 @@ import { Project, Milestone } from '../../types';
 import {
     CheckCircle, Clock, FileText, Download, ExternalLink, Send, ChevronRight, Lock, Globe,
     Mail,
-    Copy
+    Copy,
+    AlertCircle
 } from 'lucide-react';
 
 interface PortalDashboardProps {
