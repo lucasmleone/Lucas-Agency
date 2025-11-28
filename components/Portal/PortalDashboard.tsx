@@ -463,10 +463,89 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                             Ha sido un placer trabajar contigo. Tu proyecto ha sido entregado exitosamente.
                         </p>
 
+                        {/* Credentials Section */}
+                        {(project.deliveryData?.webUrl || project.deliveryData?.emailUrl) && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
+                                {/* Web Access */}
+                                {project.deliveryData?.webUrl && (
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                                        <div className="flex items-center gap-3 mb-4 text-blue-600">
+                                            <Globe size={24} />
+                                            <h3 className="font-bold text-gray-900">Acceso Web</h3>
+                                        </div>
+                                        <div className="space-y-3 text-sm">
+                                            <div>
+                                                <span className="block text-gray-500 mb-1">URL de Acceso</span>
+                                                <a href={project.deliveryData.webUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                                    {project.deliveryData.webUrl}
+                                                </a>
+                                            </div>
+                                            {project.deliveryData.webUser && (
+                                                <div>
+                                                    <span className="block text-gray-500 mb-1">Usuario</span>
+                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                        {project.deliveryData.webUser}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {project.deliveryData.webPass && (
+                                                <div>
+                                                    <span className="block text-gray-500 mb-1">Contraseña</span>
+                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                        {project.deliveryData.webPass}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Email Access */}
+                                {project.deliveryData?.emailUrl && (
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                                        <div className="flex items-center gap-3 mb-4 text-purple-600">
+                                            <Mail size={24} />
+                                            <h3 className="font-bold text-gray-900">Acceso Correo</h3>
+                                        </div>
+                                        <div className="space-y-3 text-sm">
+                                            <div>
+                                                <span className="block text-gray-500 mb-1">URL Webmail</span>
+                                                <a href={project.deliveryData.emailUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                                    {project.deliveryData.emailUrl}
+                                                </a>
+                                            </div>
+                                            {project.deliveryData.emailUser && (
+                                                <div>
+                                                    <span className="block text-gray-500 mb-1">Correo</span>
+                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                        {project.deliveryData.emailUser}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {project.deliveryData.emailPass && (
+                                                <div>
+                                                    <span className="block text-gray-500 mb-1">Contraseña</span>
+                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                        {project.deliveryData.emailPass}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto mt-8">
                             <h3 className="font-bold text-gray-900 mb-4">Descargas</h3>
-                            <button className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
-                                <Download size={20} /> Descargar Factura Final
+                            <button
+                                onClick={() => {
+                                    // Fallback to mailto since we don't have an invoice URL field yet
+                                    window.location.href = `mailto:admin@agency.com?subject=Solicitud Factura Final - ${project.clientName}`;
+                                }}
+                                className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                            >
+                                <Download size={20} /> Solicitar Factura Final
                             </button>
                         </div>
 
