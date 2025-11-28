@@ -102,7 +102,8 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
             SELECT p.id, p.name, p.description, p.status, p.start_date, p.end_date, 
                    p.drive_link, p.requirements, p.portal_expires_at,
                    p.base_price, p.custom_price, p.discount, p.discount_type, 
-                   p.final_price as finalPrice, p.plan as planType
+                   p.final_price as finalPrice, p.plan as planType,
+                   p.delivery_data
             FROM projects p 
             WHERE p.portal_token = ?
         `, [token]);
@@ -132,7 +133,8 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
         res.json({
             project: {
                 ...project,
-                requirements: typeof project.requirements === 'string' ? JSON.parse(project.requirements) : project.requirements
+                requirements: typeof project.requirements === 'string' ? JSON.parse(project.requirements) : project.requirements,
+                deliveryData: typeof project.delivery_data === 'string' ? JSON.parse(project.delivery_data) : project.delivery_data
             },
             milestones: visibleMilestones
         });
