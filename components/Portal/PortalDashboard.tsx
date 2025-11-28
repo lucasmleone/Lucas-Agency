@@ -15,8 +15,19 @@ interface PortalDashboardProps {
 
 export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, milestones, onAction }) => {
     const [loading, setLoading] = useState(false);
+    const [checkedRequirements, setCheckedRequirements] = useState<Set<number>>(new Set());
 
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; action: string; title: string; message: string } | null>(null);
+
+    const toggleRequirement = (index: number) => {
+        const newChecked = new Set(checkedRequirements);
+        if (newChecked.has(index)) {
+            newChecked.delete(index);
+        } else {
+            newChecked.add(index);
+        }
+        setCheckedRequirements(newChecked);
+    };
 
     const handleActionClick = (action: string) => {
         let title = '¿Estás seguro?';
@@ -244,9 +255,19 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                     </h3>
                                     <ul className="space-y-3">
                                         {(project.requirements || []).map((req, i) => (
-                                            <li key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                <div className="mt-0.5 w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
-                                                <span className="text-gray-700">{req}</span>
+                                            <li
+                                                key={i}
+                                                onClick={() => toggleRequirement(i)}
+                                                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                                                <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${checkedRequirements.has(i)
+                                                    ? 'bg-green-500 border-green-500'
+                                                    : 'border-gray-300 hover:border-gray-400'
+                                                    }`}>
+                                                    {checkedRequirements.has(i) && (
+                                                        <CheckCircle size={16} className="text-white" />
+                                                    )}
+                                                </div>
+                                                <span className={`text-gray-700 ${checkedRequirements.has(i) ? 'line-through opacity-60' : ''}`}>{req}</span>
                                             </li>
                                         ))}
                                         {(!project.requirements || project.requirements.length === 0) && (
