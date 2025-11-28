@@ -117,6 +117,13 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
             [project.id]
         );
 
+        // Check if resources were confirmed
+        const [logs] = await pool.query(
+            'SELECT id FROM project_logs WHERE project_id = ? AND message = ? LIMIT 1',
+            [project.id, 'Cliente confirmó envío de recursos y pago desde el Portal']
+        );
+        const resourcesSent = logs.length > 0;
+
         // Filter milestones for "Fog of War"
         // Show all 'completed' and 'active'.
         // If 'active' exists, show it.
@@ -135,7 +142,8 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
                 ...project,
                 driveLink: project.drive_link,  // Convert to camelCase
                 requirements: typeof project.requirements === 'string' ? JSON.parse(project.requirements) : project.requirements,
-                deliveryData: typeof project.delivery_data === 'string' ? JSON.parse(project.delivery_data) : project.delivery_data
+                deliveryData: typeof project.delivery_data === 'string' ? JSON.parse(project.delivery_data) : project.delivery_data,
+                resourcesSent
             },
             milestones: visibleMilestones
         });

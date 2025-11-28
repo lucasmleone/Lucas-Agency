@@ -17,7 +17,7 @@ interface PortalDashboardProps {
 export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, milestones, onAction }) => {
     const [loading, setLoading] = useState(false);
     const [checkedRequirements, setCheckedRequirements] = useState<Set<number>>(new Set());
-    const [resourcesConfirmed, setResourcesConfirmed] = useState(false);
+    const [resourcesConfirmed, setResourcesConfirmed] = useState(project.resourcesSent || false);
 
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; action: string; title: string; message: string } | null>(null);
 

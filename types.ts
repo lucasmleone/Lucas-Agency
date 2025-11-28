@@ -110,6 +110,7 @@ export interface Project {
 
   // Delivery Fields
   deliveryData?: DeliveryData;
+  resourcesSent?: boolean; // Flag to indicate if client confirmed resources
 }
 
 export interface Milestone {
