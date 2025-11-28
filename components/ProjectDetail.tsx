@@ -218,13 +218,23 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
     // Helper to safely update project while preserving critical fields
     const safeUpdateProject = (updates: Partial<Project>) => {
-        onUpdateProject({
+        const mergedUpdates = {
             ...updates,
             // CRITICAL: Always preserve portal fields
             portalToken: updates.portalToken ?? project.portalToken,
             portalPin: updates.portalPin ?? project.portalPin,
             portalEnabled: updates.portalEnabled ?? project.portalEnabled
+        };
+
+        console.log('[ProjectDetail] safeUpdateProject - input:', updates);
+        console.log('[ProjectDetail] safeUpdateProject - merged:', mergedUpdates);
+        console.log('[ProjectDetail] safeUpdateProject - current project portal data:', {
+            portalToken: project.portalToken,
+            portalPin: project.portalPin,
+            portalEnabled: project.portalEnabled
         });
+
+        onUpdateProject(mergedUpdates);
     };
 
     const handleStatusChange = (newStatus: ProjectStatus) => {
@@ -1190,6 +1200,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             project={project}
                             onRefresh={async (updates) => {
                                 if (updates) {
+                                    console.log('[ProjectDetail] onRefresh called with:', updates);
                                     // CRITICAL: Use safeUpdateProject to preserve portal fields
                                     safeUpdateProject(updates);
                                 }

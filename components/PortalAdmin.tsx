@@ -57,8 +57,14 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                 portalPin: response.pin,
                 portalEnabled: response.enabled
             };
+
+            console.log('[PortalAdmin] Portal generated:', updates);
+
             setProject(prev => ({ ...prev, ...updates }));
+
+            console.log('[PortalAdmin] Calling onRefresh with:', updates);
             await onRefresh(updates); // Refresh parent with updates
+
             setToast({ type: 'success', message: 'Acceso generado correctamente' });
         } catch (error) {
             console.error('Error generating portal:', error);
