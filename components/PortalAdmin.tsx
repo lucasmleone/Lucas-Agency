@@ -102,7 +102,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
     const handleSaveConfig = async () => {
         setLoading(true);
         try {
-            // Use updateProject endpoint which already exists and handles drive_link and requirements
+            // onRefresh now handles updating the project with the new config
             await onRefresh({
                 driveLink: config.driveLink,
                 requirements: config.requirements.split('\n').filter(r => r.trim())
