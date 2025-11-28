@@ -136,8 +136,8 @@ function App() {
               No pudimos encontrar este portal. Por favor verifique el enlace.
             </p>
             <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-500">
-              <strong>Lucas Agency</strong><br />
-              contacto@lucasagency.com<br />
+              <strong>Agencia Leone</strong><br />
+              contacto@agencialeone.com<br />
               +54 9 11 XXXX-XXXX
             </div>
           </div>

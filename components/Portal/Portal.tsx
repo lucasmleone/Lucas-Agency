@@ -124,7 +124,7 @@ export const Portal: React.FC<PortalProps> = ({ token }) => {
                             : 'No pudimos encontrar este portal. Por favor verifica el enlace.'}
                     </p>
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <p className="text-sm font-bold text-gray-900 mb-2">Lucas Agency</p>
+                        <p className="text-sm font-bold text-gray-900 mb-2">Agencia Leone</p>
                         <p className="text-sm text-gray-600">contacto@lucasagency.com</p>
                         <p className="text-sm text-gray-600">+54 9 11 XXXX-XXXX</p>
                     </div>

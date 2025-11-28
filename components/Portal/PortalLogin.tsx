@@ -78,7 +78,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ clientName, projectNam
                     </form>
                 </div>
                 <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
-                    <p className="text-xs text-gray-400">Protegido por Lucas Agency Security</p>
+                    <p className="text-xs text-gray-400">Protegido por Agencia Leone Security</p>
                 </div>
             </div>
         </div>
