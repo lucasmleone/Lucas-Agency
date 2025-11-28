@@ -317,7 +317,15 @@ function App() {
 
   if (!isAuthenticated) {
     const path = window.location.pathname;
+
+    // If accessing /register, show register page
     if (path === '/register') return <RegisterPage />;
+
+    // If not already on /login, redirect there
+    if (path !== '/login') {
+      window.history.replaceState(null, '', '/login');
+    }
+
     return <LoginPage />;
   }
 
