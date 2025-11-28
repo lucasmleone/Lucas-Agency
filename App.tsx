@@ -18,6 +18,9 @@ import {
   Edit2,
   Trash2,
   RefreshCw,
+  CheckCircle,
+  Send,
+  ChevronRight,
   StickyNote,
   Search
 } from 'lucide-react';
@@ -154,8 +157,8 @@ function App() {
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
 
-  const handleMarkAsRead = (projectId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleMarkAsRead = (projectId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     const newSet = new Set(readNotifications);
     newSet.add(projectId);
     setReadNotifications(newSet);
@@ -181,9 +184,59 @@ function App() {
     deleteFinance
   } = useProjects();
 
+  // Calculate unread notifications
+  const unreadNotifications = useMemo(() => {
+    const notifications: Array<{ id: string; projectId: string; projectName: string; type: 'proposal' | 'resources'; date: string }> = [];
+
+    projects.forEach(project => {
+      if (project.status === ProjectStatus.WAITING_RESOURCES) {
+        // Check for proposal approval
+        const proposalLog = logs.find(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente aprobó propuesta desde el Portal');
+        if (proposalLog && !readNotifications.has(`${project.id}-proposal`)) {
+          notifications.push({
+            id: `${project.id}-proposal`,
+            projectId: project.id,
+            projectName: project.clientName,
+            type: 'proposal',
+            date: proposalLog.createdAt
+          });
+        }
+
+        // Check for resources confirmation
+        const resourcesLog = logs.find(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal');
+        if (resourcesLog && !readNotifications.has(`${project.id}-resources`)) {
+          notifications.push({
+            id: `${project.id}-resources`,
+            projectId: project.id,
+            projectName: project.clientName,
+            type: 'resources',
+            date: resourcesLog.createdAt
+          });
+        }
+      }
+    });
+
+    return notifications.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [projects, logs, readNotifications]);
+
+  const markAllAsRead = () => {
+    const newSet = new Set(readNotifications);
+    unreadNotifications.forEach(n => newSet.add(n.id));
+    setReadNotifications(newSet);
+    localStorage.setItem('agency_read_notifications', JSON.stringify(Array.from(newSet)));
+  };
+
+  const handleNotificationClick = (notificationId: string, projectId: string) => {
+    handleMarkAsRead(notificationId);
+    setSelectedProjectId(projectId);
+    setView('projects');
+    setShowNotifications(false);
+  };
+
   // --- Estados ---
   const [view, setView] = useState<'public' | 'dashboard' | 'projects' | 'finance' | 'clients' | 'notes'>('dashboard');
   const [showPricingConfig, setShowPricingConfig] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   // Selected Client State
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -475,10 +528,18 @@ function App() {
             >
               <Settings className="w-5 h-5" />
             </button>
-            <div className="relative">
-              <Bell className="w-5 h-5 text-gray-500" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </div>
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
+              title="Notificaciones"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadNotifications.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  {unreadNotifications.length}
+                </span>
+              )}
+            </button>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-700">{user?.email.charAt(0).toUpperCase()}</div>
               <span className="text-sm font-medium text-gray-700 hidden sm:inline">{user?.email.split('@')[0]}</span>
@@ -647,12 +708,12 @@ function App() {
                                   <span
                                     onClick={(e) => isUnread ? handleMarkAsRead(project.id, e) : undefined}
                                     className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap flex items-center gap-1.5 ${isResourcesReceived
-                                        ? 'bg-purple-50 text-purple-700 border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors'
-                                        : project.status === ProjectStatus.DELIVERED
-                                          ? 'bg-gray-50 text-gray-700 border border-gray-200'
-                                          : project.status === ProjectStatus.WAITING_RESOURCES
-                                            ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                                            : 'bg-blue-50 text-blue-700 border border-blue-200'
+                                      ? 'bg-purple-50 text-purple-700 border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors'
+                                      : project.status === ProjectStatus.DELIVERED
+                                        ? 'bg-gray-50 text-gray-700 border border-gray-200'
+                                        : project.status === ProjectStatus.WAITING_RESOURCES
+                                          ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                                          : 'bg-blue-50 text-blue-700 border border-blue-200'
                                       }`}
                                   >
                                     {isUnread && (
@@ -1056,8 +1117,108 @@ function App() {
           onCancel={() => setDeleteConfirm({ show: false, financeId: null })}
         />
       )}
+
+      {/* Notification Modal - iOS Style Slide Up */}
+      {showNotifications && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center sm:justify-center"
+          onClick={() => setShowNotifications(false)}
+        >
+          <div
+            className="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[80vh] sm:max-h-[600px] overflow-hidden shadow-2xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">Notificaciones</h2>
+              <div className="flex items-center gap-2">
+                {unreadNotifications.length > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    Marcar todas
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowNotifications(false)}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+            </div>
+
+            {/* Notification List */}
+            <div className="overflow-y-auto max-h-[calc(80vh-80px)] sm:max-h-[520px]">
+              {unreadNotifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 px-6">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <Bell className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500 text-center font-medium">No hay notificaciones nuevas</p>
+                  <p className="text-gray-400 text-sm text-center mt-1">Te avisaremos cuando haya novedades</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {unreadNotifications.map(notification => {
+                    const getTimeAgo = (dateStr: string) => {
+                      const diff = Date.now() - new Date(dateStr).getTime();
+                      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                      const hours = Math.floor(diff / (1000 * 60 * 60));
+                      const minutes = Math.floor(diff / (1000 * 60));
+
+                      if (days > 0) return days === 1 ? 'Hace 1 día' : `Hace ${days} días`;
+                      if (hours > 0) return hours === 1 ? 'Hace 1 hora' : `Hace ${hours} horas`;
+                      if (minutes > 0) return minutes === 1 ? 'Hace 1 min' : `Hace ${minutes} min`;
+                      return 'Ahora mismo';
+                    };
+
+                    return (
+                      <div
+                        key={notification.id}
+                        onClick={() => handleNotificationClick(notification.id, notification.projectId)}
+                        className="px-6 py-4 hover:bg-indigo-50 cursor-pointer transition-colors group"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.type === 'proposal'
+                            ? 'bg-green-100 group-hover:bg-green-200'
+                            : 'bg-purple-100 group-hover:bg-purple-200'
+                            }`}>
+                            {notification.type === 'proposal' ? (
+                              <CheckCircle className="w-5 h-5 text-green-600" />
+                            ) : (
+                              <Send className="w-5 h-5 text-purple-600" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 mb-1">
+                              {notification.type === 'proposal'
+                                ? '✅ Presupuesto Aprobado'
+                                : '📦 Recursos Enviados'}
+                            </p>
+                            <p className="text-sm text-gray-600 mb-1">
+                              <span className="font-medium">{notification.projectName}</span>
+                              {notification.type === 'proposal'
+                                ? ' aprobó el presupuesto desde el portal'
+                                : ' confirmó el envío de recursos y pago'}
+                            </p>
+                            <p className="text-xs text-gray-400">{getTimeAgo(notification.date)}</p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 flex-shrink-0" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default App;
+```
