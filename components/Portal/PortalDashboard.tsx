@@ -596,5 +596,6 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                 )}
 
             </main>
-            );
+        </div>
+    );
 };
