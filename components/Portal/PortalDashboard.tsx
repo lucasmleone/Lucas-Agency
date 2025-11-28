@@ -46,10 +46,21 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
 
     const confirmAction = async () => {
         if (!confirmModal) return;
+        const currentAction = confirmModal.action;
         setLoading(true);
         setConfirmModal(null);
         try {
-            await onAction(confirmModal.action);
+            await onAction(currentAction);
+
+            // Show success message for resource confirmation
+            if (currentAction === 'confirm_resources') {
+                setConfirmModal({
+                    show: true,
+                    action: 'success',
+                    title: '✅ ¡Confirmación Recibida!',
+                    message: 'Hemos notificado al equipo. Revisaremos los archivos y comenzaremos el desarrollo a la brevedad. Te mantendremos informado.'
+                });
+            }
         } catch (error) {
             console.error('Error:', error);
             alert('Ocurrió un error al procesar la solicitud.');
@@ -71,22 +82,31 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
             {/* Custom Modal */}
             {confirmModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">{confirmModal.title}</h3>
-                        <p className="text-gray-600 mb-6">{confirmModal.message}</p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setConfirmModal(null)}
-                                className="px-4 py-2 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={confirmAction}
-                                className="px-4 py-2 rounded-lg bg-black text-white font-bold hover:bg-gray-800 transition-colors"
-                            >
-                                Confirmar
-                            </button>
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-3">{confirmModal.title}</h3>
+                        <p className="text-gray-600 mb-6 leading-relaxed">{confirmModal.message}</p>
+                        <div className={`flex gap-3 ${confirmModal.action === 'success' ? 'justify-center' : 'justify-end'}`}>
+                            {confirmModal.action !== 'success' ? (
+                                <>
+                                    <button
+                                        onClick={() => setConfirmModal(null)}
+                                        className="px-6 py-3 rounded-xl text-gray-600 font-bold hover:bg-gray-100 transition-colors border-2 border-gray-300">
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={confirmAction}
+                                        disabled={loading}
+                                        className="px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-lg">
+                                        {loading ? 'Procesando...' : 'Confirmar'}
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={() => setConfirmModal(null)}
+                                    className="px-8 py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition-colors shadow-lg">
+                                    Cerrar
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
