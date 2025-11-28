@@ -51,7 +51,7 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({ projects, logs = [] 
                     // Check if resources are confirmed
                     const hasConfirmedResources = logs.some(l =>
                         String(l.projectId) === String(p.id) &&
-                        l.message === 'Cliente confirmó envío de recursos y pago desde el Portal'
+                        l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal'
                     );
 
                     return (

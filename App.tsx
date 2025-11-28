@@ -628,7 +628,7 @@ function App() {
                                   <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-green-50 text-green-700 border border-green-200 flex items-center gap-1">
                                     ✓ Presupuesto Aceptado
                                   </span>
-                                  {logs.some(l => String(l.projectId) === String(project.id) && l.message === 'Cliente confirmó envío de recursos y pago desde el Portal') && (
+                                  {logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal') && (
                                     <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1 animate-pulse">
                                       ✓ Recursos Enviados
                                     </span>
