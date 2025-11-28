@@ -216,9 +216,20 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const [blockReason, setBlockReason] = useState('');
     const [showToast, setShowToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
 
+    // Helper to safely update project while preserving critical fields
+    const safeUpdateProject = (updates: Partial<Project>) => {
+        onUpdateProject({
+            ...updates,
+            // CRITICAL: Always preserve portal fields
+            portalToken: updates.portalToken ?? project.portalToken,
+            portalPin: updates.portalPin ?? project.portalPin,
+            portalEnabled: updates.portalEnabled ?? project.portalEnabled
+        });
+    };
+
     const handleStatusChange = (newStatus: ProjectStatus) => {
         setStatus(newStatus);
-        onUpdateProject({ status: newStatus });
+        safeUpdateProject({ status: newStatus });
         onAddLog(`Estado cambiado manualmente a: ${newStatus}`);
     };
 
@@ -267,7 +278,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const handleChecklistChange = (key: keyof typeof checklists) => {
         const newCheck = { ...checklists, [key]: !checklists[key] };
         setChecklists(newCheck);
-        onUpdateProject({ checklists: newCheck });
+        safeUpdateProject({ checklists: newCheck });
     };
 
     const handleDeadlineChange = (newDeadline: string) => {
@@ -275,7 +286,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         setGeneralData({ ...generalData, deadline: newDeadline });
 
         // Auto-save to backend immediately
-        onUpdateProject({ deadline: newDeadline });
+        safeUpdateProject({ deadline: newDeadline });
         onAddLog(`Fecha de entrega actualizada: ${formatDateForDisplay(newDeadline)}`);
     };
 
@@ -910,7 +921,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             </div>
                                             <button
                                                 onClick={() => {
-                                                    onUpdateProject({ blockedStatus: false, blockedReason: undefined, blockedSince: undefined });
+                                                    safeUpdateProject({ blockedStatus: false, blockedReason: undefined, blockedSince: undefined });
                                                     onAddLog('Proyecto desbloqueado.');
                                                 }}
                                                 className="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700"
@@ -956,7 +967,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                     </button>
                                                     <button
                                                         onClick={() => {
-                                                            onUpdateProject({
+                                                            safeUpdateProject({
                                                                 blockedStatus: true,
                                                                 blockedReason: blockReason,
                                                                 blockedSince: new Date().toISOString()
@@ -1063,7 +1074,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                         <button
                                             disabled={!checklists.depositPaid || (!checklists.infoReceived && !checklists.fillerAccepted)}
                                             onClick={() => {
-                                                onUpdateProject({ paymentStatus: PaymentStatus.DEPOSIT_PAID });
+                                                safeUpdateProject({ paymentStatus: PaymentStatus.DEPOSIT_PAID });
                                                 handleStageChange(ProjectStatus.PRODUCTION);
                                             }}
                                             className={`w-full px-4 py-3 rounded-lg font-bold text-sm flex items-center justify-center transition-colors ${(checklists.depositPaid && (checklists.infoReceived || checklists.fillerAccepted))
@@ -1120,7 +1131,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center">
                                                 <p className="font-bold mb-2">¡Proyecto Liberado!</p>
                                                 <p className="text-sm mb-4">Ya puedes entregar credenciales. El proyecto está en mantenimiento.</p>
-                                                <button onClick={() => { onUpdateProject({ paymentStatus: PaymentStatus.FULLY_PAID, status: ProjectStatus.DELIVERED }); onClose(); }} className="bg-green-700 text-white px-4 py-2 rounded text-sm font-bold">
+                                                <button onClick={() => { safeUpdateProject({ paymentStatus: PaymentStatus.FULLY_PAID, status: ProjectStatus.DELIVERED }); onClose(); }} className="bg-green-700 text-white px-4 py-2 rounded text-sm font-bold">
                                                     Cerrar Proyecto (Archivar)
                                                 </button>
                                             </div>
