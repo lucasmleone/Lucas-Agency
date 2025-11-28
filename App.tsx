@@ -615,12 +615,12 @@ function App() {
                             </div>
                             <div className="flex flex-col gap-2 items-end ml-3">
                               <span className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg whitespace-nowrap ${project.status === ProjectStatus.WAITING_RESOURCES && logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal')
-                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                                  : project.status === ProjectStatus.DELIVERED
-                                    ? 'bg-gray-50 text-gray-700 border border-gray-200'
-                                    : project.status === ProjectStatus.WAITING_RESOURCES
-                                      ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                                      : 'bg-blue-50 text-blue-700 border border-blue-200'
+                                ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                : project.status === ProjectStatus.DELIVERED
+                                  ? 'bg-gray-50 text-gray-700 border border-gray-200'
+                                  : project.status === ProjectStatus.WAITING_RESOURCES
+                                    ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                                    : 'bg-blue-50 text-blue-700 border border-blue-200'
                                 }`}>
                                 {project.status === ProjectStatus.WAITING_RESOURCES && logs.some(l => String(l.projectId) === String(project.id) && l.comment === 'Cliente confirmó envío de recursos y pago desde el Portal')
                                   ? 'Recursos Recibidos'
@@ -638,7 +638,17 @@ function App() {
                                       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                                       if (days === 0) return 'Hoy';
                                       if (days === 1) return 'Ayer';
+                                      if (days > 10) return '+10d';
                                       return `hace ${days}d`;
+                                    };
+
+                                    const getResourceStyle = (dateStr: string) => {
+                                      const diff = Date.now() - new Date(dateStr).getTime();
+                                      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+                                      if (days >= 7) return 'bg-red-50 text-red-700 border-red-200'; // Critical (> 1 week)
+                                      if (days >= 3) return 'bg-orange-50 text-orange-700 border-orange-200'; // Warning (> 3 days)
+                                      return 'bg-purple-50 text-purple-700 border-purple-200'; // Fresh
                                     };
 
                                     return (
@@ -647,7 +657,7 @@ function App() {
                                           ✓ Presupuesto Aceptado {proposalLog && <span className="opacity-75 font-normal">({getTimeAgo(proposalLog.createdAt)})</span>}
                                         </span>
                                         {resourcesLog && (
-                                          <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1 animate-pulse">
+                                          <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md border flex items-center gap-1 ${getResourceStyle(resourcesLog.createdAt)}`}>
                                             ✓ Recursos Enviados {<span className="opacity-75 font-normal">({getTimeAgo(resourcesLog.createdAt)})</span>}
                                           </span>
                                         )}
