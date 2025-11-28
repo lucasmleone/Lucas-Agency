@@ -912,6 +912,7 @@ function App() {
           onUpdateProject={handleUpdateProject}
           onDeleteProject={handleDeleteProject}
           onAddFinance={addFinance}
+          onRefreshData={refreshData}
         />
       )}
       {showPricingConfig && (

@@ -155,10 +155,11 @@ interface ProjectDetailProps {
     onDeleteProject: (id: string) => void;
     finances: FinanceRecord[];
     onAddFinance: (finance: Omit<FinanceRecord, 'id'>) => Promise<void>;
+    onRefreshData?: () => Promise<void>; // NEW: Refresh all data from DB
 }
 
 export const ProjectDetail: React.FC<ProjectDetailProps> = ({
-    project,
+    project: initialProject,
     client,
     logs,
     onClose,
@@ -167,7 +168,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     onUpdateProject,
     onDeleteProject,
     finances,
-    onAddFinance
+    onAddFinance,
+    onRefreshData
 }) => {
     // ... other hooks
 
@@ -1203,6 +1205,12 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     console.log('[ProjectDetail] onRefresh called with:', updates);
                                     // CRITICAL: Use safeUpdateProject to preserve portal fields
                                     safeUpdateProject(updates);
+                                    // CRITICAL: Refresh all data from DB to sync React state
+                                    if (onRefreshData) {
+                                        console.log('[ProjectDetail] Calling onRefreshData to sync state...');
+                                        await onRefreshData();
+                                        console.log('[ProjectDetail] onRefreshData completed');
+                                    }
                                 }
                             }}
                         />
