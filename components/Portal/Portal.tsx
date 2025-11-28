@@ -17,25 +17,25 @@ export const Portal: React.FC<PortalProps> = ({ token }) => {
     }, [token]);
 
     const checkPortal = async () => {
-        console.log('[Portal] Checking portal with token:', token);
+
         try {
             const url = `/api/portal/${token}/check`;
-            console.log('[Portal] Fetching:', url);
+
             const res = await fetch(url);
-            console.log('[Portal] Response status:', res.status);
+
 
             if (res.status === 410) {
-                console.log('[Portal] Portal expired');
+
                 setStatus('expired');
                 return;
             }
             if (!res.ok) {
-                console.log('[Portal] Portal check failed');
+
                 setStatus('error');
                 return;
             }
             const data = await res.json();
-            console.log('[Portal] Portal data:', data);
+
             setPortalData(data);
             setStatus('login');
         } catch (error) {
