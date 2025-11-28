@@ -171,7 +171,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     onAddFinance,
     onRefreshData
 }) => {
-    // ... other hooks
+    // Local state for project to track updates
+    const [project, setProject] = useState(initialProject);
 
     const { config: pricingConfig } = usePricingConfig();
 
