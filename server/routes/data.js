@@ -134,10 +134,7 @@ router.put('/projects/:id', async (req, res) => {
     };
 
     if (process.env.NODE_ENV === 'development' || true) { // Force log for debugging
-        console.log('[UPDATE PROJECT]', id, 'user:', req.user.id);
-        console.log('Body received:', JSON.stringify(p));
-        console.log('Deadline raw:', p.deadline || p.endDate);
-        console.log('Converted MySQL Date:', toMySQLDate(p.deadline || p.endDate));
+
     }
 
     try {

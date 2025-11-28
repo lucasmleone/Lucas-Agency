@@ -87,30 +87,11 @@ export const useProjects = () => {
     };
 
     const updateProject = async (id: string, updatedFields: Partial<Project>) => {
-        console.log('[useProjects] updateProject called with ID:', id);
-        console.log('[useProjects] updatedFields:', updatedFields);
-
         const project = projects.find(p => p.id === id);
-
-        console.log('[useProjects] Found project:', project ? 'YES' : 'NO');
-        console.log('[useProjects] All projects IDs:', projects.map(p => ({ id: p.id, type: typeof p.id })));
 
         if (project) {
             const updatedProject = { ...project, ...updatedFields };
-
-            // DEBUG: Log what we're sending
-            console.log('[useProjects] Updating project:', id);
-            console.log('[useProjects] Full updatedProject object:', updatedProject);
-            console.log('[useProjects] Portal fields being sent:', {
-                portalToken: updatedProject.portalToken,
-                portalPin: updatedProject.portalPin,
-                portalEnabled: updatedProject.portalEnabled
-            });
-
-            console.log('[useProjects] About to call apiService.updateProject...');
             await apiService.updateProject(updatedProject);
-            console.log('[useProjects] apiService.updateProject COMPLETED');
-
             setProjects(prev => prev.map(p => p.id === id ? updatedProject : p));
         } else {
             console.error('[useProjects] PROJECT NOT FOUND! Cannot update.');

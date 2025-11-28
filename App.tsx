@@ -117,10 +117,33 @@ import { Portal } from './components/Portal/Portal';
  * - Modales para CRUD operations
  */
 function App() {
-  // Check if accessing Portal route
-  const portalMatch = window.location.pathname.match(/^\/portal\/([a-f0-9-]+)$/);
-  if (portalMatch) {
-    return <Portal token={portalMatch[1]} />;
+  // SECURITY: Check if accessing Portal route
+  // Only allow valid UUID tokens, otherwise show error page (NOT login)
+  if (window.location.pathname.startsWith('/portal/')) {
+    const portalMatch = window.location.pathname.match(/^\/portal\/([a-f0-9-]{36})$/);
+    if (portalMatch) {
+      return <Portal token={portalMatch[1]} />;
+    } else {
+      // Invalid portal URL - show 404 error, NOT login page
+      return (
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock size={32} />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Portal No Disponible</h1>
+            <p className="text-gray-600 mb-6">
+              No pudimos encontrar este portal. Por favor verifique el enlace.
+            </p>
+            <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-500">
+              <strong>Lucas Agency</strong><br />
+              contacto@lucasagency.com<br />
+              +54 9 11 XXXX-XXXX
+            </div>
+          </div>
+        </div>
+      );
+    }
   }
 
   const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();

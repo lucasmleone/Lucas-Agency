@@ -58,11 +58,10 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                 portalEnabled: response.enabled
             };
 
-            console.log('[PortalAdmin] Portal generated:', updates);
-
             setProject(prev => ({ ...prev, ...updates }));
 
-            console.log('[PortalAdmin] Calling onRefresh with:', updates);
+            // CRITICAL: Pass updates to parent to trigger data refresh
+            // This ensures the ProjectDetail sees the new portal data
             await onRefresh(updates); // Refresh parent with updates
 
             setToast({ type: 'success', message: 'Acceso generado correctamente' });
@@ -121,7 +120,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
         e.preventDefault();
         if (!newMilestone.trim()) return;
         try {
-            console.log('Adding milestone:', newMilestone, 'to project:', project.id);
+
             await apiService.addMilestone(project.id, { title: newMilestone });
             setNewMilestone('');
             fetchMilestones();
