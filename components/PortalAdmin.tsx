@@ -102,11 +102,11 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
     const handleSaveConfig = async () => {
         setLoading(true);
         try {
-            await apiService.updatePortalConfig(project.id, {
+            // Use updateProject endpoint which already exists and handles drive_link and requirements
+            await onRefresh({
                 driveLink: config.driveLink,
                 requirements: config.requirements.split('\n').filter(r => r.trim())
             });
-            await onRefresh();
             setToast({ type: 'success', message: 'Configuración guardada' });
         } catch (error) {
             console.error('Error saving config:', error);
