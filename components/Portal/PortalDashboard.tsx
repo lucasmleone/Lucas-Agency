@@ -16,6 +16,7 @@ interface PortalDashboardProps {
 export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, milestones, onAction }) => {
     const [loading, setLoading] = useState(false);
     const [checkedRequirements, setCheckedRequirements] = useState<Set<number>>(new Set());
+    const [resourcesConfirmed, setResourcesConfirmed] = useState(false);
 
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; action: string; title: string; message: string } | null>(null);
 
@@ -52,8 +53,9 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
         try {
             await onAction(currentAction);
 
-            // Show success message for resource confirmation
+            // Show success message and mark resources as confirmed
             if (currentAction === 'confirm_resources') {
+                setResourcesConfirmed(true);
                 setConfirmModal({
                     show: true,
                     action: 'success',
@@ -237,7 +239,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                 )}
 
                 {/* STAGE 2: WAITING RESOURCES */}
-                {isWaitingResources && (
+                {isWaitingResources && !resourcesConfirmed && (
                     <div className="space-y-8 animate-fade-in">
                         <div className="text-center space-y-4">
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-600 rounded-full mb-4">
@@ -308,6 +310,81 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                         </>
                                     )}
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* STAGE 2b: RESOURCES CONFIRMED - UNDER REVIEW */}
+                {isWaitingResources && resourcesConfirmed && (
+                    <div className="space-y-8 animate-fade-in">
+                        <div className="text-center space-y-4">
+                            <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-100 text-purple-600 rounded-full mb-4">
+                                <CheckCircle size={40} />
+                            </div>
+                            <h2 className="text-3xl font-extrabold text-gray-900">Recursos en Revisión</h2>
+                            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                                Gracias por enviar los archivos. Nuestro equipo los está revisando y comenzaremos el desarrollo pronto.
+                            </p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 border border-purple-200">
+                            <div className="max-w-2xl mx-auto space-y-6">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                        1
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 mb-1">Revisión de Archivos</h3>
+                                        <p className="text-gray-600 text-sm">
+                                            Verificamos que todos los materiales estén completos y sean correctos.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                        2
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-700 mb-1">Inicio de Desarrollo</h3>
+                                        <p className="text-gray-500 text-sm">
+                                            Una vez aprobados, comenzaremos a trabajar en tu proyecto.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                        3
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-700 mb-1">Actualizaciones Regulares</h3>
+                                        <p className="text-gray-500 text-sm">
+                                            Te mantendremos informado del progreso a través de este portal.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                            <div className="flex gap-4">
+                                <div className="text-blue-600 flex-shrink-0">
+                                    <AlertCircle size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-blue-900 mb-1">¿Necesitas agregar algo?</h4>
+                                    <p className="text-blue-700 text-sm">
+                                        Si olvidaste algún archivo o necesitas hacer cambios, puedes subirlos a la{' '}
+                                        <a
+                                            href={project.driveLink || '#'}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline font-bold hover:text-blue-900">
+                                            carpeta compartida
+                                        </a>
+                                        {' '}y te contactaremos si hay algún problema.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
