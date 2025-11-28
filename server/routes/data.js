@@ -44,6 +44,13 @@ router.get('/projects', async (req, res) => {
             discountType: p.discount_type,
             finalPrice: p.final_price,
             pricingNotes: p.pricing_notes,
+            // Portal fields
+            portalToken: p.portal_token,
+            portalPin: p.portal_pin,
+            portalEnabled: Boolean(p.portal_enabled),
+            portalExpiresAt: p.portal_expires_at,
+            driveLink: p.drive_link,
+            requirements: typeof p.requirements === 'string' ? JSON.parse(p.requirements) : p.requirements,
             // Maintenance
             nextMaintenanceDate: p.nextMaintenanceDate || (() => {
                 if (!p.maintenance_tasks_json) return undefined;
