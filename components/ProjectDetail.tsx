@@ -176,12 +176,6 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
     // CRITICAL: Sync local state when parent refreshes data
     useEffect(() => {
-        console.log('[ProjectDetail] initialProject changed, syncing local state');
-        console.log('[ProjectDetail] New portal data from parent:', {
-            portalToken: initialProject.portalToken,
-            portalPin: initialProject.portalPin,
-            portalEnabled: initialProject.portalEnabled
-        });
         setProject(initialProject);
     }, [initialProject]);
 
@@ -240,16 +234,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             portalEnabled: updates.portalEnabled ?? project.portalEnabled
         };
 
-        console.log('[ProjectDetail] safeUpdateProject - input:', updates);
-        console.log('[ProjectDetail] safeUpdateProject - merged:', mergedUpdates);
-        console.log('[ProjectDetail] safeUpdateProject - current project portal data:', {
-            portalToken: project.portalToken,
-            portalPin: project.portalPin,
-            portalEnabled: project.portalEnabled
-        });
-
         await onUpdateProject(mergedUpdates);
-        console.log('[ProjectDetail] safe UpdateProject - onUpdateProject COMPLETED');
     };
 
     const handleStatusChange = (newStatus: ProjectStatus) => {
@@ -1215,14 +1200,11 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             project={project}
                             onRefresh={async (updates) => {
                                 if (updates) {
-                                    console.log('[ProjectDetail] onRefresh called with:', updates);
                                     // CRITICAL: Use safeUpdateProject to preserve portal fields
                                     await safeUpdateProject(updates); // ← WAIT for save to complete!
                                     // CRITICAL: Refresh all data from DB to sync React state
                                     if (onRefreshData) {
-                                        console.log('[ProjectDetail] Calling onRefreshData to sync state...');
                                         await onRefreshData();
-                                        console.log('[ProjectDetail] onRefreshData completed');
                                     }
                                 }
                             }}

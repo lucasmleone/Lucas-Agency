@@ -101,7 +101,7 @@ router.post('/:id/complete-task', verifyToken, async (req, res) => {
     const { id } = req.params;
     const { monthIndex } = req.body;
 
-    console.log('[COMPLETE-TASK] Received:', { id, monthIndex });
+
 
     try {
         // Get current task
@@ -117,11 +117,7 @@ router.post('/:id/complete-task', verifyToken, async (req, res) => {
         const monthlyTasks = typeof rows[0].monthly_tasks === 'string'
             ? JSON.parse(rows[0].monthly_tasks || '[]')
             : (rows[0].monthly_tasks || []);
-        console.log('[COMPLETE-TASK] Before:', {
-            taskCount: monthlyTasks.length,
-            monthIndexTask: monthlyTasks[monthIndex]?.month,
-            completed: monthlyTasks[monthIndex]?.completed
-        });
+
 
         if (monthlyTasks[monthIndex]) {
             monthlyTasks[monthIndex].completed = true;
@@ -132,7 +128,7 @@ router.post('/:id/complete-task', verifyToken, async (req, res) => {
             // Logic: If we are completing the last available month, deactivate maintenance.
             // This applies to both the initial 2-month period and any manually added periods.
             if (monthlyTasks[monthIndex].month === maxMonth) {
-                console.log('[COMPLETE-TASK] Last month completed. Deactivating maintenance.');
+
 
                 // Update project status to inactive
                 await pool.query(
@@ -148,14 +144,14 @@ router.post('/:id/complete-task', verifyToken, async (req, res) => {
             }
         }
 
-        console.log('[COMPLETE-TASK] After:', { taskCount: monthlyTasks.length });
+
 
         await pool.query(
             'UPDATE maintenance_tasks SET monthly_tasks = ? WHERE id = ?',
             [JSON.stringify(monthlyTasks), id]
         );
 
-        console.log('[COMPLETE-TASK] Saved successfully');
+
         res.json({ success: true });
     } catch (err) {
         console.error('Error completing task:', err);
