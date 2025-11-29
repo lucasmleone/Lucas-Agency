@@ -163,7 +163,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
         setToast({ type: 'success', message: 'Copiado al portapapeles' });
     };
 
-    const portalUrl = `${window.location.origin} /portal/${project.portalToken} `;
+    const portalUrl = `${window.location.origin}/portal/${project.portalToken}`;
 
     return (
         <div className="space-y-8">

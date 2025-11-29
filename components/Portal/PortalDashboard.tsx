@@ -632,6 +632,48 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                             Ha sido un placer trabajar contigo. Tu proyecto ha sido entregado exitosamente.
                         </p>
 
+                        {/* Premium Website Showcase */}
+                        {project.deliveryData?.finalUrl && (
+                            <div className="mb-12 animate-slide-up text-left max-w-4xl mx-auto">
+                                <div className="relative group cursor-pointer" onClick={() => window.open(project.deliveryData?.finalUrl, '_blank')}>
+                                    {/* Glow Effect */}
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+
+                                    <div className="relative bg-white rounded-xl overflow-hidden shadow-2xl border border-gray-100">
+                                        {/* Browser Bar */}
+                                        <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center gap-4">
+                                            <div className="flex gap-1.5">
+                                                <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                                                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                                            </div>
+                                            <div className="flex-1 bg-white rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-400 flex items-center justify-center font-mono truncate">
+                                                <Lock size={10} className="mr-1.5 text-green-500" />
+                                                {project.deliveryData.finalUrl}
+                                            </div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="p-8 md:p-12 text-center bg-gradient-to-b from-white to-gray-50">
+                                            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                                <Globe size={40} />
+                                            </div>
+                                            <h3 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
+                                                Esta es tu nueva web
+                                            </h3>
+                                            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                                                Diseñada profesionalmente, optimizada y lista para el mundo.
+                                            </p>
+
+                                            <button className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-black hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 mx-auto">
+                                                Visitar Sitio Web <ExternalLink size={20} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Credentials Section */}
                         {(project.deliveryData?.webUrl || project.deliveryData?.emailUrl) && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
