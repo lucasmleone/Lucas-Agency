@@ -65,6 +65,7 @@ export interface DeliveryData {
   emailUser?: string;
   emailPass?: string;
   reportLink?: string;
+  finalUrl?: string;
 }
 
 export interface Project {

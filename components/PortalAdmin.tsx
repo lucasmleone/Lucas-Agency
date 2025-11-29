@@ -258,6 +258,35 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                 </div>
             </div>
 
+            {/* Final Web URL */}
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Datos de la Web (Pública)</h3>
+                <p className="text-sm text-gray-500 mb-4">Esta es la URL final que se mostrará al cliente con un diseño destacado.</p>
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">URL Final del Sitio</label>
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                            <input
+                                type="url"
+                                value={project.deliveryData?.finalUrl || ''}
+                                onChange={e => setProject({ ...project, deliveryData: { ...project.deliveryData, finalUrl: e.target.value } })}
+                                placeholder="https://mi-sitio-increible.com"
+                                className="w-full border border-gray-300 rounded-lg pl-10 p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                        </div>
+                        <a
+                            href={project.deliveryData?.finalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`p-2 rounded-lg border border-gray-300 flex items-center justify-center ${project.deliveryData?.finalUrl ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-300 cursor-not-allowed'}`}
+                        >
+                            <ExternalLink size={20} />
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             {/* Delivery Data */}
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Datos de Entrega (Credenciales)</h3>
