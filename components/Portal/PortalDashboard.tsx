@@ -758,11 +758,9 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
             <div className="bg-yellow-50 p-4 rounded-xl inline-block text-yellow-800 text-sm max-w-md">
                 <strong>Nota:</strong> Este enlace de acceso caducará automáticamente en 10 días por seguridad.
             </div>
-        </div>
-    )
-}
 
-                    </main >
+
+        </main >
         </div >
     );
 };
