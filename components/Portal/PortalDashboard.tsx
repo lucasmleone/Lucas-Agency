@@ -616,148 +616,153 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                         </a>
                                     </div>
                                 </div>
-                        )}
                             </div>
+                    </>
                 )}
+        </div>
+    )
+}
 
-                        {/* STAGE 4: FINISHED */}
-                        {isFinished && (
-                            <div className="space-y-8 animate-fade-in text-center">
-                                <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 text-green-600 rounded-full mb-4 animate-bounce">
-                                    <CheckCircle size={48} />
+{/* STAGE 4: FINISHED */ }
+{
+    isFinished && (
+        <div className="space-y-8 animate-fade-in text-center">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 text-green-600 rounded-full mb-4 animate-bounce">
+                <CheckCircle size={48} />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900">¡Proyecto Terminado!</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Ha sido un placer trabajar contigo. Tu proyecto ha sido entregado exitosamente.
+            </p>
+
+            {/* Credentials Section */}
+            {(project.deliveryData?.webUrl || project.deliveryData?.emailUrl) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
+                    {/* Web Access */}
+                    {project.deliveryData?.webUrl && (
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                            <div className="flex items-center gap-3 mb-4 text-blue-600">
+                                <Globe size={24} />
+                                <h3 className="font-bold text-gray-900">Acceso Web</h3>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                                <div>
+                                    <span className="block text-gray-500 mb-1">URL de Acceso</span>
+                                    <a href={project.deliveryData.webUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                        {project.deliveryData.webUrl}
+                                    </a>
                                 </div>
-                                <h2 className="text-4xl font-bold text-gray-900">¡Proyecto Terminado!</h2>
-                                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                                    Ha sido un placer trabajar contigo. Tu proyecto ha sido entregado exitosamente.
-                                </p>
-
-                                {/* Credentials Section */}
-                                {(project.deliveryData?.webUrl || project.deliveryData?.emailUrl) && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
-                                        {/* Web Access */}
-                                        {project.deliveryData?.webUrl && (
-                                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                                                <div className="flex items-center gap-3 mb-4 text-blue-600">
-                                                    <Globe size={24} />
-                                                    <h3 className="font-bold text-gray-900">Acceso Web</h3>
-                                                </div>
-                                                <div className="space-y-3 text-sm">
-                                                    <div>
-                                                        <span className="block text-gray-500 mb-1">URL de Acceso</span>
-                                                        <a href={project.deliveryData.webUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
-                                                            {project.deliveryData.webUrl}
-                                                        </a>
-                                                    </div>
-                                                    {project.deliveryData.webUser && (
-                                                        <div>
-                                                            <span className="block text-gray-500 mb-1">Usuario</span>
-                                                            <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                                {project.deliveryData.webUser}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {project.deliveryData.webPass && (
-                                                        <div>
-                                                            <span className="block text-gray-500 mb-1">Contraseña</span>
-                                                            <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                                {project.deliveryData.webPass}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Email Access */}
-                                        {project.deliveryData?.emailUrl && (
-                                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                                                <div className="flex items-center gap-3 mb-4 text-purple-600">
-                                                    <Mail size={24} />
-                                                    <h3 className="font-bold text-gray-900">Acceso Correo</h3>
-                                                </div>
-                                                <div className="space-y-3 text-sm">
-                                                    <div>
-                                                        <span className="block text-gray-500 mb-1">URL Webmail</span>
-                                                        <a href={project.deliveryData.emailUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
-                                                            {project.deliveryData.emailUrl}
-                                                        </a>
-                                                    </div>
-                                                    {project.deliveryData.emailUser && (
-                                                        <div>
-                                                            <span className="block text-gray-500 mb-1">Correo</span>
-                                                            <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                                {project.deliveryData.emailUser}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {project.deliveryData.emailPass && (
-                                                        <div>
-                                                            <span className="block text-gray-500 mb-1">Contraseña</span>
-                                                            <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                                {project.deliveryData.emailPass}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Drive/Report Link */}
-                                {project.deliveryData?.reportLink && (
-                                    <div className="max-w-4xl mx-auto mt-6 text-left">
-                                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between gap-4">
-                                            <div className="flex items-center gap-3 text-green-600">
-                                                <FileText size={24} />
-                                                <div>
-                                                    <h3 className="font-bold text-gray-900">Informe Final / Entregables</h3>
-                                                    <p className="text-sm text-gray-500">Enlace a Google Drive o PDF</p>
-                                                </div>
-                                            </div>
-                                            <a
-                                                href={project.deliveryData.reportLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium hover:bg-green-100 transition-colors flex items-center gap-2"
-                                            >
-                                                <ExternalLink size={18} /> Abrir
-                                            </a>
+                                {project.deliveryData.webUser && (
+                                    <div>
+                                        <span className="block text-gray-500 mb-1">Usuario</span>
+                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                            {project.deliveryData.webUser}
                                         </div>
                                     </div>
                                 )}
-
-                                <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto mt-8">
-                                    <h3 className="font-bold text-gray-900 mb-4">Acciones</h3>
-                                    <button
-                                        onClick={() => {
-                                            const data = [
-                                                '--- CREDENCIALES DEL PROYECTO ---',
-                                                '',
-                                                project.deliveryData?.webUrl ? `[ACCESO WEB]\nURL: ${project.deliveryData.webUrl} \nUsuario: ${project.deliveryData.webUser || ''} \nContraseña: ${project.deliveryData.webPass || ''} ` : '',
-                                                '',
-                                                project.deliveryData?.emailUrl ? `[ACCESO CORREO]\nURL: ${project.deliveryData.emailUrl} \nUsuario: ${project.deliveryData.emailUser || ''} \nContraseña: ${project.deliveryData.emailPass || ''} ` : '',
-                                                '',
-                                                project.deliveryData?.reportLink ? `[INFORME FINAL]\nLink: ${project.deliveryData.reportLink} ` : ''
-                                            ].filter(Boolean).join('\n');
-
-                                            navigator.clipboard.writeText(data).then(() => {
-                                                alert('Datos copiados al portapapeles');
-                                            });
-                                        }}
-                                        className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
-                                    >
-                                        <Copy size={20} /> Copiar Todos los Datos
-                                    </button>
-                                </div>
-
-                                <div className="bg-yellow-50 p-4 rounded-xl inline-block text-yellow-800 text-sm max-w-md">
-                                    <strong>Nota:</strong> Este enlace de acceso caducará automáticamente en 10 días por seguridad.
-                                </div>
+                                {project.deliveryData.webPass && (
+                                    <div>
+                                        <span className="block text-gray-500 mb-1">Contraseña</span>
+                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                            {project.deliveryData.webPass}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                    </main>
+                    {/* Email Access */}
+                    {project.deliveryData?.emailUrl && (
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                            <div className="flex items-center gap-3 mb-4 text-purple-600">
+                                <Mail size={24} />
+                                <h3 className="font-bold text-gray-900">Acceso Correo</h3>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                                <div>
+                                    <span className="block text-gray-500 mb-1">URL Webmail</span>
+                                    <a href={project.deliveryData.emailUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                        {project.deliveryData.emailUrl}
+                                    </a>
+                                </div>
+                                {project.deliveryData.emailUser && (
+                                    <div>
+                                        <span className="block text-gray-500 mb-1">Correo</span>
+                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                            {project.deliveryData.emailUser}
+                                        </div>
+                                    </div>
+                                )}
+                                {project.deliveryData.emailPass && (
+                                    <div>
+                                        <span className="block text-gray-500 mb-1">Contraseña</span>
+                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                            {project.deliveryData.emailPass}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Drive/Report Link */}
+            {project.deliveryData?.reportLink && (
+                <div className="max-w-4xl mx-auto mt-6 text-left">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 text-green-600">
+                            <FileText size={24} />
+                            <div>
+                                <h3 className="font-bold text-gray-900">Informe Final / Entregables</h3>
+                                <p className="text-sm text-gray-500">Enlace a Google Drive o PDF</p>
+                            </div>
+                        </div>
+                        <a
+                            href={project.deliveryData.reportLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium hover:bg-green-100 transition-colors flex items-center gap-2"
+                        >
+                            <ExternalLink size={18} /> Abrir
+                        </a>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto mt-8">
+                <h3 className="font-bold text-gray-900 mb-4">Acciones</h3>
+                <button
+                    onClick={() => {
+                        const data = [
+                            '--- CREDENCIALES DEL PROYECTO ---',
+                            '',
+                            project.deliveryData?.webUrl ? `[ACCESO WEB]\nURL: ${project.deliveryData.webUrl} \nUsuario: ${project.deliveryData.webUser || ''} \nContraseña: ${project.deliveryData.webPass || ''} ` : '',
+                            '',
+                            project.deliveryData?.emailUrl ? `[ACCESO CORREO]\nURL: ${project.deliveryData.emailUrl} \nUsuario: ${project.deliveryData.emailUser || ''} \nContraseña: ${project.deliveryData.emailPass || ''} ` : '',
+                            '',
+                            project.deliveryData?.reportLink ? `[INFORME FINAL]\nLink: ${project.deliveryData.reportLink} ` : ''
+                        ].filter(Boolean).join('\n');
+
+                        navigator.clipboard.writeText(data).then(() => {
+                            alert('Datos copiados al portapapeles');
+                        });
+                    }}
+                    className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                >
+                    <Copy size={20} /> Copiar Todos los Datos
+                </button>
+            </div>
+
+            <div className="bg-yellow-50 p-4 rounded-xl inline-block text-yellow-800 text-sm max-w-md">
+                <strong>Nota:</strong> Este enlace de acceso caducará automáticamente en 10 días por seguridad.
+            </div>
         </div>
+    )
+}
+
+                    </main >
+        </div >
     );
 };
