@@ -106,7 +106,8 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
             // onRefresh now handles updating the project with the new config
             await onRefresh({
                 driveLink: config.driveLink,
-                requirements: config.requirements.split('\n').filter(r => r.trim())
+                requirements: config.requirements.split('\n').filter(r => r.trim()),
+                deliveryData: project.deliveryData
             });
             setToast({ type: 'success', message: 'Configuración guardada' });
         } catch (error) {
