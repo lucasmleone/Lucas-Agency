@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Project, Milestone } from '../types';
 import { apiService } from '../services/apiService';
-import { Lock, Unlock, RefreshCw, Save, Plus, Trash2, GripVertical, CheckCircle, Circle, PlayCircle, ExternalLink, Copy } from 'lucide-react';
+import { Lock, Unlock, RefreshCw, Save, Plus, Trash2, GripVertical, CheckCircle, Circle, PlayCircle, ExternalLink, Copy, X, Globe } from 'lucide-react';
 import { Toast } from './Toast';
 
 interface PortalAdminProps {
@@ -161,7 +162,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
         setToast({ type: 'success', message: 'Copiado al portapapeles' });
     };
 
-    const portalUrl = `${window.location.origin}/portal/${project.portalToken}`;
+    const portalUrl = `${window.location.origin} /portal/${project.portalToken} `;
 
     return (
         <div className="space-y-8">
@@ -172,7 +173,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                         <h3 className="text-lg font-bold text-gray-900">Control de Acceso</h3>
                         <p className="text-sm text-gray-500">Gestiona el enlace público y el PIN de seguridad.</p>
                     </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-bold ${project.portalEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    <div className={`px - 3 py - 1 rounded - full text - xs font - bold ${project.portalEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'} `}>
                         {project.portalEnabled ? 'ACTIVO' : 'INACTIVO'}
                     </div>
                 </div>
@@ -279,7 +280,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                             href={project.deliveryData?.finalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`p-2 rounded-lg border border-gray-300 flex items-center justify-center ${project.deliveryData?.finalUrl ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-300 cursor-not-allowed'}`}
+                            className={`p - 2 rounded - lg border border - gray - 300 flex items - center justify - center ${project.deliveryData?.finalUrl ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-300 cursor-not-allowed'} `}
                         >
                             <ExternalLink size={20} />
                         </a>
@@ -416,12 +417,12 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
 
                 <div className="space-y-2 mb-4">
                     {milestones.map((milestone, index) => (
-                        <div key={milestone.id} className={`flex items-center gap-3 p-3 rounded-lg border ${milestone.status === 'active' ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'}`}>
+                        <div key={milestone.id} className={`flex items - center gap - 3 p - 3 rounded - lg border ${milestone.status === 'active' ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'} `}>
                             <div className="cursor-move text-gray-400">
                                 <GripVertical size={16} />
                             </div>
                             <div className="flex-1">
-                                <p className={`font-medium ${milestone.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                                <p className={`font - medium ${milestone.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-900'} `}>
                                     {milestone.title}
                                 </p>
                             </div>
