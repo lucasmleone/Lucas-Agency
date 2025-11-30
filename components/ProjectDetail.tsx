@@ -183,7 +183,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
     const { config: pricingConfig } = usePricingConfig();
 
-    const [activeTab, setActiveTab] = useState<'workflow' | 'data' | 'logs' | 'finance' | 'maintenance' | 'notes' | 'portal'>('workflow');
+    const [activeTab, setActiveTab] = useState<'workflow' | 'data' | 'pricing' | 'logs' | 'finance' | 'maintenance' | 'notes' | 'portal'>('workflow');
     const [status, setStatus] = useState(project.status);
     const [discoveryData, setDiscoveryData] = useState(project.discoveryData || {
         buyerPersona: '', competitors: '', references: '', materialStatus: '', currentUrl: '', objective: '', materials: ''
@@ -548,13 +548,17 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     <button onClick={() => setActiveTab('workflow')} className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-t-lg ${activeTab === 'workflow' ? 'bg-white text-gray-900 border-t border-x border-gray-200' : 'text-gray-500 hover:bg-gray-200'}`}>
                         Flujo de Trabajo
                     </button>
-                    {['data', 'logs', 'finance', 'notes'].map((tabKey) => {
+                    {['data', 'pricing', 'logs', 'finance', 'notes'].map((tabKey) => {
                         let label = '';
                         let icon = null;
                         switch (tabKey) {
                             case 'data':
                                 label = 'Datos y Edición';
                                 icon = <Settings className="w-4 h-4 mr-2" />;
+                                break;
+                            case 'pricing':
+                                label = 'Cotización';
+                                icon = <DollarSign className="w-4 h-4 mr-2" />;
                                 break;
                             case 'logs':
                                 label = 'Bitácora';
@@ -773,231 +777,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 </div>
                             </div>
 
-                            {/* Section 1.5: Pricing & Quotation */}
-                            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 border-2 border-green-200 rounded-xl shadow-sm">
-                                <h4 className="text-sm font-bold text-green-800 uppercase mb-4 pb-2 border-b border-green-300 flex items-center">
-                                    <DollarSign className="w-4 h-4 mr-2" /> Cotización y Pricing
-                                </h4>
 
-                                <div className="space-y-5">
-                                    {/* Base Price Info */}
-                                    <div className="bg-white p-4 rounded-lg border border-green-200">
-                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <span className="text-gray-600 font-medium">Plan Base:</span>
-                                                <p className="font-bold text-gray-900">{getPlanDisplayName(generalData.planType)}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-600 font-medium">Precio Base:</span>
-                                                <p className="font-bold text-gray-900 text-lg">{formatCurrency(pricingData.basePrice)}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Custom Price */}
-                                    <div>
-                                        <label className="flex items-center space-x-2 mb-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={pricingData.customPrice > 0}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        // Set initial custom price to base price or 0
-                                                        setPricingData({ ...pricingData, customPrice: pricingData.basePrice });
-                                                    } else {
-                                                        setPricingData({ ...pricingData, customPrice: 0 });
-                                                    }
-                                                }}
-                                                className="rounded text-green-600"
-                                            />
-                                            <span className="text-sm font-bold text-gray-700">Precio Personalizado (Cotizado)</span>
-                                        </label>
-                                        {pricingData.customPrice > 0 || pricingData.basePrice === 0 ? (
-                                            <div className="flex items-center space-x-2">
-                                                <span className="text-gray-600">$</span>
-                                                <input
-                                                    type="number"
-                                                    value={pricingData.customPrice || ''}
-                                                    onChange={(e) => setPricingData({ ...pricingData, customPrice: Number(e.target.value) || 0 })}
-                                                    className="flex-1 border border-gray-300 rounded p-2 text-sm"
-                                                    placeholder="Ingrese precio cotizado"
-                                                    min="0"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <p className="text-xs text-gray-500 italic">Marque la casilla para establecer un precio personalizado</p>
-                                        )}
-                                    </div>
-
-                                    {/* Discount */}
-                                    <div>
-                                        <label className="flex items-center space-x-2 mb-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={pricingData.discount > 0}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        // Set initial discount value when checked
-                                                        setPricingData({ ...pricingData, discount: 10 });
-                                                    } else {
-                                                        // Clear discount when unchecked
-                                                        setPricingData({ ...pricingData, discount: 0 });
-                                                    }
-                                                }}
-                                                className="rounded text-green-600"
-                                            />
-                                            <span className="text-sm font-bold text-gray-700">Aplicar Descuento</span>
-                                        </label>
-                                        {pricingData.discount > 0 ? (
-                                            <div className="space-y-3">
-                                                <div className="flex gap-4">
-                                                    <label className="flex items-center space-x-2">
-                                                        <input
-                                                            type="radio"
-                                                            checked={pricingData.discountType === 'percentage'}
-                                                            onChange={() => setPricingData({ ...pricingData, discountType: 'percentage' })}
-                                                            className="text-green-600"
-                                                        />
-                                                        <span className="text-sm">Porcentaje (%)</span>
-                                                    </label>
-                                                    <label className="flex items-center space-x-2">
-                                                        <input
-                                                            type="radio"
-                                                            checked={pricingData.discountType === 'fixed'}
-                                                            onChange={() => setPricingData({ ...pricingData, discountType: 'fixed' })}
-                                                            className="text-green-600"
-                                                        />
-                                                        <span className="text-sm">Monto Fijo ($)</span>
-                                                    </label>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <input
-                                                        type="number"
-                                                        value={pricingData.discount}
-                                                        onChange={(e) => setPricingData({ ...pricingData, discount: Number(e.target.value) || 0 })}
-                                                        className="flex-1 border border-gray-300 rounded p-2 text-sm"
-                                                        placeholder={pricingData.discountType === 'percentage' ? '10' : '50'}
-                                                        min="0"
-                                                        max={pricingData.discountType === 'percentage' ? 100 : undefined}
-                                                    />
-                                                    <span className="text-gray-600 font-bold">
-                                                        {pricingData.discountType === 'percentage' ? '%' : '$'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p className="text-xs text-gray-500 italic">Marque la casilla para aplicar un descuento</p>
-                                        )}
-                                    </div>
-
-                                    {/* Pricing Notes */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Notas de Cotización</label>
-                                        <textarea
-                                            rows={2}
-                                            value={pricingData.pricingNotes}
-                                            onChange={(e) => setPricingData({ ...pricingData, pricingNotes: e.target.value })}
-                                            className="w-full border border-gray-300 rounded p-2 text-sm"
-                                            placeholder="Ej: Descuento por cliente frecuente, promoción especial, etc."
-                                        />
-                                    </div>
-
-                                    {/* Add-ons Section */}
-                                    <div className="border-t border-green-200 pt-4 mt-4">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <h5 className="text-sm font-bold text-green-800 uppercase flex items-center">
-                                                <Sparkles className="w-4 h-4 mr-2" /> Añadidos (Add-ons)
-                                            </h5>
-                                            <button
-                                                onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }}
-                                                className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 font-bold flex items-center"
-                                            >
-                                                <Plus className="w-3 h-3 mr-1" /> Gestionar Librería
-                                            </button>
-                                        </div>
-
-                                        {projectAddOns.length === 0 ? (
-                                            <p className="text-xs text-gray-500 italic mb-2">No hay añadidos en este proyecto.</p>
-                                        ) : (
-                                            <div className="space-y-2 mb-3">
-                                                {projectAddOns.map(addon => (
-                                                    <div key={addon.id} className="flex justify-between items-center bg-white p-2 rounded border border-green-100">
-                                                        <div>
-                                                            <p className="text-sm font-bold text-gray-800">{addon.name}</p>
-                                                            {addon.description && <p className="text-xs text-gray-500">{addon.description}</p>}
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="font-bold text-green-700">{formatCurrency(addon.price)}</span>
-                                                            <button onClick={() => handleRemoveAddOn(addon.id)} className="text-gray-400 hover:text-red-500">
-                                                                <X size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Final Price Calculation */}
-                                    <div className="mt-6 pt-4 border-t-2 border-green-200">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-700 font-bold">Precio Final Estimado:</span>
-                                            <div className="text-right">
-                                                <p className="text-2xl font-black text-green-700">
-                                                    {formatCurrency(
-                                                        (pricingData.customPrice > 0 ? pricingData.customPrice : pricingData.basePrice)
-                                                        - (pricingData.discountType === 'percentage'
-                                                            ? ((pricingData.customPrice || pricingData.basePrice) * (pricingData.discount / 100))
-                                                            : pricingData.discount)
-                                                        + addOnsTotal
-                                                    )}
-                                                </p>
-                                                {addOnsTotal > 0 && (
-                                                    <p className="text-xs text-green-600 font-medium">
-                                                        (Incluye {formatCurrency(addOnsTotal)} en añadidos)
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-1 text-right">
-                                            * Este es el valor que se mostrará en la propuesta.
-                                        </p>
-                                    </div>
-
-                                    {/* Final Price Display */}
-                                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-5 rounded-xl text-white shadow-lg">
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <p className="text-xs font-medium opacity-90 uppercase tracking-wide">Precio Final</p>
-                                                <p className="text-3xl font-black mt-1">
-                                                    {formatCurrency(calculateFinalPrice(
-                                                        pricingData.basePrice,
-                                                        pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
-                                                        pricingData.discount,
-                                                        pricingData.discountType
-                                                    ))}
-                                                </p>
-                                            </div>
-                                            {(pricingData.discount > 0) && (
-                                                <div className="text-right">
-                                                    <p className="text-xs opacity-90">Ahorro</p>
-                                                    <p className="text-lg font-bold">
-                                                        -{formatCurrency(
-                                                            (pricingData.customPrice > 0 ? pricingData.customPrice : pricingData.basePrice) -
-                                                            calculateFinalPrice(
-                                                                pricingData.basePrice,
-                                                                pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
-                                                                pricingData.discount,
-                                                                pricingData.discountType
-                                                            )
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             {/* Section 2: Discovery Data */}
                             <div className="bg-white p-6 border rounded-xl shadow-sm">
