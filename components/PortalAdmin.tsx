@@ -550,24 +550,18 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                 />
             )}
 
-            {/* Sticky Save Bar */}
-            <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-between items-center z-10 -mx-4 sm:-mx-8 -mb-4 sm:-mb-8 mt-8">
-                <div className="text-sm text-gray-500 hidden sm:block">
-                    Recuerda guardar tus cambios antes de salir.
-                </div>
+            {/* Floating Save Button */}
+            <div className="fixed bottom-8 right-8 z-50">
                 <button
                     onClick={handleSaveAll}
                     disabled={loading}
-                    className="w-full sm:w-auto bg-gray-900 text-white px-8 py-3 rounded-xl text-base font-bold hover:bg-black shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                    className="bg-gray-900 text-white pl-6 pr-5 py-4 rounded-full shadow-2xl hover:shadow-xl hover:scale-105 transition-all flex items-center gap-3 font-bold text-base"
                 >
+                    <span>Guardar</span>
                     {loading ? (
-                        <>
-                            <RefreshCw className="animate-spin" size={20} /> Guardando...
-                        </>
+                        <RefreshCw className="animate-spin" size={20} />
                     ) : (
-                        <>
-                            <Save size={20} /> Guardar Todos los Cambios
-                        </>
+                        <Save size={20} />
                     )}
                 </button>
             </div>
