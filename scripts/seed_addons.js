@@ -25,7 +25,7 @@ async function seedAddons() {
     const dbConfig = {
         host: process.env.DB_HOST || 'mysql',
         user: process.env.DB_USER || 'user',
-        password: process.env.DB_PASSWORD || 'userpassword',
+        password: process.env.DB_PASSWORD || process.env.DB_PASS || 'userpassword',
         database: process.env.DB_NAME || 'agency_flow',
     };
 
@@ -37,20 +37,27 @@ async function seedAddons() {
         // await connection.execute('DELETE FROM add_on_templates');
         // console.log('🗑️ Cleared existing templates.');
 
+        // Get a valid user ID for the templates (required field)
+        const [users] = await connection.execute('SELECT id FROM users LIMIT 1');
+        if (users.length === 0) {
+            throw new Error('No users found in database. Cannot create templates without user_id.');
+        }
+        const userId = users[0].id;
+
         for (const t of templates) {
             // Check if exists
             const [rows] = await connection.execute('SELECT id FROM add_on_templates WHERE name = ?', [t.name]);
 
             if (rows.length === 0) {
                 await connection.execute(
-                    'INSERT INTO add_on_templates (name, price, description) VALUES (?, ?, ?)',
-                    [t.name, t.price, t.description]
+                    'INSERT INTO add_on_templates (name, default_price, description, user_id) VALUES (?, ?, ?, ?)',
+                    [t.name, t.price, t.description, userId]
                 );
                 console.log(`➕ Added: ${t.name} - $${t.price}`);
             } else {
                 // Update price if exists
                 await connection.execute(
-                    'UPDATE add_on_templates SET price = ?, description = ? WHERE name = ?',
+                    'UPDATE add_on_templates SET default_price = ?, description = ? WHERE name = ?',
                     [t.price, t.description, t.name]
                 );
                 console.log(`🔄 Updated: ${t.name} - $${t.price}`);

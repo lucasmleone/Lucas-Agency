@@ -50,3 +50,5 @@ services:
 
 volumes:
   db_data:
+    name: app_db_data
+    external: true
