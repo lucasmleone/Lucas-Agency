@@ -13,7 +13,9 @@ import maintenanceRoutes from './routes/maintenance.js';
 import publicRoutes from './routes/public.js';
 import notesRoutes from './routes/notes.js';
 import portalRoutes from './routes/portal.js';
+import portalRoutes from './routes/portal.js';
 import publicPortalRoutes from './routes/public_portal.js';
+import addonsRoutes from './routes/addons.js';
 
 dotenv.config();
 
@@ -78,6 +80,7 @@ app.use('/api/config', internalMiddleware, configRoutes);
 app.use('/api/maintenance', internalMiddleware, maintenanceRoutes);
 app.use('/api/notes', internalMiddleware, notesRoutes);
 app.use('/api', internalMiddleware, portalRoutes);
+app.use('/api/addons', internalMiddleware, addonsRoutes);
 
 // Serve Static Files (Production)
 if (process.env.NODE_ENV === 'production') {

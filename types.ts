@@ -211,3 +211,18 @@ export interface Note {
   linkedEntityId?: string;
   updated_at: string;
 }
+
+export interface AddOnTemplate {
+  id: number;
+  name: string;
+  description?: string;
+  default_price: number;
+}
+
+export interface ProjectAddOn {
+  id: number;
+  projectId: number;
+  name: string;
+  description?: string;
+  price: number;
+}

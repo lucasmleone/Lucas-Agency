@@ -1,4 +1,4 @@
-import { Project, Client, FinanceRecord, ProjectLog, MaintenanceTask, Note } from '../types';
+import { Project, Client, FinanceRecord, ProjectLog, MaintenanceTask, Note, AddOnTemplate, ProjectAddOn } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const DATA_URL = BASE_URL;
@@ -337,5 +337,54 @@ export const apiService = {
       credentials: 'include'
     });
     if (!res.ok) throw new Error('Failed to delete milestone');
+    if (!res.ok) throw new Error('Failed to delete milestone');
+  },
+
+  // --- Add-ons ---
+
+  getTemplates: async (): Promise<AddOnTemplate[]> => {
+    const res = await fetch(`${DATA_URL}/addons/templates`, { credentials: 'include' });
+    if (!res.ok) return [];
+    return res.json();
+  },
+
+  createTemplate: async (template: { name: string; description: string; defaultPrice: number }) => {
+    const res = await fetch(`${DATA_URL}/addons/templates`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(template),
+      credentials: 'include'
+    });
+    return res.json();
+  },
+
+  deleteTemplate: async (id: number) => {
+    await fetch(`${DATA_URL}/addons/templates/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+  },
+
+  getProjectAddOns: async (projectId: string): Promise<ProjectAddOn[]> => {
+    const res = await fetch(`${DATA_URL}/addons/projects/${projectId}`, { credentials: 'include' });
+    if (!res.ok) return [];
+    return res.json();
+  },
+
+  addProjectAddOn: async (projectId: string, addon: { name: string; description?: string; price: number }) => {
+    const res = await fetch(`${DATA_URL}/addons/projects/${projectId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(addon),
+      credentials: 'include'
+    });
+    return res.json();
+  },
+
+  removeProjectAddOn: async (projectId: string, addonId: number) => {
+    await fetch(`${DATA_URL}/addons/projects/${projectId}/${addonId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
   }
 };
