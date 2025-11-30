@@ -908,343 +908,342 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
                             {/* Floating Save Button for Data Tab */}
-                    <div className="fixed bottom-8 right-8 z-50">
-                        <button
-                            onClick={handleSaveData}
-                            className="bg-gray-900 text-white pl-6 pr-5 py-4 rounded-full shadow-2xl hover:shadow-xl hover:scale-105 transition-all flex items-center gap-3 font-bold text-base"
-                        >
-                            <span>Guardar</span>
-                            <Save size={20} />
-                        </button>
-                    </div>
-                </div>
+                            <div className="fixed bottom-8 right-8 z-50">
+                                <button
+                                    onClick={handleSaveData}
+                                    className="bg-gray-900 text-white pl-6 pr-5 py-4 rounded-full shadow-2xl hover:shadow-xl hover:scale-105 transition-all flex items-center gap-3 font-bold text-base"
+                                >
+                                    <span>Guardar</span>
+                                    <Save size={20} />
+                                </button>
+                            </div>
+                        </div>
                     )}
 
-                {activeTab === 'workflow' && (
-                    <div className="flex flex-col md:flex-row gap-6 h-full">
-                        {/* Left: Stage Action Area */}
-                        <div className="flex-1 space-y-6">
-                            {/* Blocking Banner */}
-                            {project.blockedStatus && (
-                                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h4 className="text-sm font-bold text-red-900 flex items-center">
-                                                <Lock className="w-4 h-4 mr-2" /> Proyecto Bloqueado - Esperando Cliente
-                                            </h4>
-                                            <p className="text-xs text-red-700 mt-1">Razón: {project.blockedReason}</p>
-                                            <p className="text-xs text-red-600 mt-1">
-                                                Bloqueado desde: {new Date(project.blockedSince!).toLocaleDateString()}
-                                                ({Math.floor((Date.now() - new Date(project.blockedSince!).getTime()) / (1000 * 60 * 60 * 24))} días)
-                                            </p>
+                    {activeTab === 'workflow' && (
+                        <div className="flex flex-col md:flex-row gap-6 h-full">
+                            {/* Left: Stage Action Area */}
+                            <div className="flex-1 space-y-6">
+                                {/* Blocking Banner */}
+                                {project.blockedStatus && (
+                                    <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-red-900 flex items-center">
+                                                    <Lock className="w-4 h-4 mr-2" /> Proyecto Bloqueado - Esperando Cliente
+                                                </h4>
+                                                <p className="text-xs text-red-700 mt-1">Razón: {project.blockedReason}</p>
+                                                <p className="text-xs text-red-600 mt-1">
+                                                    Bloqueado desde: {new Date(project.blockedSince!).toLocaleDateString()}
+                                                    ({Math.floor((Date.now() - new Date(project.blockedSince!).getTime()) / (1000 * 60 * 60 * 24))} días)
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    safeUpdateProject({ blockedStatus: false, blockedReason: undefined, blockedSince: undefined });
+                                                    onAddLog('Proyecto desbloqueado.');
+                                                }}
+                                                className="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700"
+                                            >
+                                                Desbloquear
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => {
-                                                safeUpdateProject({ blockedStatus: false, blockedReason: undefined, blockedSince: undefined });
-                                                onAddLog('Proyecto desbloqueado.');
-                                            }}
-                                            className="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700"
-                                        >
-                                            Desbloquear
-                                        </button>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Block Button */}
-                            {!project.blockedStatus && (
-                                <button
-                                    onClick={() => setShowBlockModal(true)}
-                                    className="w-full bg-orange-100 border border-orange-300 text-orange-800 px-4 py-2 rounded-lg text-sm font-bold hover:bg-orange-200 flex items-center justify-center"
-                                >
-                                    <Lock className="w-4 h-4 mr-2" /> Bloquear Proyecto (Esperando Cliente)
-                                </button>
-                            )}
+                                {/* Block Button */}
+                                {!project.blockedStatus && (
+                                    <button
+                                        onClick={() => setShowBlockModal(true)}
+                                        className="w-full bg-orange-100 border border-orange-300 text-orange-800 px-4 py-2 rounded-lg text-sm font-bold hover:bg-orange-200 flex items-center justify-center"
+                                    >
+                                        <Lock className="w-4 h-4 mr-2" /> Bloquear Proyecto (Esperando Cliente)
+                                    </button>
+                                )}
 
-                            {/* Block Modal */}
-                            {showBlockModal && (
-                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                                    <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
-                                        <h3 className="text-lg font-bold mb-4">Bloquear Proyecto</h3>
+                                {/* Block Modal */}
+                                {showBlockModal && (
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                                        <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
+                                            <h3 className="text-lg font-bold mb-4">Bloquear Proyecto</h3>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">¿Qué estás esperando del cliente?</label>
+                                                    <textarea
+                                                        className="w-full border rounded p-2 text-sm"
+                                                        rows={3}
+                                                        value={blockReason}
+                                                        onChange={e => setBlockReason(e.target.value)}
+                                                        placeholder="Ej: Pago del anticipo, contenido, imágenes, etc."
+                                                    />
+                                                </div>
+                                                <div className="flex justify-end gap-3">
+                                                    <button
+                                                        onClick={() => { setShowBlockModal(false); setBlockReason(''); }}
+                                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            safeUpdateProject({
+                                                                blockedStatus: true,
+                                                                blockedReason: blockReason,
+                                                                blockedSince: new Date().toISOString()
+                                                            });
+                                                            onAddLog(`Proyecto bloqueado: ${blockReason}`);
+                                                            setShowBlockModal(false);
+                                                            setBlockReason('');
+                                                        }}
+                                                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                                        disabled={!blockReason.trim()}
+                                                    >
+                                                        Bloquear
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {status === ProjectStatus.DISCOVERY && (
+                                    <div className="bg-white border border-indigo-100 ring-1 ring-indigo-50 rounded-xl p-6 shadow-sm">
+                                        <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> 2. Discovery (Entrevista)</h4>
                                         <div className="space-y-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">¿Qué estás esperando del cliente?</label>
-                                                <textarea
-                                                    className="w-full border rounded p-2 text-sm"
-                                                    rows={3}
-                                                    value={blockReason}
-                                                    onChange={e => setBlockReason(e.target.value)}
-                                                    placeholder="Ej: Pago del anticipo, contenido, imágenes, etc."
-                                                />
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Buyer Persona</label>
+                                                <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.buyerPersona} onChange={e => setDiscoveryData({ ...discoveryData, buyerPersona: e.target.value })} placeholder="¿Quién es su cliente ideal?" />
                                             </div>
-                                            <div className="flex justify-end gap-3">
-                                                <button
-                                                    onClick={() => { setShowBlockModal(false); setBlockReason(''); }}
-                                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-                                                >
-                                                    Cancelar
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        safeUpdateProject({
-                                                            blockedStatus: true,
-                                                            blockedReason: blockReason,
-                                                            blockedSince: new Date().toISOString()
-                                                        });
-                                                        onAddLog(`Proyecto bloqueado: ${blockReason}`);
-                                                        setShowBlockModal(false);
-                                                        setBlockReason('');
-                                                    }}
-                                                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                                                    disabled={!blockReason.trim()}
-                                                >
-                                                    Bloquear
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Competencia (Top 3)</label>
+                                                <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.competitors} onChange={e => setDiscoveryData({ ...discoveryData, competitors: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Referencias Visuales</label>
+                                                <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.references} onChange={e => setDiscoveryData({ ...discoveryData, references: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Estado Materiales (Logo/Texto)</label>
+                                                <input className="w-full border-gray-300 rounded text-sm p-2" value={discoveryData.materialStatus} onChange={e => setDiscoveryData({ ...discoveryData, materialStatus: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Materiales a Solicitar</label>
+                                                <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={3} value={discoveryData.materials || ''} onChange={e => setDiscoveryData({ ...discoveryData, materials: e.target.value })} placeholder="Lista de materiales necesarios..." />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Otros Comentarios</label>
+                                                <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.otherComments || ''} onChange={e => setDiscoveryData({ ...discoveryData, otherComments: e.target.value })} placeholder="Información adicional relevante..." />
+                                            </div>
+                                            <div className="flex justify-between pt-4">
+                                                <button onClick={handleSaveData} className="text-indigo-600 text-sm font-bold hover:underline">Guardar Datos</button>
+                                                <button onClick={() => { handleSaveData(); handleStageChange(ProjectStatus.PROPOSAL); }} className="bg-gray-900 text-white px-4 py-2 rounded font-bold text-sm hover:bg-black flex items-center">
+                                                    Guardar y Avanzar &rarr;
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {status === ProjectStatus.DISCOVERY && (
-                                <div className="bg-white border border-indigo-100 ring-1 ring-indigo-50 rounded-xl p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> 2. Discovery (Entrevista)</h4>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Buyer Persona</label>
-                                            <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.buyerPersona} onChange={e => setDiscoveryData({ ...discoveryData, buyerPersona: e.target.value })} placeholder="¿Quién es su cliente ideal?" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Competencia (Top 3)</label>
-                                            <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.competitors} onChange={e => setDiscoveryData({ ...discoveryData, competitors: e.target.value })} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Referencias Visuales</label>
-                                            <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.references} onChange={e => setDiscoveryData({ ...discoveryData, references: e.target.value })} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Estado Materiales (Logo/Texto)</label>
-                                            <input className="w-full border-gray-300 rounded text-sm p-2" value={discoveryData.materialStatus} onChange={e => setDiscoveryData({ ...discoveryData, materialStatus: e.target.value })} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Materiales a Solicitar</label>
-                                            <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={3} value={discoveryData.materials || ''} onChange={e => setDiscoveryData({ ...discoveryData, materials: e.target.value })} placeholder="Lista de materiales necesarios..." />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-700 mb-1">Otros Comentarios</label>
-                                            <textarea className="w-full border-gray-300 rounded text-sm p-2" rows={2} value={discoveryData.otherComments || ''} onChange={e => setDiscoveryData({ ...discoveryData, otherComments: e.target.value })} placeholder="Información adicional relevante..." />
-                                        </div>
-                                        <div className="flex justify-between pt-4">
-                                            <button onClick={handleSaveData} className="text-indigo-600 text-sm font-bold hover:underline">Guardar Datos</button>
-                                            <button onClick={() => { handleSaveData(); handleStageChange(ProjectStatus.PROPOSAL); }} className="bg-gray-900 text-white px-4 py-2 rounded font-bold text-sm hover:bg-black flex items-center">
-                                                Guardar y Avanzar &rarr;
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                                {status === ProjectStatus.PROPOSAL && (
+                                    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                        <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2" /> 3. Propuesta y Contrato</h4>
+                                        <p className="text-sm text-gray-600 mb-4">Envía la propuesta automática con los T&C.</p>
 
-                            {status === ProjectStatus.PROPOSAL && (
-                                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><FileText className="w-5 h-5 mr-2" /> 3. Propuesta y Contrato</h4>
-                                    <p className="text-sm text-gray-600 mb-4">Envía la propuesta automática con los T&C.</p>
+                                        <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6">
+                                            <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Acciones de Envío</h5>
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => handleCopyEmail('PROPOSAL')}
+                                                    className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded font-bold text-sm hover:bg-indigo-700 flex items-center justify-center shadow-sm"
+                                                >
+                                                    <Copy className="w-4 h-4 mr-2" /> Copiar Propuesta (Portapapeles)
+                                                </button>
+                                            </div>
+                                        </div>
 
-                                    <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6">
-                                        <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Acciones de Envío</h5>
-                                        <div className="flex gap-3">
+                                        <div className="border-t border-gray-100 pt-6">
                                             <button
-                                                onClick={() => handleCopyEmail('PROPOSAL')}
-                                                className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded font-bold text-sm hover:bg-indigo-700 flex items-center justify-center shadow-sm"
+                                                onClick={() => handleStageChange(ProjectStatus.WAITING_RESOURCES)}
+                                                className="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-bold text-sm hover:bg-green-700 flex items-center justify-center shadow-md"
                                             >
-                                                <Copy className="w-4 h-4 mr-2" /> Copiar Propuesta (Portapapeles)
+                                                <CheckCircle className="w-5 h-5 mr-2" /> ✅ Cliente Aceptó (Manual)
                                             </button>
                                         </div>
                                     </div>
+                                )}
 
-                                    <div className="border-t border-gray-100 pt-6">
-                                        <button
-                                            onClick={() => handleStageChange(ProjectStatus.WAITING_RESOURCES)}
-                                            className="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-bold text-sm hover:bg-green-700 flex items-center justify-center shadow-md"
-                                        >
-                                            <CheckCircle className="w-5 h-5 mr-2" /> ✅ Cliente Aceptó (Manual)
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {status === ProjectStatus.WAITING_RESOURCES && (
-                                <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-orange-900 mb-4 flex items-center"><Lock className="w-5 h-5 mr-2" /> 4. Espera de Recursos (Bloqueo)</h4>
-                                    <div className="bg-white p-4 rounded-lg shadow-sm space-y-3 mb-6">
-                                        <label className="flex items-center space-x-3">
-                                            <input type="checkbox" checked={checklists.depositPaid} onChange={() => handleChecklistChange('depositPaid')} className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500" />
-                                            <span className="text-sm font-medium text-gray-900">Anticipo 50% Recibido</span>
-                                        </label>
-                                        <label className="flex items-center space-x-3">
-                                            <input type="checkbox" checked={checklists.infoReceived} onChange={() => handleChecklistChange('infoReceived')} className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500" />
-                                            <span className="text-sm font-medium text-gray-900">Accesos/Archivos Recibidos</span>
-                                        </label>
-                                        <label className="flex items-center space-x-3">
-                                            <input type="checkbox" checked={checklists.fillerAccepted} onChange={() => handleChecklistChange('fillerAccepted')} className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500" />
-                                            <span className="text-sm font-medium text-gray-500">Modo Relleno Aceptado (Opcional)</span>
-                                        </label>
-                                    </div>
-
-                                    <button
-                                        disabled={!checklists.depositPaid || (!checklists.infoReceived && !checklists.fillerAccepted)}
-                                        onClick={() => {
-                                            safeUpdateProject({ paymentStatus: PaymentStatus.DEPOSIT_PAID });
-                                            handleStageChange(ProjectStatus.PRODUCTION);
-                                        }}
-                                        className={`w-full px-4 py-3 rounded-lg font-bold text-sm flex items-center justify-center transition-colors ${(checklists.depositPaid && (checklists.infoReceived || checklists.fillerAccepted))
-                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            }`}
-                                    >
-                                        {(checklists.depositPaid && (checklists.infoReceived || checklists.fillerAccepted)) ? 'Desbloquear & Iniciar Producción' : 'Completar Checklist para Avanzar'}
-                                    </button>
-                                </div>
-                            )}
-
-                            {status === ProjectStatus.PRODUCTION && (
-                                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Briefcase className="w-5 h-5 mr-2" /> 5. Producción y Revisión</h4>
-
-                                    <div className="mb-6">
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">URL de Desarrollo (Staging)</label>
-                                        <div className="flex gap-2">
-                                            <input type="text" value={generalData.devUrl} onChange={e => setGeneralData({ ...generalData, devUrl: e.target.value })} className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm" placeholder="https://..." />
-                                            <button onClick={() => { handleSaveData(); onAddLog(`URL Desarrollo actualizada: ${generalData.devUrl}`); }} className="bg-gray-200 text-gray-700 px-3 rounded text-xs font-bold">Guardar</button>
+                                {status === ProjectStatus.WAITING_RESOURCES && (
+                                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 shadow-sm">
+                                        <h4 className="text-lg font-bold text-orange-900 mb-4 flex items-center"><Lock className="w-5 h-5 mr-2" /> 4. Espera de Recursos (Bloqueo)</h4>
+                                        <div className="bg-white p-4 rounded-lg shadow-sm space-y-3 mb-6">
+                                            <label className="flex items-center space-x-3">
+                                                <input type="checkbox" checked={checklists.depositPaid} onChange={() => handleChecklistChange('depositPaid')} className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500" />
+                                                <span className="text-sm font-medium text-gray-900">Anticipo 50% Recibido</span>
+                                            </label>
+                                            <label className="flex items-center space-x-3">
+                                                <input type="checkbox" checked={checklists.infoReceived} onChange={() => handleChecklistChange('infoReceived')} className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500" />
+                                                <span className="text-sm font-medium text-gray-900">Accesos/Archivos Recibidos</span>
+                                            </label>
+                                            <label className="flex items-center space-x-3">
+                                                <input type="checkbox" checked={checklists.fillerAccepted} onChange={() => handleChecklistChange('fillerAccepted')} className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500" />
+                                                <span className="text-sm font-medium text-gray-500">Modo Relleno Aceptado (Opcional)</span>
+                                            </label>
                                         </div>
-                                    </div>
 
-                                    <div className="bg-gray-50 p-4 rounded border border-gray-200 mb-4">
-                                        <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Enviar Revisión</h5>
-                                        <p className="text-xs text-gray-600 mb-2">Genera el correo con el link de desarrollo y tu Calendly.</p>
                                         <button
-                                            onClick={() => copyToClipboard(getEmailTemplate('REVIEW', project).body)}
-                                            className="text-indigo-600 text-xs font-bold hover:underline"
+                                            disabled={!checklists.depositPaid || (!checklists.infoReceived && !checklists.fillerAccepted)}
+                                            onClick={() => {
+                                                safeUpdateProject({ paymentStatus: PaymentStatus.DEPOSIT_PAID });
+                                                handleStageChange(ProjectStatus.PRODUCTION);
+                                            }}
+                                            className={`w-full px-4 py-3 rounded-lg font-bold text-sm flex items-center justify-center transition-colors ${(checklists.depositPaid && (checklists.infoReceived || checklists.fillerAccepted))
+                                                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                }`}
                                         >
-                                            Copiar Plantilla Email Revisión
+                                            {(checklists.depositPaid && (checklists.infoReceived || checklists.fillerAccepted)) ? 'Desbloquear & Iniciar Producción' : 'Completar Checklist para Avanzar'}
                                         </button>
                                     </div>
+                                )}
 
-                                    <button onClick={() => handleStageChange(ProjectStatus.DELIVERY)} className="w-full bg-gray-900 text-white px-4 py-3 rounded font-bold text-sm hover:bg-black">
-                                        Finalizar Desarrollo &rarr; Ir a Cierre
-                                    </button>
-                                </div>
-                            )}
+                                {status === ProjectStatus.PRODUCTION && (
+                                    <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                        <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Briefcase className="w-5 h-5 mr-2" /> 5. Producción y Revisión</h4>
 
-                            {status === ProjectStatus.DELIVERY && (
-                                <div className="bg-green-50 border border-green-200 rounded-xl p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-green-900 mb-4 flex items-center"><CheckCircle className="w-5 h-5 mr-2" /> 6. Cierre y Entrega</h4>
+                                        <div className="mb-6">
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">URL de Desarrollo (Staging)</label>
+                                            <div className="flex gap-2">
+                                                <input type="text" value={generalData.devUrl} onChange={e => setGeneralData({ ...generalData, devUrl: e.target.value })} className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm" placeholder="https://..." />
+                                                <button onClick={() => { handleSaveData(); onAddLog(`URL Desarrollo actualizada: ${generalData.devUrl}`); }} className="bg-gray-200 text-gray-700 px-3 rounded text-xs font-bold">Guardar</button>
+                                            </div>
+                                        </div>
 
-                                    <div className="bg-white p-4 rounded-lg shadow-sm space-y-3 mb-6">
-                                        <label className="flex items-center space-x-3">
-                                            <input type="checkbox" checked={checklists.finalPaymentPaid} onChange={() => handleChecklistChange('finalPaymentPaid')} className="h-5 w-5 text-green-600 rounded focus:ring-green-500" />
-                                            <span className="text-sm font-bold text-gray-900">Factura Final Pagada</span>
-                                        </label>
-                                    </div>
-
-                                    {checklists.finalPaymentPaid ? (
-                                        <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center">
-                                            <p className="font-bold mb-2">¡Proyecto Liberado!</p>
-                                            <p className="text-sm mb-4">Ya puedes entregar credenciales. El proyecto está en mantenimiento.</p>
-                                            <button onClick={() => { safeUpdateProject({ paymentStatus: PaymentStatus.FULLY_PAID, status: ProjectStatus.DELIVERED }); onClose(); }} className="bg-green-700 text-white px-4 py-2 rounded text-sm font-bold">
-                                                Cerrar Proyecto (Archivar)
+                                        <div className="bg-gray-50 p-4 rounded border border-gray-200 mb-4">
+                                            <h5 className="text-xs font-bold text-gray-500 uppercase mb-2">Enviar Revisión</h5>
+                                            <p className="text-xs text-gray-600 mb-2">Genera el correo con el link de desarrollo y tu Calendly.</p>
+                                            <button
+                                                onClick={() => copyToClipboard(getEmailTemplate('REVIEW', project).body)}
+                                                className="text-indigo-600 text-xs font-bold hover:underline"
+                                            >
+                                                Copiar Plantilla Email Revisión
                                             </button>
                                         </div>
-                                    ) : (
-                                        <div className="bg-red-50 text-red-700 p-3 rounded text-xs font-bold text-center">
-                                            ⛔ PROHIBIDO ENTREGAR CREDENCIALES HASTA EL PAGO FINAL.
+
+                                        <button onClick={() => handleStageChange(ProjectStatus.DELIVERY)} className="w-full bg-gray-900 text-white px-4 py-3 rounded font-bold text-sm hover:bg-black">
+                                            Finalizar Desarrollo &rarr; Ir a Cierre
+                                        </button>
+                                    </div>
+                                )}
+
+                                {status === ProjectStatus.DELIVERY && (
+                                    <div className="bg-green-50 border border-green-200 rounded-xl p-6 shadow-sm">
+                                        <h4 className="text-lg font-bold text-green-900 mb-4 flex items-center"><CheckCircle className="w-5 h-5 mr-2" /> 6. Cierre y Entrega</h4>
+
+                                        <div className="bg-white p-4 rounded-lg shadow-sm space-y-3 mb-6">
+                                            <label className="flex items-center space-x-3">
+                                                <input type="checkbox" checked={checklists.finalPaymentPaid} onChange={() => handleChecklistChange('finalPaymentPaid')} className="h-5 w-5 text-green-600 rounded focus:ring-green-500" />
+                                                <span className="text-sm font-bold text-gray-900">Factura Final Pagada</span>
+                                            </label>
                                         </div>
-                                    )}
-                                </div>
-                            )}
 
-                            {status === ProjectStatus.DELIVERED && (
-                                <div className="bg-green-50 border border-green-200 rounded-xl p-8 shadow-sm text-center">
-                                    <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                                        <CheckCircle className="w-10 h-10" />
+                                        {checklists.finalPaymentPaid ? (
+                                            <div className="bg-green-100 text-green-800 p-4 rounded-lg text-center">
+                                                <p className="font-bold mb-2">¡Proyecto Liberado!</p>
+                                                <p className="text-sm mb-4">Ya puedes entregar credenciales. El proyecto está en mantenimiento.</p>
+                                                <button onClick={() => { safeUpdateProject({ paymentStatus: PaymentStatus.FULLY_PAID, status: ProjectStatus.DELIVERED }); onClose(); }} className="bg-green-700 text-white px-4 py-2 rounded text-sm font-bold">
+                                                    Cerrar Proyecto (Archivar)
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-red-50 text-red-700 p-3 rounded text-xs font-bold text-center">
+                                                ⛔ PROHIBIDO ENTREGAR CREDENCIALES HASTA EL PAGO FINAL.
+                                            </div>
+                                        )}
                                     </div>
-                                    <h4 className="text-2xl font-bold text-green-900 mb-3">¡Proyecto Entregado!</h4>
-                                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                                        El proyecto ha sido finalizado exitosamente. Puedes gestionar los accesos desde el Portal o ver el estado del mantenimiento.
-                                    </p>
+                                )}
 
-                                    <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                        <button onClick={() => setActiveTab('portal')} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-md transition-all hover:-translate-y-1">
-                                            Gestionar Portal Cliente
-                                        </button>
-                                        <button onClick={() => setActiveTab('maintenance')} className="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 shadow-sm transition-all hover:-translate-y-1">
-                                            Ver Mantenimiento
+                                {status === ProjectStatus.DELIVERED && (
+                                    <div className="bg-green-50 border border-green-200 rounded-xl p-8 shadow-sm text-center">
+                                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                            <CheckCircle className="w-10 h-10" />
+                                        </div>
+                                        <h4 className="text-2xl font-bold text-green-900 mb-3">¡Proyecto Entregado!</h4>
+                                        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                                            El proyecto ha sido finalizado exitosamente. Puedes gestionar los accesos desde el Portal o ver el estado del mantenimiento.
+                                        </p>
+
+                                        <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                            <button onClick={() => setActiveTab('portal')} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-md transition-all hover:-translate-y-1">
+                                                Gestionar Portal Cliente
+                                            </button>
+                                            <button onClick={() => setActiveTab('maintenance')} className="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 shadow-sm transition-all hover:-translate-y-1">
+                                                Ver Mantenimiento
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {(status === ProjectStatus.CANCELLED || status === ProjectStatus.LOST) && (
+                                    <div className="bg-gray-100 border border-gray-200 rounded-xl p-6 shadow-sm text-center">
+                                        <h4 className="text-lg font-bold text-gray-500 mb-4">Proyecto Archivado / Perdido</h4>
+                                        <button onClick={() => handleStageChange(ProjectStatus.DISCOVERY)} className="text-indigo-600 text-sm font-bold underline">Reactivar (Volver a Discovery)</button>
+                                    </div>
+                                )}
+
+                                {status !== ProjectStatus.DELIVERED && (
+                                    <div className="mt-8 pt-8 border-t border-gray-100">
+                                        <button
+                                            onClick={() => { if (deleteStage === 0) setDeleteStage(1); else if (deleteStage === 1) setDeleteStage(2); else onDeleteProject(project.id); }}
+                                            className={`text-xs text-gray-400 hover:text-red-600 underline ${deleteStage > 0 ? 'text-red-600 font-bold' : ''}`}
+                                        >
+                                            {deleteStage === 0 && "Eliminar Proyecto"}
+                                            {deleteStage === 1 && "¿Seguro?"}
+                                            {deleteStage === 2 && "CONFIRMAR ELIMINACIÓN"}
                                         </button>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
 
-                            {(status === ProjectStatus.CANCELLED || status === ProjectStatus.LOST) && (
-                                <div className="bg-gray-100 border border-gray-200 rounded-xl p-6 shadow-sm text-center">
-                                    <h4 className="text-lg font-bold text-gray-500 mb-4">Proyecto Archivado / Perdido</h4>
-                                    <button onClick={() => handleStageChange(ProjectStatus.DISCOVERY)} className="text-indigo-600 text-sm font-bold underline">Reactivar (Volver a Discovery)</button>
-                                </div>
-                            )}
-
-                            {status !== ProjectStatus.DELIVERED && (
-                                <div className="mt-8 pt-8 border-t border-gray-100">
-                                    <button
-                                        onClick={() => { if (deleteStage === 0) setDeleteStage(1); else if (deleteStage === 1) setDeleteStage(2); else onDeleteProject(project.id); }}
-                                        className={`text-xs text-gray-400 hover:text-red-600 underline ${deleteStage > 0 ? 'text-red-600 font-bold' : ''}`}
-                                    >
-                                        {deleteStage === 0 && "Eliminar Proyecto"}
-                                        {deleteStage === 1 && "¿Seguro?"}
-                                        {deleteStage === 2 && "CONFIRMAR ELIMINACIÓN"}
-                                    </button>
+                            {/* Right: Technical Sheet (Sticky) */}
+                            {(status === ProjectStatus.PRODUCTION || status === ProjectStatus.DELIVERY || status === ProjectStatus.WAITING_RESOURCES || status === ProjectStatus.DELIVERED) && (
+                                <div className="w-full md:w-1/3 shrink-0">
+                                    <TechnicalSheet />
                                 </div>
                             )}
                         </div>
+                    )}
 
-                        {/* Right: Technical Sheet (Sticky) */}
-                        {(status === ProjectStatus.PRODUCTION || status === ProjectStatus.DELIVERY || status === ProjectStatus.WAITING_RESOURCES || status === ProjectStatus.DELIVERED) && (
-                            <div className="w-full md:w-1/3 shrink-0">
-                                <TechnicalSheet />
-                            </div>
-                        )}
-                    </div>
-                )}
+                    {activeTab === 'maintenance' && (
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <MaintenanceView project={project} />
+                        </div>
+                    )}
 
-                {activeTab === 'maintenance' && (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <MaintenanceView project={project} />
-                    </div>
-                )}
+                    {activeTab === 'notes' && (
+                        <div className="bg-gray-50 rounded-xl border border-gray-200 min-h-[400px]">
+                            <NotesBoard entityType="project" entityId={String(project.id)} />
+                        </div>
+                    )}
 
-                {activeTab === 'notes' && (
-                    <div className="bg-gray-50 rounded-xl border border-gray-200 min-h-[400px]">
-                        <NotesBoard entityType="project" entityId={String(project.id)} />
-                    </div>
-                )}
-
-                {activeTab === 'portal' && (
-                    <PortalAdmin
-                        project={project}
-                        onRefresh={async (updates) => {
-                            if (updates) {
-                                // CRITICAL: Use safeUpdateProject to preserve portal fields
-                                await safeUpdateProject(updates); // ← WAIT for save to complete!
-                                // CRITICAL: Refresh all data from DB to sync React state
-                                if (onRefreshData) {
-                                    await onRefreshData();
+                    {activeTab === 'portal' && (
+                        <PortalAdmin
+                            project={project}
+                            onRefresh={async (updates) => {
+                                if (updates) {
+                                    // CRITICAL: Use safeUpdateProject to preserve portal fields
+                                    await safeUpdateProject(updates); // ← WAIT for save to complete!
+                                    // CRITICAL: Refresh all data from DB to sync React state
+                                    if (onRefreshData) {
+                                        await onRefreshData();
+                                    }
                                 }
-                            }
-                        }}
-                    />
-                )}
+                            }}
+                        />
+                    )}
+                </div>
             </div>
-        </div>
         </div >
     );
 };
