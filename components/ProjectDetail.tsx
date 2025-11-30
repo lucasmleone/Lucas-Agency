@@ -1156,6 +1156,27 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     </div>
                                 )}
 
+                                {status === ProjectStatus.DELIVERED && (
+                                    <div className="bg-green-50 border border-green-200 rounded-xl p-8 shadow-sm text-center">
+                                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                            <CheckCircle className="w-10 h-10" />
+                                        </div>
+                                        <h4 className="text-2xl font-bold text-green-900 mb-3">¡Proyecto Entregado!</h4>
+                                        <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                                            El proyecto ha sido finalizado exitosamente. Puedes gestionar los accesos desde el Portal o ver el estado del mantenimiento.
+                                        </p>
+
+                                        <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                            <button onClick={() => setActiveTab('portal')} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-md transition-all hover:-translate-y-1">
+                                                Gestionar Portal Cliente
+                                            </button>
+                                            <button onClick={() => setActiveTab('maintenance')} className="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 shadow-sm transition-all hover:-translate-y-1">
+                                                Ver Mantenimiento
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {(status === ProjectStatus.CANCELLED || status === ProjectStatus.LOST) && (
                                     <div className="bg-gray-100 border border-gray-200 rounded-xl p-6 shadow-sm text-center">
                                         <h4 className="text-lg font-bold text-gray-500 mb-4">Proyecto Archivado / Perdido</h4>
