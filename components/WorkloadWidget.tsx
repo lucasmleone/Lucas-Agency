@@ -164,14 +164,18 @@ export const WorkloadWidget: React.FC<WorkloadWidgetProps> = ({ projects }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-7 text-center py-2 bg-gray-50 border-b border-gray-200">
-                {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
-                    <div key={d} className="text-xs font-bold text-gray-400 uppercase">{d}</div>
-                ))}
-            </div>
+            <div className="overflow-x-auto">
+                <div className="min-w-[600px]">
+                    <div className="grid grid-cols-7 text-center py-2 bg-gray-50 border-b border-gray-200">
+                        {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
+                            <div key={d} className="text-xs font-bold text-gray-400 uppercase">{d}</div>
+                        ))}
+                    </div>
 
-            <div className="grid grid-cols-7 bg-white">
-                {renderCalendarDays()}
+                    <div className="grid grid-cols-7 bg-white">
+                        {renderCalendarDays()}
+                    </div>
+                </div>
             </div>
 
             <div className="p-3 bg-gray-50 border-t border-gray-200 space-y-2">

@@ -208,11 +208,11 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                                 </div>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-3">
-                            <button onClick={handleGeneratePortal} className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                        <div className="flex flex-col sm:flex-row justify-end gap-3">
+                            <button onClick={handleGeneratePortal} className="text-sm text-blue-600 hover:underline flex items-center justify-center gap-1 py-2 sm:py-0">
                                 <RefreshCw size={14} /> Regenerar Credenciales
                             </button>
-                            <button onClick={handleRevokePortal} className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-100 flex items-center gap-2">
+                            <button onClick={handleRevokePortal} className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-100 flex items-center justify-center gap-2 w-full sm:w-auto">
                                 <Lock size={16} /> Revocar Acceso
                             </button>
                         </div>
@@ -418,16 +418,26 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
 
                 <div className="space-y-2 mb-4">
                     {milestones.map((milestone, index) => (
-                        <div key={milestone.id} className={`flex items - center gap - 3 p - 3 rounded - lg border ${milestone.status === 'active' ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'} `}>
-                            <div className="cursor-move text-gray-400">
-                                <GripVertical size={16} />
+                        <div key={milestone.id} className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 rounded-lg border ${milestone.status === 'active' ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'} `}>
+                            <div className="flex items-center w-full sm:w-auto">
+                                <div className="cursor-move text-gray-400 mr-3 sm:mr-0">
+                                    <GripVertical size={16} />
+                                </div>
+                                <div className="flex-1 sm:hidden">
+                                    {/* Mobile Title */}
+                                    <p className={`font-medium ${milestone.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-900'} `}>
+                                        {milestone.title}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="flex-1">
-                                <p className={`font - medium ${milestone.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-900'} `}>
+
+                            <div className="hidden sm:block flex-1">
+                                <p className={`font-medium ${milestone.status === 'completed' ? 'text-gray-500 line-through' : 'text-gray-900'} `}>
                                     {milestone.title}
                                 </p>
                             </div>
-                            <div className="flex items-center gap-2">
+
+                            <div className="flex items-center justify-end w-full sm:w-auto gap-2 border-t sm:border-t-0 border-gray-100 pt-2 sm:pt-0 mt-2 sm:mt-0">
                                 {milestone.status === 'pending' && (
                                     <button onClick={() => handleUpdateMilestone(milestone.id, { status: 'active' })} className="text-gray-400 hover:text-blue-600" title="Marcar como Activo">
                                         <PlayCircle size={18} />
@@ -451,15 +461,15 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                     ))}
                 </div>
 
-                <form onSubmit={handleAddMilestone} className="flex gap-2 mb-6">
+                <form onSubmit={handleAddMilestone} className="flex flex-col sm:flex-row gap-2 mb-6">
                     <input
                         type="text"
                         value={newMilestone}
                         onChange={e => setNewMilestone(e.target.value)}
                         placeholder="Nuevo hito (ej: Diseño UI)"
-                        className="flex-1 border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="flex-1 border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full"
                     />
-                    <button type="submit" className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 flex items-center gap-2">
+                    <button type="submit" className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 flex items-center justify-center gap-2 w-full sm:w-auto">
                         <Plus size={16} /> Agregar
                     </button>
                 </form>
