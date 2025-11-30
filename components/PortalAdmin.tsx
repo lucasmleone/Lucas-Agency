@@ -253,12 +253,9 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                     </div>
                 </div>
             </div>
-        </div>
-                </div >
-            </div >
 
-    {/* Final Web URL */ }
-    < div className = "bg-white p-6 rounded-xl border border-gray-200 shadow-sm" >
+            {/* Final Web URL */}
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Datos de la Web (Pública)</h3>
                 <p className="text-sm text-gray-500 mb-4">Esta es la URL final que se mostrará al cliente con un diseño destacado.</p>
                 <div>
@@ -278,16 +275,16 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                             href={project.deliveryData?.finalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`p - 2 rounded - lg border border - gray - 300 flex items - center justify - center ${project.deliveryData?.finalUrl ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-300 cursor-not-allowed'} `}
+                            className={`p-2 rounded-lg border border-gray-300 flex items-center justify-center ${project.deliveryData?.finalUrl ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-300 cursor-not-allowed'}`}
                         >
                             <ExternalLink size={20} />
                         </a>
                     </div>
                 </div>
-            </div >
+            </div>
 
-    {/* Delivery Data */ }
-    < div className = "bg-white p-6 rounded-xl border border-gray-200 shadow-sm" >
+            {/* Delivery Data */}
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Datos de Entrega (Credenciales)</h3>
                 <p className="text-sm text-gray-500 mb-4">Estos datos se mostrarán al cliente en la etapa "Cierre y Entrega" solo si el pago está completo.</p>
                 <div className="space-y-6">
@@ -381,10 +378,10 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                         />
                     </div>
                 </div>
-            </div >
+            </div>
 
-    {/* Milestones (Fog of War) */ }
-    < div className = "bg-white p-6 rounded-xl border border-gray-200 shadow-sm" >
+            {/* Milestones (Fog of War) */}
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h3 className="text-lg font-bold text-gray-900">Línea de Tiempo (Niebla de Guerra)</h3>
@@ -450,45 +447,11 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                     </button>
                 </form>
 
-{/* Milestone Library */ }
-<div className="border-t border-gray-100 pt-4">
-    <p className="text-xs font-bold text-gray-500 uppercase mb-3">Sugerencias (Clic para agregar)</p>
-    <div className="flex flex-wrap gap-2">
-        {[
-            'Inicio del Proyecto',
-            'Investigación y Estrategia',
-            'Diseño Visual',
-            'Desarrollo',
-            'Carga e Integración de Contenidos',
-            'Pruebas de Calidad (TESTING)',
-            'Revisión con Cliente',
-            'Aplicación de Feedback',
-            'Ajustes Finales',
-            'Creación de Informe',
-            'Lanzamiento y Entrega'
-        ].map(suggestion => (
-            <button
-                key={suggestion}
-                onClick={async () => {
-                    try {
-                        await apiService.addMilestone(project.id, { title: suggestion });
-                        fetchMilestones();
-                        setToast({ type: 'success', message: 'Hito agregado' });
-                    } catch (error) {
-                        console.error('Error adding suggestion:', error);
-                    }
-                }}
-                className="px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors"
-            >
-                + {suggestion}
-            </button>
-        ))}
-        <div className="w-full mt-2">
-            <button
-                onClick={async () => {
-                    setLoading(true);
-                    try {
-                        const suggestions = [
+                {/* Milestone Library */}
+                <div className="border-t border-gray-100 pt-4">
+                    <p className="text-xs font-bold text-gray-500 uppercase mb-3">Sugerencias (Clic para agregar)</p>
+                    <div className="flex flex-wrap gap-2">
+                        {[
                             'Inicio del Proyecto',
                             'Investigación y Estrategia',
                             'Diseño Visual',
@@ -500,81 +463,114 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                             'Ajustes Finales',
                             'Creación de Informe',
                             'Lanzamiento y Entrega'
-                        ];
-                        for (const title of suggestions) {
-                            // Check if already exists to avoid duplicates
-                            if (!milestones.some(m => m.title === title)) {
-                                await apiService.addMilestone(project.id, { title });
-                            }
-                        }
-                        fetchMilestones();
-                        setToast({ type: 'success', message: 'Hitos sugeridos agregados' });
-                    } catch (error) {
-                        console.error('Error adding all suggestions:', error);
-                    } finally {
-                        setLoading(false);
+                        ].map(suggestion => (
+                            <button
+                                key={suggestion}
+                                onClick={async () => {
+                                    try {
+                                        await apiService.addMilestone(project.id, { title: suggestion });
+                                        fetchMilestones();
+                                        setToast({ type: 'success', message: 'Hito agregado' });
+                                    } catch (error) {
+                                        console.error('Error adding suggestion:', error);
+                                    }
+                                }}
+                                className="px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                            >
+                                + {suggestion}
+                            </button>
+                        ))}
+                        <div className="w-full mt-2">
+                            <button
+                                onClick={async () => {
+                                    setLoading(true);
+                                    try {
+                                        const suggestions = [
+                                            'Inicio del Proyecto',
+                                            'Investigación y Estrategia',
+                                            'Diseño Visual',
+                                            'Desarrollo',
+                                            'Carga e Integración de Contenidos',
+                                            'Pruebas de Calidad (TESTING)',
+                                            'Revisión con Cliente',
+                                            'Aplicación de Feedback',
+                                            'Ajustes Finales',
+                                            'Creación de Informe',
+                                            'Lanzamiento y Entrega'
+                                        ];
+                                        for (const title of suggestions) {
+                                            // Check if already exists to avoid duplicates
+                                            if (!milestones.some(m => m.title === title)) {
+                                                await apiService.addMilestone(project.id, { title });
+                                            }
+                                        }
+                                        fetchMilestones();
+                                        setToast({ type: 'success', message: 'Hitos sugeridos agregados' });
+                                    } catch (error) {
+                                        console.error('Error adding all suggestions:', error);
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }}
+                                className="text-xs text-blue-600 hover:underline font-medium"
+                            >
+                                Agregar todos los sugeridos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {toast && (
+                <Toast
+                    type={toast.type}
+                    message={toast.message}
+                    onCancel={() => setToast(null)}
+                />
+            )}
+
+            {confirmModal && (
+                <Toast
+                    type="confirm"
+                    message={
+                        confirmModal.action === 'generate'
+                            ? '¿Generar nuevo acceso? Esto invalidará el enlace anterior.'
+                            : confirmModal.action === 'revoke'
+                                ? '¿Revocar acceso? El cliente ya no podrá entrar.'
+                                : '¿Eliminar este hito?'
                     }
-                }}
-                className="text-xs text-blue-600 hover:underline font-medium"
-            >
-                Agregar todos los sugeridos
-            </button>
+                    onConfirm={
+                        confirmModal.action === 'generate'
+                            ? confirmGeneratePortal
+                            : confirmModal.action === 'revoke'
+                                ? confirmRevokePortal
+                                : confirmDeleteMilestone
+                    }
+                    onCancel={() => setConfirmModal(null)}
+                />
+            )}
+
+            {/* Sticky Save Bar */}
+            <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-between items-center z-10 -mx-4 sm:-mx-8 -mb-4 sm:-mb-8 mt-8">
+                <div className="text-sm text-gray-500 hidden sm:block">
+                    Recuerda guardar tus cambios antes de salir.
+                </div>
+                <button
+                    onClick={handleSaveAll}
+                    disabled={loading}
+                    className="w-full sm:w-auto bg-gray-900 text-white px-8 py-3 rounded-xl text-base font-bold hover:bg-black shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                >
+                    {loading ? (
+                        <>
+                            <RefreshCw className="animate-spin" size={20} /> Guardando...
+                        </>
+                    ) : (
+                        <>
+                            <Save size={20} /> Guardar Todos los Cambios
+                        </>
+                    )}
+                </button>
+            </div>
         </div>
-    </div>
-</div>
-            </div >
-
-    { toast && (
-        <Toast
-            type={toast.type}
-            message={toast.message}
-            onCancel={() => setToast(null)}
-        />
-    )}
-
-{
-    confirmModal && (
-        <Toast
-            type="confirm"
-            message={
-                confirmModal.action === 'generate'
-                    ? '¿Generar nuevo acceso? Esto invalidará el enlace anterior.'
-                    : confirmModal.action === 'revoke'
-                        ? '¿Revocar acceso? El cliente ya no podrá entrar.'
-                        : '¿Eliminar este hito?'
-            }
-            onConfirm={
-                confirmModal.action === 'generate'
-                    ? confirmGeneratePortal
-                    : confirmModal.action === 'revoke'
-                        ? confirmRevokePortal
-                        : confirmDeleteMilestone
-            }
-            onCancel={() => setConfirmModal(null)}
-        />
-    )
-}
-{/* Sticky Save Bar */ }
-<div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-between items-center z-10 -mx-4 sm:-mx-8 -mb-4 sm:-mb-8 mt-8">
-    <div className="text-sm text-gray-500 hidden sm:block">
-        Recuerda guardar tus cambios antes de salir.
-    </div>
-    <button
-        onClick={handleSaveAll}
-        disabled={loading}
-        className="w-full sm:w-auto bg-gray-900 text-white px-8 py-3 rounded-xl text-base font-bold hover:bg-black shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-    >
-        {loading ? (
-            <>
-                <RefreshCw className="animate-spin" size={20} /> Guardando...
-            </>
-        ) : (
-            <>
-                <Save size={20} /> Guardar Todos los Cambios
-            </>
-        )}
-    </button>
-</div>
-        </div >
     );
 };
