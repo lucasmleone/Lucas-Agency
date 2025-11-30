@@ -555,16 +555,16 @@ function App() {
 
           {view === 'projects' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-2xl font-bold text-gray-900">Cartera de Proyectos</h2>
-                <div className="flex gap-3">
+                <div className="grid grid-cols-1 sm:flex gap-3 w-full sm:w-auto">
                   <button
                     onClick={() => refreshData()}
                     className="bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                     title="Actualizar Proyectos"
                   >
                     <RefreshCw className="w-4 h-4" />
-                    Actualizar
+                    <span className="sm:hidden">Actualizar</span>
                   </button>
                   <button
                     onClick={() => setProjectSortBy(projectSortBy === 'deadline' ? 'client' : 'deadline')}
@@ -572,7 +572,7 @@ function App() {
                   >
                     {projectSortBy === 'deadline' ? '📅 Por Vencimiento' : '👤 Por Cliente'}
                   </button>
-                  <button onClick={() => setShowAddProject(true)} className="bg-gray-900 text-white px-4 py-2.5 rounded-lg flex items-center text-sm font-medium hover:bg-black shadow-lg">
+                  <button onClick={() => setShowAddProject(true)} className="bg-gray-900 text-white px-4 py-2.5 rounded-lg flex items-center justify-center text-sm font-medium hover:bg-black shadow-lg">
                     <Plus className="w-4 h-4 mr-2" /> Nuevo Proyecto
                   </button>
                 </div>

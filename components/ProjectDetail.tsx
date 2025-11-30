@@ -424,27 +424,30 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             <div className="relative bg-white rounded-t-xl sm:rounded-xl text-left overflow-hidden shadow-2xl transform transition-all w-full max-w-7xl h-[95vh] flex flex-col">
 
                 {/* Header */}
-                <div className="bg-gray-900 px-4 sm:px-6 py-4 flex justify-between items-center shrink-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        <div>
-                            <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                                {project.clientName}
-                            </h3>
-                            <p className="text-gray-400 text-xs mt-1">
-                                {generalData.planType} | {generalData.deadline ? formatDateForDisplay(generalData.deadline) : 'Sin fecha'}
-                            </p>
+                <div className="bg-gray-900 px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                        <div className="flex justify-between items-start w-full sm:w-auto">
+                            <div>
+                                <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                                    {project.clientName}
+                                </h3>
+                                <p className="text-gray-400 text-xs mt-1">
+                                    {generalData.planType} | {generalData.deadline ? formatDateForDisplay(generalData.deadline) : 'Sin fecha'}
+                                </p>
+                            </div>
+                            <button onClick={onClose} className="text-gray-400 hover:text-white sm:hidden"><X className="h-6 w-6" /></button>
                         </div>
                         <select
                             value={status}
                             onChange={(e) => handleStatusChange(e.target.value as ProjectStatus)}
-                            className="bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold py-2.5 px-4 rounded-lg border-none cursor-pointer hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-300 shadow-lg transition-all"
+                            className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold py-2.5 px-4 rounded-lg border-none cursor-pointer hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-300 shadow-lg transition-all"
                         >
                             {Object.values(ProjectStatus).map(s => (
                                 <option key={s} value={s} className="text-gray-900 bg-white">{s}</option>
                             ))}
                         </select>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white"><X className="h-6 w-6" /></button>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white hidden sm:block"><X className="h-6 w-6" /></button>
                 </div>
 
                 {/* Tabs */}
@@ -499,7 +502,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 overflow-y-auto bg-white p-6">
+                <div className="flex-1 overflow-y-auto bg-white p-4 sm:p-6">
                     {activeTab === 'logs' && (
                         <div className="h-full flex flex-col">
                             <div className="flex-1 overflow-y-auto space-y-3 mb-4">
