@@ -62,6 +62,38 @@ export const calculateFinalPrice = (
 };
 
 /**
+ * Calculate the total price including add-ons and applying discounts
+ * This is the main function to use for final price calculations across the app
+ */
+export const calculateTotalWithAddOns = (
+    basePrice: number,
+    addOnsTotal: number,
+    customPrice?: number,
+    discount?: number,
+    discountType?: 'percentage' | 'fixed'
+): number => {
+    // If custom price is set and greater than 0, use it as override (ignores base + addons)
+    // Otherwise, start with base price + add-ons
+    const subtotal = basePrice + addOnsTotal;
+    const startingPrice = customPrice && customPrice > 0 ? customPrice : subtotal;
+
+    // Apply discount to the starting price
+    if (!discount || discount <= 0) {
+        return Math.round(startingPrice * 100) / 100;
+    }
+
+    let finalPrice = startingPrice;
+
+    if (discountType === 'percentage') {
+        finalPrice = startingPrice * (1 - discount / 100);
+    } else {
+        finalPrice = startingPrice - discount;
+    }
+
+    return Math.max(0, Math.round(finalPrice * 100) / 100);
+};
+
+/**
  * Calculate savings amount
  */
 export const calculateSavings = (

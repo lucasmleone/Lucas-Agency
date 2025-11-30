@@ -173,7 +173,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                             { title: 'Desarrollo Web Optimizado', desc: 'Código limpio enfocado en velocidad de carga y posicionamiento en buscadores (SEO Técnico).' },
                                             { title: 'Diseño Responsivo', desc: 'Visualización perfecta en celulares, tablets y computadoras.' },
                                             { title: 'Funcionalidades Clave', desc: 'Integración con WhatsApp, formularios de contacto y mapas interactivos.' },
-                                            { title: 'Seguridad y Soporte', desc: 'Configuración de certificado SSL (candado seguro) y 2 meses de mantenimiento técnico bonificado.' }
+                                            { title: '🎁 Seguridad y Soporte', desc: 'Configuración de certificado SSL (candado seguro).', isFree: false }
                                         ].map((item, i) => (
                                             <li key={i} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                                                 <strong className="block text-gray-900 mb-1">{item.title}</strong>
@@ -181,6 +181,22 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                             </li>
                                         ))}
                                     </ul>
+
+                                    {/* FREE Maintenance Highlight */}
+                                    <div className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-2xl">🎉</span>
+                                                    <strong className="text-green-900 font-bold">Mantenimiento Técnico Bonificado</strong>
+                                                </div>
+                                                <p className="text-sm text-green-800">2 meses de soporte y actualizaciones sin costo adicional</p>
+                                            </div>
+                                            <div className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-black shadow-lg whitespace-nowrap">
+                                                GRATIS
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Terms & Conditions */}

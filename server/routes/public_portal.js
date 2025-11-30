@@ -102,7 +102,7 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
             SELECT p.id, p.name, p.description, p.status, p.start_date, p.end_date, 
                    p.drive_link, p.requirements, p.portal_expires_at,
                    p.base_price, p.custom_price, p.discount, p.discount_type, 
-                   p.final_price as finalPrice, p.plan as planType,
+                   p.final_price, p.plan as planType,
                    p.delivery_data
             FROM projects p 
             WHERE p.portal_token = ?
@@ -116,6 +116,33 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
             'SELECT title, status, sort_order FROM project_milestones WHERE project_id = ? ORDER BY sort_order ASC',
             [project.id]
         );
+
+        // Get Add-ons for price calculation
+        const [addOns] = await pool.query(
+            'SELECT price FROM project_add_ons WHERE project_id = ?',
+            [project.id]
+        );
+        const addOnsTotal = addOns.reduce((sum, addon) => sum + parseFloat(addon.price || 0), 0);
+
+        // Calculate final price including add-ons
+        const basePrice = parseFloat(project.base_price || 0);
+        const customPrice = project.custom_price ? parseFloat(project.custom_price) : null;
+        const discount = parseFloat(project.discount || 0);
+        const discountType = project.discount_type || 'percentage';
+
+        // Calculate total: (base + addons) or customPrice, then apply discount
+        const subtotal = basePrice + addOnsTotal;
+        const startingPrice = customPrice && customPrice > 0 ? customPrice : subtotal;
+
+        let calculatedFinalPrice = startingPrice;
+        if (discount > 0) {
+            if (discountType === 'percentage') {
+                calculatedFinalPrice = startingPrice * (1 - discount / 100);
+            } else {
+                calculatedFinalPrice = startingPrice - discount;
+            }
+        }
+        calculatedFinalPrice = Math.max(0, Math.round(calculatedFinalPrice * 100) / 100);
 
         // Check if resources were confirmed
         const [logs] = await pool.query(
@@ -140,6 +167,7 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
         res.json({
             project: {
                 ...project,
+                finalPrice: calculatedFinalPrice, // Calculated price including add-ons
                 driveLink: project.drive_link,  // Convert to camelCase
                 requirements: typeof project.requirements === 'string' ? JSON.parse(project.requirements) : project.requirements,
                 deliveryData: typeof project.delivery_data === 'string' ? JSON.parse(project.delivery_data) : project.delivery_data,

@@ -24,7 +24,7 @@ import { MaintenanceView } from './MaintenanceView';
 import { Toast } from './Toast';
 import { usePricingConfig } from '../hooks/usePricingConfig';
 import { Project, ProjectStatus, PlanType, ProjectLog, Client, PaymentStatus, FinanceRecord, ProjectAddOn, AddOnTemplate } from '../types';
-import { getBasePriceForPlan, calculateFinalPrice, getPlanDisplayName, formatCurrency } from '../utils/pricing';
+import { getBasePriceForPlan, calculateFinalPrice, calculateTotalWithAddOns, getPlanDisplayName, formatCurrency } from '../utils/pricing';
 
 // Helper to format date from YYYY-MM-DD without timezone conversion
 const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
@@ -635,12 +635,13 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     <p className="text-xs font-bold text-indigo-800 uppercase">Saldo Restante (Proyecto)</p>
                                     <div className="flex items-baseline gap-2">
                                         <p className="text-2xl font-black text-indigo-700">
-                                            {formatCurrency((project.finalPrice || calculateFinalPrice(
+                                            {formatCurrency(calculateTotalWithAddOns(
                                                 project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
+                                                addOnsTotal,
                                                 project.customPrice,
                                                 project.discount,
                                                 project.discountType
-                                            )) - finances
+                                            ) - finances
                                                 .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
                                                 .reduce((acc, curr) => acc + Number(curr.amount), 0))}
                                         </p>
@@ -651,8 +652,9 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             style={{
                                                 width: `${Math.min(100, (finances
                                                     .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
-                                                    .reduce((acc, curr) => acc + Number(curr.amount), 0) / (project.finalPrice || calculateFinalPrice(
+                                                    .reduce((acc, curr) => acc + Number(curr.amount), 0) / (calculateTotalWithAddOns(
                                                         project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
+                                                        addOnsTotal,
                                                         project.customPrice,
                                                         project.discount,
                                                         project.discountType
@@ -1026,6 +1028,25 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                                                 placeholder="Detalles sobre el precio..."
                                             />
+                                        </div>
+
+                                        {/* Free Benefits Section */}
+                                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-5 mt-4">
+                                            <h3 className="text-base font-bold text-green-900 mb-3 flex items-center">
+                                                <Sparkles className="w-5 h-5 mr-2 text-green-600" />
+                                                Beneficios Incluidos
+                                            </h3>
+                                            <div className="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <p className="font-bold text-gray-900 mb-1">Mantenimiento Técnico Bonificado</p>
+                                                        <p className="text-sm text-gray-600">2 meses de soporte y actualizaciones sin costo adicional</p>
+                                                    </div>
+                                                    <div className="bg-green-600 text-white px-3 py-1.5 rounded-full text-xs font-black shadow-md ml-3">
+                                                        GRATIS
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
