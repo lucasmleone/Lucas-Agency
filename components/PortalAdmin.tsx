@@ -380,11 +380,7 @@ export const PortalAdmin: React.FC<PortalAdminProps> = ({ project: initialProjec
                             className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                         />
                     </div>
-
-                    </div>
-                </div >
-            </div >
-                </div >
+                </div>
             </div >
 
     {/* Milestones (Fog of War) */ }
