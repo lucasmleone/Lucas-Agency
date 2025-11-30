@@ -60,23 +60,46 @@ export const PricingConfigModal: React.FC<PricingConfigModalProps> = ({ onClose 
                     </p>
 
                     <div className="space-y-4">
-                        {localConfig && Object.entries(localConfig).map(([plan, price]) => (
-                            <div key={plan} className="flex items-center justify-between group">
-                                <label className="text-gray-700 font-medium w-1/3">{plan}</label>
-                                <div className="relative flex-1">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span className="text-gray-500 font-bold">$</span>
+                        {localConfig && (() => {
+                            // Sort plans by logical order (ascending price)
+                            const planOrder = [
+                                'Landing Page',
+                                'Web Corporativa',
+                                'Single Page',
+                                'Multipage',
+                                'E-commerce',
+                                'Personalizado'
+                            ];
+
+                            // Ensure all plans exist in config with defaults
+                            const completeConfig = {
+                                'Landing Page': 200,
+                                'Web Corporativa': 350,
+                                'Single Page': 300,
+                                'Multipage': 600,
+                                'E-commerce': 900,
+                                'Personalizado': 0,
+                                ...localConfig
+                            };
+
+                            return planOrder.map((plan) => (
+                                <div key={plan} className="flex items-center justify-between group">
+                                    <label className="text-gray-700 font-medium w-1/3">{plan}</label>
+                                    <div className="relative flex-1">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span className="text-gray-500 font-bold">$</span>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            value={completeConfig[plan] || 0}
+                                            onChange={(e) => handleChange(plan, e.target.value)}
+                                            className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                            min="0"
+                                        />
                                     </div>
-                                    <input
-                                        type="number"
-                                        value={price}
-                                        onChange={(e) => handleChange(plan, e.target.value)}
-                                        className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                                        min="0"
-                                    />
                                 </div>
-                            </div>
-                        ))}
+                            ));
+                        })()}
                     </div>
                 </div>
 

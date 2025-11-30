@@ -9,6 +9,8 @@ export interface PricingConfig {
     "Single Page": number;
     "Multipage": number;
     "E-commerce": number;
+    "Landing Page": number;
+    "Web Corporativa": number;
     "Personalizado": number;
     [key: string]: number;
 }

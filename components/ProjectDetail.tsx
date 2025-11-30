@@ -208,7 +208,9 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         customPrice: project.customPrice || 0,
         discount: project.discount || 0,
         discountType: project.discountType || 'percentage' as 'percentage' | 'fixed',
-        pricingNotes: project.pricingNotes || ''
+        pricingNotes: project.pricingNotes || '',
+        customHours: 0,
+        hourlyRate: 25
     });
 
     // Update base price when plan type changes OR when config loads
@@ -1030,6 +1032,56 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             />
                                         </div>
 
+                                        {/* Hourly Quote System */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-3">Cotización por Horas</label>
+                                            <p className="text-xs text-gray-600 mb-4">Para proyectos personalizados fuera del alcance estándar</p>
+
+                                            <div className="space-y-3 bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <label className="text-sm text-gray-900 font-bold block">Horas Estimadas</label>
+                                                        <span className="text-xs text-gray-500">Total de horas de desarrollo</span>
+                                                    </div>
+                                                    <input
+                                                        type="number"
+                                                        value={pricingData.customHours || 0}
+                                                        onChange={(e) => setPricingData({ ...pricingData, customHours: Number(e.target.value) })}
+                                                        className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <label className="text-sm text-gray-900 font-bold block">Tarifa por Hora</label>
+                                                        <span className="text-xs text-gray-500">USD por hora</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-gray-500 font-bold">$</span>
+                                                        <input
+                                                            type="number"
+                                                            value={pricingData.hourlyRate || 25}
+                                                            onChange={(e) => setPricingData({ ...pricingData, hourlyRate: Number(e.target.value) })}
+                                                            className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
+                                                            placeholder="25"
+                                                            min="0"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {(pricingData.customHours || 0) > 0 && (
+                                                    <div className="pt-3 border-t border-purple-300 flex justify-between items-center">
+                                                        <span className="text-sm font-bold text-purple-900">Subtotal por Horas</span>
+                                                        <span className="text-lg font-black text-purple-700">
+                                                            {formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
                                         {/* Free Benefits Section */}
                                         <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-5 mt-4">
                                             <h3 className="text-base font-bold text-green-900 mb-3 flex items-center">
@@ -1078,10 +1130,23 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             </div>
                                         )}
 
+                                        {(pricingData.customHours || 0) > 0 && (
+                                            <div className="space-y-2 pt-4 border-t border-gray-700">
+                                                <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Cotización por Horas</p>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-gray-300">{pricingData.customHours}h @ ${pricingData.hourlyRate || 25}/h</span>
+                                                    <span className="font-medium">{formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {pricingData.discount > 0 && (
                                             <div className="flex justify-between items-center text-sm text-yellow-300 pt-4 border-t border-gray-700">
                                                 <span>Descuento</span>
-                                                <span>- {formatCurrency(pricingData.discountType === 'percentage' ? ((pricingData.customPrice || pricingData.basePrice) * pricingData.discount / 100) : pricingData.discount)}</span>
+                                                <span>- {formatCurrency(pricingData.discountType === 'percentage' ?
+                                                    ((pricingData.customPrice && pricingData.customPrice > 0 ? pricingData.customPrice : (pricingData.basePrice + addOnsTotal)) * pricingData.discount / 100) :
+                                                    pricingData.discount
+                                                )}</span>
                                             </div>
                                         )}
                                     </div>
@@ -1094,7 +1159,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
                                                 pricingData.discount,
                                                 pricingData.discountType
-                                            ) + addOnsTotal)}
+                                            ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
                                         </p>
                                         <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
                                     </div>
