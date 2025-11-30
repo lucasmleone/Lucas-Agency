@@ -15,6 +15,10 @@ export const getBasePriceForPlan = (plan: PlanType, config?: Record<string, numb
             return 600;
         case PlanType.ECOMMERCE:
             return 900;
+        case PlanType.LANDING:
+            return 200;
+        case PlanType.CORPORATE:
+            return 350;
         case PlanType.CUSTOM:
             return 0;
         default:

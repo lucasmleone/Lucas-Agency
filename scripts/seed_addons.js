@@ -1,5 +1,13 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config({ path: '../.env' }); // Adjust path if running from scripts folder
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load env vars
+dotenv.config({ path: join(__dirname, '../.env') });
 
 const templates = [
     { name: 'Chat WhatsApp (Botón flotante)', price: 40, description: 'Integración de botón flotante de WhatsApp para contacto directo.' },

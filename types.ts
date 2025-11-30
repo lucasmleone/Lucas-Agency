@@ -20,7 +20,9 @@ export enum PlanType {
   SINGLE = 'Single Page',
   MULTI = 'Multipage',
   ECOMMERCE = 'E-commerce',
-  CUSTOM = 'Personalizado'
+  CUSTOM = 'Personalizado',
+  LANDING = 'Landing Page',
+  CORPORATE = 'Web Corporativa'
 }
 
 export enum MaintenanceStatus {
