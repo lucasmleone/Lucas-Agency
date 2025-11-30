@@ -857,6 +857,274 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                         </div>
                     )}
 
+                    {activeTab === 'pricing' && (
+                        <div className="space-y-6 max-w-5xl mx-auto">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-2xl font-bold text-gray-900 flex items-center">
+                                    <DollarSign className="w-6 h-6 mr-2 text-green-600" />
+                                    Cotización y Pricing
+                                </h3>
+                            </div>
+
+                            {/* Base Price Card */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">Plan Base</h4>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <p className="text-sm text-gray-500 mb-1">Tipo de Plan</p>
+                                        <p className="text-lg font-bold text-gray-900">{generalData.planType}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 mb-1">Precio Base</p>
+                                        <p className="text-2xl font-black text-green-600">{formatCurrency(pricingData.basePrice)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Custom Pricing Card */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-base font-bold text-gray-800 uppercase tracking-wide">Precio Personalizado</h4>
+                                    <label className="flex items-center space-x-3">
+                                        <span className="text-sm text-gray-600">Activar</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={pricingData.customPrice > 0}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setPricingData({ ...pricingData, customPrice: pricingData.basePrice });
+                                                } else {
+                                                    setPricingData({ ...pricingData, customPrice: 0 });
+                                                }
+                                            }}
+                                            className="w-5 h-5 rounded text-green-600"
+                                        />
+                                    </label>
+                                </div>
+                                {pricingData.customPrice > 0 || pricingData.basePrice === 0 ? (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Monto Cotizado</label>
+                                        <div className="flex items-center space-x-3">
+                                            <span className="text-2xl text-gray-400">$</span>
+                                            <input
+                                                type="number"
+                                                value={pricingData.customPrice || ''}
+                                                onChange={(e) => setPricingData({ ...pricingData, customPrice: Number(e.target.value) || 0 })}
+                                                className="flex-1 border-2 border-gray-300 rounded-lg p-3 text-lg font-bold focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                                placeholder="0.00"
+                                                min="0"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">El precio personalizado reemplazará al precio base en la cotización</p>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-gray-500 italic bg-gray-50 p-4 rounded-lg">Active esta opción para establecer un precio personalizado diferente al precio base</p>
+                                )}
+                            </div>
+
+                            {/* Discounts Card */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-base font-bold text-gray-800 uppercase tracking-wide">Descuentos</h4>
+                                    <label className="flex items-center space-x-3">
+                                        <span className="text-sm text-gray-600">Activar</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={pricingData.discount > 0}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setPricingData({ ...pricingData, discount: 10 });
+                                                } else {
+                                                    setPricingData({ ...pricingData, discount: 0 });
+                                                }
+                                            }}
+                                            className="w-5 h-5 rounded text-green-600"
+                                        />
+                                    </label>
+                                </div>
+                                {pricingData.discount > 0 ? (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-3">Tipo de Descuento</label>
+                                            <div className="flex gap-4">
+                                                <label className="flex-1 cursor-pointer">
+                                                    <div className={`border-2 rounded-lg p-4 text-center transition-all ${pricingData.discountType === 'percentage'
+                                                            ? 'border-green-500 bg-green-50'
+                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        }`}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={pricingData.discountType === 'percentage'}
+                                                            onChange={() => setPricingData({ ...pricingData, discountType: 'percentage' })}
+                                                            className="sr-only"
+                                                        />
+                                                        <p className="text-lg font-bold text-gray-900">Porcentaje</p>
+                                                        <p className="text-sm text-gray-500">%</p>
+                                                    </div>
+                                                </label>
+                                                <label className="flex-1 cursor-pointer">
+                                                    <div className={`border-2 rounded-lg p-4 text-center transition-all ${pricingData.discountType === 'fixed'
+                                                            ? 'border-green-500 bg-green-50'
+                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        }`}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={pricingData.discountType === 'fixed'}
+                                                            onChange={() => setPricingData({ ...pricingData, discountType: 'fixed' })}
+                                                            className="sr-only"
+                                                        />
+                                                        <p className="text-lg font-bold text-gray-900">Monto Fijo</p>
+                                                        <p className="text-sm text-gray-500">$</p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Valor del Descuento</label>
+                                            <div className="flex items-center space-x-3">
+                                                <input
+                                                    type="number"
+                                                    value={pricingData.discount}
+                                                    onChange={(e) => setPricingData({ ...pricingData, discount: Number(e.target.value) || 0 })}
+                                                    className="flex-1 border-2 border-gray-300 rounded-lg p-3 text-lg font-bold focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                                    placeholder={pricingData.discountType === 'percentage' ? '10' : '50'}
+                                                    min="0"
+                                                    max={pricingData.discountType === 'percentage' ? 100 : undefined}
+                                                />
+                                                <span className="text-2xl font-black text-gray-400">
+                                                    {pricingData.discountType === 'percentage' ? '%' : '$'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-gray-500 italic bg-gray-50 p-4 rounded-lg">Active esta opción para aplicar un descuento al precio</p>
+                                )}
+                            </div>
+
+                            {/* Add-ons Card */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-base font-bold text-gray-800 uppercase tracking-wide flex items-center">
+                                        <Sparkles className="w-5 h-5 mr-2 text-purple-500" />
+                                        Añadidos
+                                    </h4>
+                                    <button
+                                        onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }}
+                                        className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-200 font-bold text-sm flex items-center transition-colors"
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" /> Gestionar Librería
+                                    </button>
+                                </div>
+                                {projectAddOns.length === 0 ? (
+                                    <div className="bg-gray-50 p-6 rounded-lg text-center">
+                                        <p className="text-gray-500 italic mb-3">No hay añadidos en este proyecto</p>
+                                        <button
+                                            onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }}
+                                            className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                                        >
+                                            Agregar primer añadido
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {projectAddOns.map(addon => (
+                                            <div key={addon.id} className="flex justify-between items-center p-4 bg-purple-50 rounded-lg border border-purple-100">
+                                                <div className="flex-1">
+                                                    <p className="font-bold text-gray-900">{addon.name}</p>
+                                                    {addon.description && <p className="text-sm text-gray-600 mt-1">{addon.description}</p>}
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-lg font-black text-purple-600">{formatCurrency(addon.price)}</span>
+                                                    <button
+                                                        onClick={() => handleRemoveAddOn(addon.id)}
+                                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                    >
+                                                        <X size={18} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="pt-3 border-t border-purple-200">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm font-medium text-gray-600">Subtotal Añadidos:</span>
+                                                <span className="text-xl font-black text-purple-600">{formatCurrency(addOnsTotal)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Pricing Notes Card */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <label className="block text-base font-bold text-gray-800 mb-3 uppercase tracking-wide">Notas de Cotización</label>
+                                <textarea
+                                    rows={3}
+                                    value={pricingData.pricingNotes}
+                                    onChange={(e) => setPricingData({ ...pricingData, pricingNotes: e.target.value })}
+                                    className="w-full border-2 border-gray-300 rounded-lg p-3 text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                    placeholder="Ej: Descuento por cliente frecuente, promoción especial, condiciones especiales, etc."
+                                />
+                                <p className="text-xs text-gray-500 mt-2">Estas notas son internas y no se mostrarán al cliente</p>
+                            </div>
+
+                            {/* Final Price Summary Card */}
+                            <div className="bg-gradient-to-br from-green-600 to-emerald-600 p-8 rounded-2xl shadow-2xl text-white">
+                                <h4 className="text-sm font-bold uppercase tracking-widest opacity-90 mb-4">Resumen de Presupuesto</h4>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center pb-3 border-b border-white/20">
+                                        <span className="text-white/90">Precio Base:</span>
+                                        <span className="text-xl font-bold">{formatCurrency(pricingData.customPrice > 0 ? pricingData.customPrice : pricingData.basePrice)}</span>
+                                    </div>
+                                    {pricingData.discount > 0 && (
+                                        <div className="flex justify-between items-center pb-3 border-b border-white/20">
+                                            <span className="text-white/90">Descuento ({pricingData.discountType === 'percentage' ? `${pricingData.discount}%` : 'Fijo'}):</span>
+                                            <span className="text-xl font-bold text-yellow-200">
+                                                -{formatCurrency(
+                                                    pricingData.discountType === 'percentage'
+                                                        ? ((pricingData.customPrice || pricingData.basePrice) * (pricingData.discount / 100))
+                                                        : pricingData.discount
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {addOnsTotal > 0 && (
+                                        <div className="flex justify-between items-center pb-3 border-b border-white/20">
+                                            <span className="text-white/90">Añadidos:</span>
+                                            <span className="text-xl font-bold text-purple-200">+{formatCurrency(addOnsTotal)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between items-center pt-3">
+                                        <div>
+                                            <p className="text-sm opacity-90 uppercase tracking-wide">Precio Final</p>
+                                            <p className="text-xs opacity-75 mt-1">Para mostrar al cliente</p>
+                                        </div>
+                                        <span className="text-5xl font-black">
+                                            {formatCurrency(
+                                                (pricingData.customPrice > 0 ? pricingData.customPrice : pricingData.basePrice)
+                                                - (pricingData.discountType === 'percentage'
+                                                    ? ((pricingData.customPrice || pricingData.basePrice) * (pricingData.discount / 100))
+                                                    : pricingData.discount)
+                                                + addOnsTotal
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Floating Save Button for Pricing Tab */}
+                            <div className="fixed bottom-8 right-8 z-50">
+                                <button
+                                    onClick={handleSaveData}
+                                    className="bg-gray-900 text-white pl-6 pr-5 py-4 rounded-full shadow-2xl hover:shadow-xl hover:scale-105 transition-all flex items-center gap-3 font-bold text-base"
+                                >
+                                    <span>Guardar</span>
+                                    <Save size={20} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === 'workflow' && (
                         <div className="flex flex-col md:flex-row gap-6 h-full">
                             {/* Left: Stage Action Area */}
