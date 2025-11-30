@@ -13,7 +13,6 @@ import maintenanceRoutes from './routes/maintenance.js';
 import publicRoutes from './routes/public.js';
 import notesRoutes from './routes/notes.js';
 import portalRoutes from './routes/portal.js';
-import portalRoutes from './routes/portal.js';
 import publicPortalRoutes from './routes/public_portal.js';
 import addonsRoutes from './routes/addons.js';
 
