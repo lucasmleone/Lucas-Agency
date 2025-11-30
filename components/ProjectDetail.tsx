@@ -1178,7 +1178,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             </div>
 
                             {/* Right: Technical Sheet (Sticky) */}
-                            {(status === ProjectStatus.PRODUCTION || status === ProjectStatus.DELIVERY || status === ProjectStatus.WAITING_RESOURCES) && (
+                            {(status === ProjectStatus.PRODUCTION || status === ProjectStatus.DELIVERY || status === ProjectStatus.WAITING_RESOURCES || status === ProjectStatus.DELIVERED) && (
                                 <div className="w-full md:w-1/3 shrink-0">
                                     <TechnicalSheet />
                                 </div>
