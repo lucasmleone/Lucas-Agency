@@ -370,134 +370,134 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                 </div>
                                 <h2 className="text-3xl font-bold text-gray-900">Esperando Recursos</h2>
                                 <p className="text-lg text-gray-600 max-w-xl mx-auto">
-                                    Para comenzar, necesitamos que nos envíes los materiales y confirmes el anticipo.
+                                    Para comenzar, necesitamos que completes estos 3 pasos.
                                 </p>
                             </div>
 
-                            <div className="grid md:grid-cols-3 gap-6">
-                                {/* Left Column: Resources (2/3 width) */}
-                                <div className="md:col-span-2 space-y-6">
-                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                                        <div className="p-8 space-y-8">
-                                            <div>
-                                                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                                    1. Sube tus archivos
-                                                </h3>
-                                                <a
-                                                    href={project.driveLink || '#'}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="block w-full p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
-                                                >
-                                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
-                                                        <ExternalLink size={24} />
-                                                    </div>
-                                                    <p className="font-bold text-blue-900">Abrir Carpeta Compartida</p>
-                                                    <p className="text-sm text-blue-600">Google Drive / Dropbox</p>
-                                                </a>
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden max-w-2xl mx-auto">
+                                <div className="p-8 space-y-8">
+                                    {/* Step 1: Upload Files */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                                            Sube tus archivos
+                                        </h3>
+                                        <a
+                                            href={project.driveLink || '#'}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block w-full p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
+                                        >
+                                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
+                                                <ExternalLink size={24} />
                                             </div>
-
-                                            <div>
-                                                <h3 className="text-lg font-bold text-gray-900 mb-4">
-                                                    2. Lista de Requisitos
-                                                </h3>
-                                                <ul className="space-y-3">
-                                                    {(project.requirements || []).map((req, i) => (
-                                                        <li
-                                                            key={i}
-                                                            onClick={() => toggleRequirement(i)}
-                                                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                                                            <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${checkedRequirements.has(i)
-                                                                ? 'bg-green-500 border-green-500'
-                                                                : 'border-gray-300 hover:border-gray-400'
-                                                                }`}>
-                                                                {checkedRequirements.has(i) && (
-                                                                    <CheckCircle size={16} className="text-white" />
-                                                                )}
-                                                            </div>
-                                                            <span className={`text-gray-700 ${checkedRequirements.has(i) ? 'line-through opacity-60' : ''}`}>{req}</span>
-                                                        </li>
-                                                    ))}
-                                                    {(!project.requirements || project.requirements.length === 0) && (
-                                                        <p className="text-gray-500 italic">No hay requisitos específicos listados.</p>
-                                                    )}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div className="bg-gray-50 p-8 border-t border-gray-100 flex justify-end">
-                                            <button
-                                                onClick={() => handleActionClick('confirm_resources')}
-                                                disabled={loading}
-                                                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 flex items-center gap-3"
-                                            >
-                                                {loading ? 'Enviando...' : (
-                                                    <>
-                                                        <Send size={20} /> Ya envié los recursos
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
+                                            <p className="font-bold text-blue-900">Abrir Carpeta Compartida</p>
+                                            <p className="text-sm text-blue-600">Google Drive / Dropbox</p>
+                                        </a>
                                     </div>
-                                </div>
 
-                                {/* Right Column: Advance Payment (1/3 width) */}
-                                <div className="space-y-6">
-                                    <div className={`rounded-2xl shadow-sm border p-6 ${project.advancePaymentInfo
-                                        ? 'bg-green-50 border-green-200'
-                                        : 'bg-white border-gray-200'
-                                        }`}>
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${project.advancePaymentInfo ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
-                                                }`}>
-                                                {project.advancePaymentInfo ? <CheckCircle size={20} /> : <Lock size={20} />}
-                                            </div>
-                                            <h3 className={`font-bold ${project.advancePaymentInfo ? 'text-green-900' : 'text-gray-900'}`}>
-                                                Anticipo ({project.advancePercentage}%)
-                                            </h3>
-                                        </div>
+                                    {/* Step 2: Requirements Checklist */}
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                                            Lista de Requisitos
+                                        </h3>
+                                        <ul className="space-y-3">
+                                            {(project.requirements || []).map((req, i) => (
+                                                <li
+                                                    key={i}
+                                                    onClick={() => toggleRequirement(i)}
+                                                    className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                                                    <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${checkedRequirements.has(i)
+                                                        ? 'bg-green-500 border-green-500'
+                                                        : 'border-gray-300 hover:border-gray-400'
+                                                        }`}>
+                                                        {checkedRequirements.has(i) && (
+                                                            <CheckCircle size={16} className="text-white" />
+                                                        )}
+                                                    </div>
+                                                    <span className={`text-gray-700 ${checkedRequirements.has(i) ? 'line-through opacity-60' : ''}`}>{req}</span>
+                                                </li>
+                                            ))}
+                                            {(!project.requirements || project.requirements.length === 0) && (
+                                                <p className="text-gray-500 italic">No hay requisitos específicos listados.</p>
+                                            )}
+                                        </ul>
+                                    </div>
+
+                                    {/* Step 3: Advance Payment */}
+                                    <div className="border-t pt-6">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                                            Confirma el Anticipo ({project.advancePercentage}%)
+                                        </h3>
 
                                         {project.advancePaymentInfo ? (
-                                            <div>
-                                                <p className="text-sm text-green-800 mb-2">
-                                                    ¡Gracias! Hemos recibido tu información de pago.
-                                                </p>
-                                                <div className="text-xs text-green-700 bg-green-100 p-3 rounded-lg break-words">
-                                                    {project.advancePaymentInfo}
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                <div className="flex items-start gap-3 mb-2">
+                                                    <CheckCircle size={20} className="text-green-600 mt-0.5" />
+                                                    <div className="flex-1">
+                                                        <p className="text-sm text-green-800 font-semibold mb-1">
+                                                            ✓ Pago confirmado
+                                                        </p>
+                                                        <p className="text-xs text-green-700 bg-green-100 p-2 rounded">
+                                                            {project.advancePaymentInfo}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-4">
-                                                    Para iniciar el desarrollo, se requiere un anticipo de:
-                                                </p>
-                                                <p className="text-3xl font-black text-gray-900 mb-4">
-                                                    ${((project.finalPrice || 0) * (project.advancePercentage || 50) / 100).toFixed(2)}
-                                                </p>
-
-                                                <div className="space-y-3">
-                                                    <div>
-                                                        <label className="block text-xs font-bold text-gray-700 mb-1">
-                                                            Informar Pago (Transferencia / Link)
-                                                        </label>
-                                                        <textarea
-                                                            rows={3}
-                                                            value={advancePaymentInfo}
-                                                            onChange={(e) => setAdvancePaymentInfo(e.target.value)}
-                                                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                                            placeholder="Ej: Transferencia #123456..."
-                                                        />
-                                                    </div>
-                                                    <button
-                                                        onClick={handleConfirmAdvance}
-                                                        disabled={loading || !advancePaymentInfo.trim()}
-                                                        className="w-full py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    >
-                                                        {loading ? 'Enviando...' : 'Confirmar Pago'}
-                                                    </button>
+                                            <div className="space-y-4">
+                                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                                    <p className="text-sm text-gray-700 mb-2">Para iniciar el desarrollo, necesitamos un anticipo de:</p>
+                                                    <p className="text-3xl font-black text-gray-900">
+                                                        ${((project.finalPrice || 0) * (project.advancePercentage || 50) / 100).toFixed(2)}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">De un total de ${(project.finalPrice || 0).toFixed(2)}</p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                                                        Información de Pago
+                                                    </label>
+                                                    <textarea
+                                                        rows={3}
+                                                        value={advancePaymentInfo}
+                                                        onChange={(e) => setAdvancePaymentInfo(e.target.value)}
+                                                        className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                                                        placeholder="Ejemplo: Transferencia bancaria #123456 o link al comprobante"
+                                                    />
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        Indícanos el método/número de referencia o pega el link al comprobante
+                                                    </p>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
+                                </div>
+
+                                <div className="bg-gray-50 p-6 border-t border-gray-100">
+                                    <button
+                                        onClick={() => {
+                                            if (!project.advancePaymentInfo && !advancePaymentInfo.trim()) {
+                                                alert('Por favor completa la información del anticipo antes de continuar.');
+                                                return;
+                                            }
+                                            if (!project.advancePaymentInfo) {
+                                                handleConfirmAdvance();
+                                            } else {
+                                                handleActionClick('confirm_resources');
+                                            }
+                                        }}
+                                        disabled={loading}
+                                        className="w-full bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-3"
+                                    >
+                                        {loading ? 'Procesando...' : (
+                                            <>
+                                                <Send size={20} />
+                                                {project.advancePaymentInfo ? 'Confirmar Todo Enviado' : 'Confirmar Pago y Envío'}
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
                             </div>
                         </div>
