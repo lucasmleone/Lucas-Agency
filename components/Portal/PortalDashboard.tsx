@@ -21,7 +21,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
     const [resourcesConfirmed, setResourcesConfirmed] = useState(project.resourcesSent || false);
 
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; action: string; title: string; message: string } | null>(null);
-    const [showAdvanceModal, setShowAdvanceModal] = useState(!project.advancePaymentInfo && project.advancePercentage > 0);
+
     const [advancePaymentInfo, setAdvancePaymentInfo] = useState('');
 
     const toggleRequirement = (index: number) => {
@@ -92,7 +92,6 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
 
             if (!response.ok) throw new Error('Failed to confirm advance');
 
-            setShowAdvanceModal(false);
             setConfirmModal({
                 show: true,
                 action: 'success',
@@ -150,61 +149,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                 </div>
             )}
 
-            {/* Advance Payment Modal */}
-            {showAdvanceModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
-                        <div className="text-center mb-6">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-4">
-                                <AlertCircle size={32} />
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Anticipo Requerido</h3>
-                            <p className="text-gray-600">Para comenzar el proyecto necesitamos que realices un anticipo.</p>
-                        </div>
 
-                        {/* Amount Display */}
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border-2 border-blue-200">
-                            <p className="text-sm text-gray-600 mb-2">Monto del Anticipo ({project.advancePercentage}%):</p>
-                            <p className="text-4xl font-black text-gray-900">
-                                ${((project.finalPrice || 0) * (project.advancePercentage || 50) / 100).toFixed(2)}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-2">De un total de ${(project.finalPrice || 0).toFixed(2)}</p>
-                        </div>
-
-                        {/* Payment Info Input */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                                ¿Cómo realizaste el pago?
-                            </label>
-                            <textarea
-                                rows={4}
-                                value={advancePaymentInfo}
-                                onChange={(e) => setAdvancePaymentInfo(e.target.value)}
-                                className="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                                placeholder="Ejemplo: Transferencia bancaria a cuenta XXXX, número de referencia: 123456&#10;&#10;O puedes pegar un link a tu comprobante aquí."
-                            />
-                            <p className="text-xs text-gray-500 mt-2">
-                                Indícanos el método de pago, número de referencia, o link al comprobante.
-                            </p>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex flex-col gap-3">
-                            <button
-                                onClick={handleConfirmAdvance}
-                                disabled={loading || !advancePaymentInfo.trim()}
-                                className="w-full px-6 py-3.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                                {loading ? 'Procesando...' : 'Confirmar Pago'}
-                            </button>
-                            <button
-                                onClick={() => setShowAdvanceModal(false)}
-                                className="w-full px-6 py-3 rounded-xl text-gray-600 font-medium hover:bg-gray-100 transition-colors">
-                                Cerrar (Podré hacerlo después)
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Header */}
             <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -528,12 +473,28 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                                 <p className="text-3xl font-black text-gray-900 mb-4">
                                                     ${((project.finalPrice || 0) * (project.advancePercentage || 50) / 100).toFixed(2)}
                                                 </p>
-                                                <button
-                                                    onClick={() => setShowAdvanceModal(true)}
-                                                    className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-md text-sm"
-                                                >
-                                                    Informar Pago
-                                                </button>
+
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                                                            Informar Pago (Transferencia / Link)
+                                                        </label>
+                                                        <textarea
+                                                            rows={3}
+                                                            value={advancePaymentInfo}
+                                                            onChange={(e) => setAdvancePaymentInfo(e.target.value)}
+                                                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                                                            placeholder="Ej: Transferencia #123456..."
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        onClick={handleConfirmAdvance}
+                                                        disabled={loading || !advancePaymentInfo.trim()}
+                                                        className="w-full py-2.5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {loading ? 'Enviando...' : 'Confirmar Pago'}
+                                                    </button>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
