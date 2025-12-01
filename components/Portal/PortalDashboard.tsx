@@ -370,65 +370,63 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                 </div>
                                 <h2 className="text-3xl font-bold text-gray-900">Esperando Recursos</h2>
                                 <p className="text-lg text-gray-600 max-w-xl mx-auto">
-                                    Para comenzar, necesitamos que completes estos 3 pasos.
+                                    Para comenzar, necesitamos que completes estos 2 pasos.
                                 </p>
                             </div>
 
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden max-w-2xl mx-auto">
                                 <div className="p-8 space-y-8">
-                                    {/* Step 1: Upload Files */}
+                                    {/* Step 1: Upload Files + Requirements */}
                                     <div>
                                         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                             <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
                                             Sube tus archivos
                                         </h3>
-                                        <a
-                                            href={project.driveLink || '#'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block w-full p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
-                                        >
-                                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
-                                                <ExternalLink size={24} />
-                                            </div>
-                                            <p className="font-bold text-blue-900">Abrir Carpeta Compartida</p>
-                                            <p className="text-sm text-blue-600">Google Drive / Dropbox</p>
-                                        </a>
-                                    </div>
+                                        <div className="space-y-4">
+                                            <a
+                                                href={project.driveLink || '#'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block w-full p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
+                                            >
+                                                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
+                                                    <ExternalLink size={24} />
+                                                </div>
+                                                <p className="font-bold text-blue-900">Abrir Carpeta Compartida</p>
+                                                <p className="text-sm text-blue-600">Google Drive / Dropbox</p>
+                                            </a>
 
-                                    {/* Step 2: Requirements Checklist */}
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-                                            Lista de Requisitos
-                                        </h3>
-                                        <ul className="space-y-3">
-                                            {(project.requirements || []).map((req, i) => (
-                                                <li
-                                                    key={i}
-                                                    onClick={() => toggleRequirement(i)}
-                                                    className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                                                    <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${checkedRequirements.has(i)
-                                                        ? 'bg-green-500 border-green-500'
-                                                        : 'border-gray-300 hover:border-gray-400'
-                                                        }`}>
-                                                        {checkedRequirements.has(i) && (
-                                                            <CheckCircle size={16} className="text-white" />
-                                                        )}
-                                                    </div>
-                                                    <span className={`text-gray-700 ${checkedRequirements.has(i) ? 'line-through opacity-60' : ''}`}>{req}</span>
-                                                </li>
-                                            ))}
-                                            {(!project.requirements || project.requirements.length === 0) && (
-                                                <p className="text-gray-500 italic">No hay requisitos específicos listados.</p>
+                                            {/* Requirements Checklist */}
+                                            {(project.requirements && project.requirements.length > 0) && (
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-700 mb-2">Lo que necesitamos:</p>
+                                                    <ul className="space-y-2">
+                                                        {project.requirements.map((req, i) => (
+                                                            <li
+                                                                key={i}
+                                                                onClick={() => toggleRequirement(i)}
+                                                                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                                                                <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${checkedRequirements.has(i)
+                                                                    ? 'bg-green-500 border-green-500'
+                                                                    : 'border-gray-300 hover:border-gray-400'
+                                                                    }`}>
+                                                                    {checkedRequirements.has(i) && (
+                                                                        <CheckCircle size={16} className="text-white" />
+                                                                    )}
+                                                                </div>
+                                                                <span className={`text-sm text-gray-700 ${checkedRequirements.has(i) ? 'line-through opacity-60' : ''}`}>{req}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
                                             )}
-                                        </ul>
+                                        </div>
                                     </div>
 
-                                    {/* Step 3: Advance Payment */}
+                                    {/* Step 2: Advance Payment */}
                                     <div className="border-t pt-6">
                                         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                                            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
                                             Confirma el Anticipo ({project.advancePercentage}%)
                                         </h3>
 
