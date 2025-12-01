@@ -77,7 +77,7 @@ export const Portal: React.FC<PortalProps> = ({ token }) => {
         setStatus('authenticated');
     };
 
-    const handleAction = async (action: string) => {
+    const handleAction = async (action: string, data?: any) => {
         if (!sessionToken) return;
 
         const res = await fetch(`/api/portal/${token}/action`, {
@@ -86,7 +86,7 @@ export const Portal: React.FC<PortalProps> = ({ token }) => {
                 'Content-Type': 'application/json',
                 'x-portal-token': sessionToken
             },
-            body: JSON.stringify({ action })
+            body: JSON.stringify({ action, ...data })
         });
 
         if (!res.ok) {

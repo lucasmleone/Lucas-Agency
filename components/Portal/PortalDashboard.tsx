@@ -12,7 +12,7 @@ import {
 interface PortalDashboardProps {
     project: Project;
     milestones: Milestone[];
-    onAction: (action: string) => Promise<void>;
+    onAction: (action: string, data?: any) => Promise<void>;
 }
 
 export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, milestones, onAction }) => {
@@ -83,14 +83,7 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
 
         setLoading(true);
         try {
-            // Call backend with custom action
-            const response = await fetch(`/api/portal/${project.portalToken}/action`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'confirm_advance', paymentInfo: advancePaymentInfo })
-            });
-
-            if (!response.ok) throw new Error('Failed to confirm advance');
+            await onAction('confirm_advance', { paymentInfo: advancePaymentInfo });
 
             setConfirmModal({
                 show: true,
