@@ -638,30 +638,50 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     <p className="text-xs font-bold text-indigo-800 uppercase">Saldo Restante (Proyecto)</p>
                                     <div className="flex items-baseline gap-2">
                                         <p className="text-2xl font-black text-indigo-700">
-                                            {formatCurrency(calculateTotalWithAddOns(
-                                                project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
-                                                addOnsTotal,
-                                                project.customPrice,
-                                                project.discount,
-                                                project.discountType
-                                            ) - finances
-                                                .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
-                                                .reduce((acc, curr) => acc + Number(curr.amount), 0))}
+                                            {formatCurrency((() => {
+                                                const total = project.isHourlyQuote
+                                                    ? ((project.customHours || 0) * (project.hourlyRate || 0)) - (project.discount > 0
+                                                        ? (project.discountType === 'percentage'
+                                                            ? ((project.customHours || 0) * (project.hourlyRate || 0) * project.discount / 100)
+                                                            : project.discount)
+                                                        : 0)
+                                                    : calculateTotalWithAddOns(
+                                                        project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
+                                                        addOnsTotal,
+                                                        project.customPrice,
+                                                        project.discount,
+                                                        project.discountType
+                                                    );
+                                                const paid = finances
+                                                    .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
+                                                    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+                                                return Math.max(0, total - paid);
+                                            })())}
                                         </p>
                                     </div>
                                     <div className="w-full bg-indigo-200 rounded-full h-1.5 mt-2">
                                         <div
                                             className="bg-indigo-600 h-1.5 rounded-full"
                                             style={{
-                                                width: `${Math.min(100, (finances
-                                                    .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
-                                                    .reduce((acc, curr) => acc + Number(curr.amount), 0) / (calculateTotalWithAddOns(
-                                                        project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
-                                                        addOnsTotal,
-                                                        project.customPrice,
-                                                        project.discount,
-                                                        project.discountType
-                                                    ) || 1)) * 100)}%`
+                                                width: `${(() => {
+                                                    const total = project.isHourlyQuote
+                                                        ? ((project.customHours || 0) * (project.hourlyRate || 0)) - (project.discount > 0
+                                                            ? (project.discountType === 'percentage'
+                                                                ? ((project.customHours || 0) * (project.hourlyRate || 0) * project.discount / 100)
+                                                                : project.discount)
+                                                            : 0)
+                                                        : calculateTotalWithAddOns(
+                                                            project.basePrice || getBasePriceForPlan(project.planType, pricingConfig),
+                                                            addOnsTotal,
+                                                            project.customPrice,
+                                                            project.discount,
+                                                            project.discountType
+                                                        );
+                                                    const paid = finances
+                                                        .filter(f => f.type === 'Ingreso' && !f.description.toLowerCase().includes('mantenimiento'))
+                                                        .reduce((acc, curr) => acc + Number(curr.amount), 0);
+                                                    return Math.min(100, (paid / (total || 1)) * 100);
+                                                })()}%`
                                             }}
                                         />
                                     </div>

@@ -103,7 +103,8 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
                    p.drive_link, p.requirements, p.portal_expires_at,
                    p.base_price, p.custom_price, p.discount, p.discount_type, 
                    p.final_price, p.plan as planType,
-                   p.delivery_data
+                   p.delivery_data,
+                   p.is_hourly_quote, p.custom_hours, p.hourly_rate
             FROM projects p 
             WHERE p.portal_token = ?
         `, [token]);
@@ -117,22 +118,32 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
             [project.id]
         );
 
-        // Get Add-ons for price calculation
+        // Get Add-ons
         const [addOns] = await pool.query(
-            'SELECT price FROM project_add_ons WHERE project_id = ?',
+            'SELECT name, price FROM project_add_ons WHERE project_id = ?',
             [project.id]
         );
         const addOnsTotal = addOns.reduce((sum, addon) => sum + parseFloat(addon.price || 0), 0);
 
-        // Calculate final price including add-ons
+        // Calculate final price
         const basePrice = parseFloat(project.base_price || 0);
         const customPrice = project.custom_price ? parseFloat(project.custom_price) : null;
         const discount = parseFloat(project.discount || 0);
         const discountType = project.discount_type || 'percentage';
+        const isHourlyQuote = Boolean(project.is_hourly_quote);
+        const customHours = parseFloat(project.custom_hours || 0);
+        const hourlyRate = parseFloat(project.hourly_rate || 0);
 
-        // Calculate total: (base + addons) or customPrice, then apply discount
-        const subtotal = basePrice + addOnsTotal;
-        const startingPrice = customPrice && customPrice > 0 ? customPrice : subtotal;
+        let startingPrice = 0;
+
+        if (isHourlyQuote) {
+            // Hourly Quote Calculation
+            startingPrice = customHours * hourlyRate;
+        } else {
+            // Standard Plan Calculation
+            const subtotal = basePrice + addOnsTotal;
+            startingPrice = customPrice && customPrice > 0 ? customPrice : subtotal;
+        }
 
         let calculatedFinalPrice = startingPrice;
         if (discount > 0) {
@@ -168,6 +179,10 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
             project: {
                 ...project,
                 finalPrice: calculatedFinalPrice, // Calculated price including add-ons
+                isHourlyQuote: Boolean(project.is_hourly_quote),
+                customHours: parseFloat(project.custom_hours || 0),
+                hourlyRate: parseFloat(project.hourly_rate || 0),
+                addOns: addOns, // Include full add-ons list
                 driveLink: project.drive_link,  // Convert to camelCase
                 requirements: typeof project.requirements === 'string' ? JSON.parse(project.requirements) : project.requirements,
                 deliveryData: typeof project.delivery_data === 'string' ? JSON.parse(project.delivery_data) : project.delivery_data,

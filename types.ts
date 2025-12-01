@@ -98,6 +98,9 @@ export interface Project {
   discountType?: 'percentage' | 'fixed'; // Type of discount
   finalPrice?: number; // Calculated final price
   pricingNotes?: string; // Notes about pricing/quote
+  isHourlyQuote?: boolean;
+  customHours?: number;
+  hourlyRate?: number;
   nextMaintenanceDate?: string; // Next scheduled maintenance task date
 
   // Portal Fields

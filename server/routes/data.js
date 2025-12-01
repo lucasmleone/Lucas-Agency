@@ -44,6 +44,11 @@ router.get('/projects', async (req, res) => {
             discountType: p.discount_type,
             finalPrice: p.final_price,
             pricingNotes: p.pricing_notes,
+            finalPrice: p.final_price,
+            pricingNotes: p.pricing_notes,
+            isHourlyQuote: Boolean(p.is_hourly_quote),
+            customHours: p.custom_hours,
+            hourlyRate: p.hourly_rate,
             // Portal fields
             portalToken: p.portal_token,
             portalPin: p.portal_pin,
@@ -177,7 +182,11 @@ router.put('/projects/:id', async (req, res) => {
         addUpdate('discount', p.discount);
         addUpdate('discount_type', p.discountType);
         addUpdate('final_price', p.finalPrice);
+        addUpdate('final_price', p.finalPrice);
         addUpdate('pricing_notes', p.pricingNotes);
+        addUpdate('is_hourly_quote', p.isHourlyQuote);
+        addUpdate('custom_hours', p.customHours);
+        addUpdate('hourly_rate', p.hourlyRate);
         addUpdate('portal_token', p.portalToken);
         addUpdate('portal_pin', p.portalPin);
         addUpdate('portal_enabled', p.portalEnabled);

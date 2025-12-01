@@ -157,7 +157,69 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                     </div>
                                     <div className="text-left md:text-right bg-gray-50 px-4 py-2 rounded-lg">
                                         <p className="text-xs text-gray-500 uppercase font-bold mb-1">Plan Seleccionado</p>
-                                        <p className="font-bold text-gray-900 text-lg">{project.planType}</p>
+                                        <p className="font-bold text-gray-900 text-lg">{project.isHourlyQuote ? 'Cotización por Horas' : project.planType}</p>
+                                    </div>
+                                </div>
+
+                                {/* Pricing Breakdown */}
+                                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                                    <h4 className="text-xs font-bold text-gray-500 uppercase mb-4 tracking-wider">Desglose de Inversión</h4>
+
+                                    {project.isHourlyQuote ? (
+                                        // Hourly Breakdown
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-700 font-medium">Desarrollo Personalizado</span>
+                                                <span className="font-bold text-gray-900">
+                                                    {(project.customHours * project.hourlyRate).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                                </span>
+                                            </div>
+                                            <div className="text-sm text-gray-500 pl-4 border-l-2 border-gray-300">
+                                                {project.customHours} horas estimadas x ${project.hourlyRate}/hora
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        // Plan + Addons Breakdown
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-700 font-medium">Plan Base ({project.planType})</span>
+                                                <span className="font-bold text-gray-900">
+                                                    {project.basePrice?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                                </span>
+                                            </div>
+                                            {project.addOns && project.addOns.map((addon, i) => (
+                                                <div key={i} className="flex justify-between items-center text-sm">
+                                                    <span className="text-gray-600 flex items-center">
+                                                        <Plus size={14} className="mr-2 text-blue-500" />
+                                                        {addon.name}
+                                                    </span>
+                                                    <span className="font-medium text-gray-900">
+                                                        {parseFloat(addon.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Discount */}
+                                    {project.discount > 0 && (
+                                        <div className="flex justify-between items-center pt-3 mt-3 border-t border-gray-200 text-green-600">
+                                            <span className="font-medium">Descuento Aplicado ({project.discountType === 'percentage' ? `${project.discount}%` : `$${project.discount}`})</span>
+                                            <span className="font-bold">
+                                                - {((project.isHourlyQuote
+                                                    ? (project.customHours * project.hourlyRate)
+                                                    : (project.basePrice + (project.addOns?.reduce((sum, a) => sum + parseFloat(a.price), 0) || 0))) - project.finalPrice)
+                                                    .toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Total */}
+                                    <div className="flex justify-between items-center pt-4 mt-4 border-t-2 border-gray-200">
+                                        <span className="font-black text-gray-900 text-lg">TOTAL FINAL</span>
+                                        <span className="font-black text-gray-900 text-xl">
+                                            {project.finalPrice?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                                        </span>
                                     </div>
                                 </div>
 
