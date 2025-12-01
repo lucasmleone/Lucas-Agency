@@ -1247,6 +1247,17 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     </div>
 
                                     <div className="mt-8 pt-6 border-t border-gray-700">
+                                        <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
+                                            <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
+                                            <span>{formatCurrency(
+                                                (calculateFinalPrice(
+                                                    pricingData.basePrice,
+                                                    pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
+                                                    pricingData.discount,
+                                                    pricingData.discountType
+                                                ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
+                                            )}</span>
+                                        </div>
                                         <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
                                         <p className="text-4xl font-black text-white tracking-tight">
                                             {formatCurrency(calculateFinalPrice(

@@ -67,9 +67,9 @@ export const ActionCenter: React.FC<ActionCenterProps> = ({ projects, logs = [] 
 
                                 {/* Blocking Status Alerts */}
                                 {p.status === ProjectStatus.WAITING_RESOURCES && (
-                                    hasConfirmedResources ? (
+                                    (hasConfirmedResources || p.advancePaymentInfo) ? (
                                         <div className="text-[10px] bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center font-bold animate-pulse">
-                                            <CheckCircle className="w-3 h-3 mr-1" /> Recursos Enviados
+                                            <CheckCircle className="w-3 h-3 mr-1" /> Recursos y Anticipo Recibidos
                                         </div>
                                     ) : (
                                         <div className="text-[10px] bg-orange-100 text-orange-800 px-2 py-1 rounded flex items-center">

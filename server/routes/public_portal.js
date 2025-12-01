@@ -126,7 +126,16 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
         const addOnsTotal = addOns.reduce((sum, addon) => sum + parseFloat(addon.price || 0), 0);
 
         // Calculate final price
-        const basePrice = parseFloat(project.base_price || 0);
+        let basePrice = parseFloat(project.base_price || 0);
+
+        // Fallback for legacy plans if price is 0
+        if (basePrice === 0) {
+            const plan = project.planType; // Alias from query
+            if (plan === 'Multipage') basePrice = 600;
+            else if (plan === 'E-commerce') basePrice = 900;
+            else if (plan === 'Single Page') basePrice = 300;
+        }
+
         const customPrice = project.custom_price ? parseFloat(project.custom_price) : null;
         const discount = parseFloat(project.discount || 0);
         const discountType = project.discount_type || 'percentage';

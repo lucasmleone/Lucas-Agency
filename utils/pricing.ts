@@ -15,6 +15,13 @@ export const getBasePriceForPlan = (plan: PlanType, config?: Record<string, numb
             return 350;
         case PlanType.CUSTOM:
             return 0;
+        // Legacy Plans Support
+        case 'Multipage' as any:
+            return 600;
+        case 'E-commerce' as any:
+            return 900;
+        case 'Single Page' as any:
+            return 300;
         default:
             return 0;
     }

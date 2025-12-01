@@ -273,7 +273,12 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                         // Plan + Addons Breakdown
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-700 font-medium">Plan Base ({project.planType})</span>
+                                                <span className="text-gray-700 font-medium">
+                                                    Plan Base ({project.planType})
+                                                    <span className="text-gray-400 font-normal ml-1">
+                                                        ({project.basePrice?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })})
+                                                    </span>
+                                                </span>
                                                 <span className="font-bold text-gray-900">
                                                     {project.basePrice?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                                                 </span>
@@ -408,568 +413,629 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                     </div>
                 )}
 
-                {/* STAGE 2: WAITING RESOURCES */}
-                {isWaitingResources && !resourcesConfirmed && (
-                    <div className="space-y-8 animate-fade-in">
-                        <div className="text-center space-y-4">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-600 rounded-full mb-4">
-                                <Clock size={32} />
-                            </div>
-                            <h2 className="text-3xl font-bold text-gray-900">Esperando Recursos</h2>
-                            <p className="text-lg text-gray-600 max-w-xl mx-auto">
-                                Para comenzar, necesitamos que nos envíes los siguientes materiales.
-                            </p>
-                        </div>
 
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div className="p-8 space-y-8">
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                        1. Sube tus archivos
-                                    </h3>
-                                    <a
-                                        href={project.driveLink || '#'}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block w-full p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
-                                    >
-                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
-                                            <ExternalLink size={24} />
-                                        </div>
-                                        <p className="font-bold text-blue-900">Abrir Carpeta Compartida</p>
-                                        <p className="text-sm text-blue-600">Google Drive / Dropbox</p>
-                                    </a>
+
+                {/* STAGE 2: WAITING RESOURCES & ADVANCE PAYMENT */}
+                {
+                    isWaitingResources && !resourcesConfirmed && (
+                        <div className="space-y-8 animate-fade-in">
+                            <div className="text-center space-y-4">
+                                <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 text-orange-600 rounded-full mb-4">
+                                    <Clock size={32} />
                                 </div>
-
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">
-                                        2. Lista de Requisitos
-                                    </h3>
-                                    <ul className="space-y-3">
-                                        {(project.requirements || []).map((req, i) => (
-                                            <li
-                                                key={i}
-                                                onClick={() => toggleRequirement(i)}
-                                                className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
-                                                <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${checkedRequirements.has(i)
-                                                    ? 'bg-green-500 border-green-500'
-                                                    : 'border-gray-300 hover:border-gray-400'
-                                                    }`}>
-                                                    {checkedRequirements.has(i) && (
-                                                        <CheckCircle size={16} className="text-white" />
-                                                    )}
-                                                </div>
-                                                <span className={`text-gray-700 ${checkedRequirements.has(i) ? 'line-through opacity-60' : ''}`}>{req}</span>
-                                            </li>
-                                        ))}
-                                        {(!project.requirements || project.requirements.length === 0) && (
-                                            <p className="text-gray-500 italic">No hay requisitos específicos listados.</p>
-                                        )}
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="bg-gray-50 p-8 border-t border-gray-100 flex justify-end">
-                                <button
-                                    onClick={() => handleActionClick('confirm_resources')}
-                                    disabled={loading}
-                                    className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 flex items-center gap-3"
-                                >
-                                    {loading ? 'Enviando...' : (
-                                        <>
-                                            <Send size={20} /> Ya envié los recursos
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* STAGE 2b: RESOURCES CONFIRMED - UNDER REVIEW */}
-                {isWaitingResources && resourcesConfirmed && (
-                    <div className="space-y-8 animate-fade-in">
-                        <div className="text-center space-y-4">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-100 text-purple-600 rounded-full mb-4">
-                                <CheckCircle size={40} />
-                            </div>
-                            <h2 className="text-3xl font-extrabold text-gray-900">Recursos en Revisión</h2>
-                            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                                Gracias por enviar los archivos. Nuestro equipo los está revisando y comenzaremos el desarrollo pronto.
-                            </p>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 border border-purple-200">
-                            <div className="max-w-2xl mx-auto space-y-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
-                                        1
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-900 mb-1">Revisión de Archivos</h3>
-                                        <p className="text-gray-600 text-sm">
-                                            Verificamos que todos los materiales estén completos y sean correctos.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
-                                        2
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-700 mb-1">Inicio de Desarrollo</h3>
-                                        <p className="text-gray-500 text-sm">
-                                            Una vez aprobados, comenzaremos a trabajar en tu proyecto.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
-                                        3
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-700 mb-1">Actualizaciones Regulares</h3>
-                                        <p className="text-gray-500 text-sm">
-                                            Te mantendremos informado del progreso a través de este portal.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                            <div className="flex gap-4">
-                                <div className="text-blue-600 flex-shrink-0">
-                                    <AlertCircle size={24} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-blue-900 mb-1">¿Necesitas agregar algo?</h4>
-                                    <p className="text-blue-700 text-sm">
-                                        Si olvidaste algún archivo o necesitas hacer cambios, puedes subirlos a la{' '}
-                                        <a
-                                            href={project.driveLink || '#'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="underline font-bold hover:text-blue-900">
-                                            carpeta compartida
-                                        </a>
-                                        {' '}y te contactaremos si hay algún problema.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* STAGE 3: PRODUCTION (FOG OF WAR) */}
-                {isProduction && (
-                    <div className="space-y-8 animate-fade-in">
-                        <div className="text-center space-y-4">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 text-purple-600 rounded-full mb-4">
-                                <Clock size={32} />
-                            </div>
-                            <h2 className="text-3xl font-bold text-gray-900">En Producción</h2>
-                            <p className="text-lg text-gray-600 max-w-xl mx-auto">
-                                Estamos trabajando en tu proyecto. Aquí puedes ver el progreso en tiempo real.
-                            </p>
-                        </div>
-
-                        <div className="max-w-xl mx-auto relative">
-                            {/* Vertical Line */}
-                            <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-gray-200" />
-
-                            <div className="space-y-8 relative">
-                                {milestones.map((milestone, index) => (
-                                    <div key={milestone.id} className="flex gap-6 relative">
-                                        {/* Icon */}
-                                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 z-10 border-4 border-gray-50 shadow-sm transition-all
-                                            ${milestone.status === 'completed' ? 'bg-green-500 text-white' :
-                                                milestone.status === 'active' ? 'bg-white border-blue-100 text-blue-600 ring-4 ring-blue-50' :
-                                                    'bg-gray-100 text-gray-400'
-                                            }
-`}>
-                                            {milestone.status === 'completed' ? <CheckCircle size={24} /> :
-                                                milestone.status === 'active' ? <div className="w-3 h-3 bg-blue-600 rounded-full animate-ping" /> :
-                                                    <div className="w-3 h-3 bg-gray-300 rounded-full" />}
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className={`flex - 1 pt - 3 ${milestone.status === 'active' ? 'opacity-100' : 'opacity-80'} `}>
-                                            <h3 className={`text - lg font - bold ${milestone.status === 'active' ? 'text-blue-600' : 'text-gray-900'} `}>
-                                                {milestone.title}
-                                            </h3>
-                                            <p className="text-sm text-gray-500 mt-1">
-                                                {milestone.status === 'completed' ? 'Completado' :
-                                                    milestone.status === 'active' ? 'En progreso...' :
-                                                        'Pendiente'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* Fog of War Hint */}
-                                <div className="flex gap-6 relative opacity-50 blur-[2px]">
-                                    <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center flex-shrink-0 border-4 border-white">
-                                        <Lock size={20} className="text-gray-300" />
-                                    </div>
-                                    <div className="flex-1 pt-4">
-                                        <div className="h-4 bg-gray-200 rounded w-32 mb-2" />
-                                        <div className="h-3 bg-gray-100 rounded w-24" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* STAGE 5: DELIVERY & CLOSURE */}
-                {isDelivery && (
-                    <div className="space-y-8 animate-fade-in">
-                        <div className="text-center space-y-4">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 text-green-600 rounded-full mb-4">
-                                <CheckCircle size={32} />
-                            </div>
-                            <h2 className="text-3xl font-bold text-gray-900">Cierre y Entrega</h2>
-                            <p className="text-lg text-gray-600 max-w-xl mx-auto">
-                                ¡Tu proyecto está listo! {project.paymentStatus === 'Pagado (100%)' ? 'Aquí tienes tus accesos.' : 'Completa el pago final para acceder a tus credenciales.'}
-                            </p>
-                        </div>
-
-                        {project.paymentStatus !== 'Pagado (100%)' ? (
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center max-w-lg mx-auto">
-                                <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Lock size={32} />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Esperando Confirmación de Saldo</h3>
-                                <p className="text-gray-600 mb-6">
-                                    Para liberar las credenciales de acceso y el informe final, es necesario registrar el pago del saldo restante.
+                                <h2 className="text-3xl font-bold text-gray-900">Esperando Recursos</h2>
+                                <p className="text-lg text-gray-600 max-w-xl mx-auto">
+                                    Para comenzar, necesitamos que nos envíes los materiales y confirmes el anticipo.
                                 </p>
-                                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-500">
-                                    Si ya realizaste el pago, por favor avísanos para actualizar el estado.
-                                </div>
                             </div>
-                        ) : (
-                            <>
-                                {/* Premium Website Showcase */}
-                                {project.deliveryData?.finalUrl && (
-                                    <div className="mb-12 animate-slide-up">
-                                        <div className="relative group cursor-pointer" onClick={() => window.open(project.deliveryData?.finalUrl, '_blank')}>
-                                            {/* Glow Effect */}
-                                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
 
-                                            <div className="relative bg-white rounded-xl overflow-hidden shadow-2xl border border-gray-100">
-                                                {/* Browser Bar */}
-                                                <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center gap-4">
-                                                    <div className="flex gap-1.5">
-                                                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                                                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                                                        <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                                                    </div>
-                                                    <div className="flex-1 bg-white rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-400 flex items-center justify-center font-mono truncate">
-                                                        <Lock size={10} className="mr-1.5 text-green-500" />
-                                                        {project.deliveryData.finalUrl}
-                                                    </div>
-                                                </div>
-
-                                                {/* Content */}
-                                                <div className="p-8 md:p-12 text-center bg-gradient-to-b from-white to-gray-50">
-                                                    <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                                                        <Globe size={40} />
-                                                    </div>
-                                                    <h3 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
-                                                        Esta es tu nueva web
-                                                    </h3>
-                                                    <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                                                        Diseñada profesionalmente, optimizada y lista para el mundo.
-                                                    </p>
-
-                                                    <button className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-black hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 mx-auto">
-                                                        Visitar Sitio Web <ExternalLink size={20} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="space-y-6 max-w-4xl mx-auto">
-                                    {/* Warning */}
-                                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
-                                        <div className="text-yellow-600 mt-0.5"><Lock size={20} /></div>
-                                        <div>
-                                            <h4 className="font-bold text-yellow-800">Importante: Copia estos datos ahora</h4>
-                                            <p className="text-sm text-yellow-700 mt-1">
-                                                Por seguridad, el acceso a este portal se cerrará en unos días. Asegúrate de copiar y guardar todas tus contraseñas en un lugar seguro.
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {/* Web Credentials */}
-                                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                            <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
-                                                <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                                                    <ExternalLink size={18} className="text-blue-600" /> Credenciales Web
+                            <div className="grid md:grid-cols-3 gap-6">
+                                {/* Left Column: Resources (2/3 width) */}
+                                <div className="md:col-span-2 space-y-6">
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="p-8 space-y-8">
+                                            <div>
+                                                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                    1. Sube tus archivos
                                                 </h3>
+                                                <a
+                                                    href={project.driveLink || '#'}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="block w-full p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center group"
+                                                >
+                                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
+                                                        <ExternalLink size={24} />
+                                                    </div>
+                                                    <p className="font-bold text-blue-900">Abrir Carpeta Compartida</p>
+                                                    <p className="text-sm text-blue-600">Google Drive / Dropbox</p>
+                                                </a>
                                             </div>
-                                            <div className="p-6 space-y-4">
-                                                <div>
-                                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-1">URL de Acceso</label>
-                                                    <div className="flex gap-2">
-                                                        <input readOnly value={project.deliveryData?.webUrl || ''} className="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
-                                                        <a href={project.deliveryData?.webUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded"><ExternalLink size={18} /></a>
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Usuario</label>
-                                                        <div className="relative">
-                                                            <input readOnly value={project.deliveryData?.webUser || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Contraseña</label>
-                                                        <div className="relative">
-                                                            <input readOnly value={project.deliveryData?.webPass || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Email Credentials */}
-                                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                            <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
-                                                <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                                                    <Send size={18} className="text-blue-600" /> Email Corporativo
+                                            <div>
+                                                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                                                    2. Lista de Requisitos
                                                 </h3>
-                                            </div>
-                                            <div className="p-6 space-y-4">
-                                                <div>
-                                                    <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Webmail URL</label>
-                                                    <div className="flex gap-2">
-                                                        <input readOnly value={project.deliveryData?.emailUrl || ''} className="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
-                                                        <a href={project.deliveryData?.emailUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded"><ExternalLink size={18} /></a>
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Email</label>
-                                                        <div className="relative">
-                                                            <input readOnly value={project.deliveryData?.emailUser || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Contraseña</label>
-                                                        <div className="relative">
-                                                            <input readOnly value={project.deliveryData?.emailPass || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <ul className="space-y-3">
+                                                    {(project.requirements || []).map((req, i) => (
+                                                        <li
+                                                            key={i}
+                                                            onClick={() => toggleRequirement(i)}
+                                                            className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                                                            <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${checkedRequirements.has(i)
+                                                                ? 'bg-green-500 border-green-500'
+                                                                : 'border-gray-300 hover:border-gray-400'
+                                                                }`}>
+                                                                {checkedRequirements.has(i) && (
+                                                                    <CheckCircle size={16} className="text-white" />
+                                                                )}
+                                                            </div>
+                                                            <span className={`text-gray-700 ${checkedRequirements.has(i) ? 'line-through opacity-60' : ''}`}>{req}</span>
+                                                        </li>
+                                                    ))}
+                                                    {(!project.requirements || project.requirements.length === 0) && (
+                                                        <p className="text-gray-500 italic">No hay requisitos específicos listados.</p>
+                                                    )}
+                                                </ul>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    {/* Final Report */}
-                                    <div className="bg-blue-600 rounded-xl shadow-lg p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
-                                        <div>
-                                            <h3 className="text-2xl font-bold mb-2">Informe Final de Proyecto</h3>
-                                            <p className="text-blue-100">Descarga el reporte completo con métricas, capturas y detalles técnicos de tu nueva web.</p>
-                                        </div>
-                                        <a
-                                            href={project.deliveryData?.reportLink || '#'}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition-colors flex items-center gap-2 whitespace-nowrap"
-                                        >
-                                            <Download size={20} /> Descargar Informe
-                                        </a>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                )}
-
-                {/* STAGE 4: FINISHED */}
-                {isFinished && (
-                    <div className="space-y-8 animate-fade-in text-center">
-                        <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 text-green-600 rounded-full mb-4 animate-bounce">
-                            <CheckCircle size={48} />
-                        </div>
-                        <h2 className="text-4xl font-bold text-gray-900">¡Proyecto Terminado!</h2>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            Ha sido un placer trabajar contigo. Tu proyecto ha sido entregado exitosamente.
-                        </p>
-
-                        {/* Premium Website Showcase */}
-                        {project.deliveryData?.finalUrl && (
-                            <div className="mb-12 animate-slide-up text-left max-w-4xl mx-auto">
-                                <div className="relative group cursor-pointer" onClick={() => window.open(project.deliveryData?.finalUrl, '_blank')}>
-                                    {/* Glow Effect */}
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-
-                                    <div className="relative bg-white rounded-xl overflow-hidden shadow-2xl border border-gray-100">
-                                        {/* Browser Bar */}
-                                        <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center gap-4">
-                                            <div className="flex gap-1.5">
-                                                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                                                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                                                <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                                            </div>
-                                            <div className="flex-1 bg-white rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-400 flex items-center justify-center font-mono truncate">
-                                                <Lock size={10} className="mr-1.5 text-green-500" />
-                                                {project.deliveryData.finalUrl}
-                                            </div>
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="p-8 md:p-12 text-center bg-gradient-to-b from-white to-gray-50">
-                                            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                                                <Globe size={40} />
-                                            </div>
-                                            <h3 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
-                                                Esta es tu nueva web
-                                            </h3>
-                                            <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                                                Diseñada profesionalmente, optimizada y lista para el mundo.
-                                            </p>
-
-                                            <button className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-black hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 mx-auto">
-                                                Visitar Sitio Web <ExternalLink size={20} />
+                                        <div className="bg-gray-50 p-8 border-t border-gray-100 flex justify-end">
+                                            <button
+                                                onClick={() => handleActionClick('confirm_resources')}
+                                                disabled={loading}
+                                                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/30 flex items-center gap-3"
+                                            >
+                                                {loading ? 'Enviando...' : (
+                                                    <>
+                                                        <Send size={20} /> Ya envié los recursos
+                                                    </>
+                                                )}
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
 
-                        {/* Credentials Section */}
-                        {(project.deliveryData?.webUrl || project.deliveryData?.emailUrl) && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
-                                {/* Web Access */}
-                                {project.deliveryData?.webUrl && (
-                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                                        <div className="flex items-center gap-3 mb-4 text-blue-600">
-                                            <Globe size={24} />
-                                            <h3 className="font-bold text-gray-900">Acceso Web</h3>
-                                        </div>
-                                        <div className="space-y-3 text-sm">
-                                            <div>
-                                                <span className="block text-gray-500 mb-1">URL de Acceso</span>
-                                                <a href={project.deliveryData.webUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
-                                                    {project.deliveryData.webUrl}
-                                                </a>
+                                {/* Right Column: Advance Payment (1/3 width) */}
+                                <div className="space-y-6">
+                                    <div className={`rounded-2xl shadow-sm border p-6 ${project.advancePaymentInfo
+                                        ? 'bg-green-50 border-green-200'
+                                        : 'bg-white border-gray-200'
+                                        }`}>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${project.advancePaymentInfo ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                                                }`}>
+                                                {project.advancePaymentInfo ? <CheckCircle size={20} /> : <Lock size={20} />}
                                             </div>
-                                            {project.deliveryData.webUser && (
-                                                <div>
-                                                    <span className="block text-gray-500 mb-1">Usuario</span>
-                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                        {project.deliveryData.webUser}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {project.deliveryData.webPass && (
-                                                <div>
-                                                    <span className="block text-gray-500 mb-1">Contraseña</span>
-                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                        {project.deliveryData.webPass}
-                                                    </div>
-                                                </div>
-                                            )}
+                                            <h3 className={`font-bold ${project.advancePaymentInfo ? 'text-green-900' : 'text-gray-900'}`}>
+                                                Anticipo ({project.advancePercentage}%)
+                                            </h3>
                                         </div>
-                                    </div>
-                                )}
 
-                                {/* Email Access */}
-                                {project.deliveryData?.emailUrl && (
-                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                                        <div className="flex items-center gap-3 mb-4 text-purple-600">
-                                            <Mail size={24} />
-                                            <h3 className="font-bold text-gray-900">Acceso Correo</h3>
-                                        </div>
-                                        <div className="space-y-3 text-sm">
+                                        {project.advancePaymentInfo ? (
                                             <div>
-                                                <span className="block text-gray-500 mb-1">URL Webmail</span>
-                                                <a href={project.deliveryData.emailUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
-                                                    {project.deliveryData.emailUrl}
-                                                </a>
+                                                <p className="text-sm text-green-800 mb-2">
+                                                    ¡Gracias! Hemos recibido tu información de pago.
+                                                </p>
+                                                <div className="text-xs text-green-700 bg-green-100 p-3 rounded-lg break-words">
+                                                    {project.advancePaymentInfo}
+                                                </div>
                                             </div>
-                                            {project.deliveryData.emailUser && (
-                                                <div>
-                                                    <span className="block text-gray-500 mb-1">Correo</span>
-                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                        {project.deliveryData.emailUser}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {project.deliveryData.emailPass && (
-                                                <div>
-                                                    <span className="block text-gray-500 mb-1">Contraseña</span>
-                                                    <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
-                                                        {project.deliveryData.emailPass}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
+                                        ) : (
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-4">
+                                                    Para iniciar el desarrollo, se requiere un anticipo de:
+                                                </p>
+                                                <p className="text-3xl font-black text-gray-900 mb-4">
+                                                    ${((project.finalPrice || 0) * (project.advancePercentage || 50) / 100).toFixed(2)}
+                                                </p>
+                                                <button
+                                                    onClick={() => setShowAdvanceModal(true)}
+                                                    className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-md text-sm"
+                                                >
+                                                    Informar Pago
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Drive/Report Link */}
-                        {project.deliveryData?.reportLink && (
-                            <div className="max-w-4xl mx-auto mt-6 text-left">
-                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3 text-green-600">
-                                        <FileText size={24} />
-                                        <div>
-                                            <h3 className="font-bold text-gray-900">Informe Final / Entregables</h3>
-                                            <p className="text-sm text-gray-500">Enlace a Google Drive o PDF</p>
-                                        </div>
-                                    </div>
-                                    <a
-                                        href={project.deliveryData.reportLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium hover:bg-green-100 transition-colors flex items-center gap-2"
-                                    >
-                                        <ExternalLink size={18} /> Abrir
-                                    </a>
                                 </div>
                             </div>
-                        )}
-
-                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto mt-8">
-                            <h3 className="font-bold text-gray-900 mb-4">Acciones</h3>
-                            <button
-                                onClick={() => {
-                                    const data = [
-                                        '--- CREDENCIALES DEL PROYECTO ---',
-                                        '',
-                                        project.deliveryData?.webUrl ? `[ACCESO WEB]\nURL: ${project.deliveryData.webUrl} \nUsuario: ${project.deliveryData.webUser || ''} \nContraseña: ${project.deliveryData.webPass || ''} ` : '',
-                                        '',
-                                        project.deliveryData?.emailUrl ? `[ACCESO CORREO]\nURL: ${project.deliveryData.emailUrl} \nUsuario: ${project.deliveryData.emailUser || ''} \nContraseña: ${project.deliveryData.emailPass || ''} ` : '',
-                                        '',
-                                        project.deliveryData?.reportLink ? `[INFORME FINAL]\nLink: ${project.deliveryData.reportLink} ` : ''
-                                    ].filter(Boolean).join('\n');
-
-                                    navigator.clipboard.writeText(data).then(() => {
-                                        alert('Datos copiados al portapapeles');
-                                    });
-                                }}
-                                className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
-                            >
-                                <Copy size={20} /> Copiar Todos los Datos
-                            </button>
                         </div>
+                    )
+                }
 
-                        <div className="bg-yellow-50 p-4 rounded-xl inline-block text-yellow-800 text-sm max-w-md">
-                            <strong>Nota:</strong> Este enlace de acceso caducará automáticamente en 10 días por seguridad.
+                {/* STAGE 2b: RESOURCES CONFIRMED - UNDER REVIEW */}
+                {
+                    isWaitingResources && resourcesConfirmed && (
+                        <div className="space-y-8 animate-fade-in">
+                            <div className="text-center space-y-4">
+                                <div className="inline-flex items-center justify-center w-20 h-20 bg-purple-100 text-purple-600 rounded-full mb-4">
+                                    <CheckCircle size={40} />
+                                </div>
+                                <h2 className="text-3xl font-extrabold text-gray-900">Recursos en Revisión</h2>
+                                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                                    Gracias por enviar los archivos. Nuestro equipo los está revisando y comenzaremos el desarrollo pronto.
+                                </p>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 border border-purple-200">
+                                <div className="max-w-2xl mx-auto space-y-6">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                            1
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900 mb-1">Revisión de Archivos y Pago</h3>
+                                            <p className="text-gray-600 text-sm">
+                                                Verificamos que todos los materiales estén completos y confirmamos el anticipo.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                            2
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-gray-700 mb-1">Inicio de Desarrollo</h3>
+                                            <p className="text-gray-500 text-sm">
+                                                Una vez aprobados, comenzaremos a trabajar en tu proyecto.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                            3
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-gray-700 mb-1">Actualizaciones Regulares</h3>
+                                            <p className="text-gray-500 text-sm">
+                                                Te mantendremos informado del progreso a través de este portal.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                                <div className="flex gap-4">
+                                    <div className="text-blue-600 flex-shrink-0">
+                                        <AlertCircle size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-blue-900 mb-1">¿Necesitas agregar algo?</h4>
+                                        <p className="text-blue-700 text-sm">
+                                            Si olvidaste algún archivo o necesitas hacer cambios, puedes subirlos a la{' '}
+                                            <a
+                                                href={project.driveLink || '#'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline font-bold hover:text-blue-900">
+                                                carpeta compartida
+                                            </a>
+                                            {' '}y te contactaremos si hay algún problema.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
-            </main>
-        </div>
+                {/* STAGE 3: PRODUCTION (FOG OF WAR) */}
+                {
+                    isProduction && (
+                        <div className="space-y-8 animate-fade-in">
+                            <div className="text-center space-y-4">
+                                <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 text-purple-600 rounded-full mb-4">
+                                    <Clock size={32} />
+                                </div>
+                                <h2 className="text-3xl font-bold text-gray-900">En Producción</h2>
+                                <p className="text-lg text-gray-600 max-w-xl mx-auto">
+                                    Estamos trabajando en tu proyecto. Aquí puedes ver el progreso en tiempo real.
+                                </p>
+                            </div>
+
+                            <div className="max-w-xl mx-auto relative">
+                                {/* Vertical Line */}
+                                <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-gray-200" />
+
+                                <div className="space-y-8 relative">
+                                    {milestones.map((milestone, index) => (
+                                        <div key={milestone.id} className="flex gap-6 relative">
+                                            {/* Icon */}
+                                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 z-10 border-4 border-gray-50 shadow-sm transition-all
+                                            ${milestone.status === 'completed' ? 'bg-green-500 text-white' :
+                                                    milestone.status === 'active' ? 'bg-white border-blue-100 text-blue-600 ring-4 ring-blue-50' :
+                                                        'bg-gray-100 text-gray-400'
+                                                }
+`}>
+                                                {milestone.status === 'completed' ? <CheckCircle size={24} /> :
+                                                    milestone.status === 'active' ? <div className="w-3 h-3 bg-blue-600 rounded-full animate-ping" /> :
+                                                        <div className="w-3 h-3 bg-gray-300 rounded-full" />}
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className={`flex - 1 pt - 3 ${milestone.status === 'active' ? 'opacity-100' : 'opacity-80'} `}>
+                                                <h3 className={`text - lg font - bold ${milestone.status === 'active' ? 'text-blue-600' : 'text-gray-900'} `}>
+                                                    {milestone.title}
+                                                </h3>
+                                                <p className="text-sm text-gray-500 mt-1">
+                                                    {milestone.status === 'completed' ? 'Completado' :
+                                                        milestone.status === 'active' ? 'En progreso...' :
+                                                            'Pendiente'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Fog of War Hint */}
+                                    <div className="flex gap-6 relative opacity-50 blur-[2px]">
+                                        <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center flex-shrink-0 border-4 border-white">
+                                            <Lock size={20} className="text-gray-300" />
+                                        </div>
+                                        <div className="flex-1 pt-4">
+                                            <div className="h-4 bg-gray-200 rounded w-32 mb-2" />
+                                            <div className="h-3 bg-gray-100 rounded w-24" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* STAGE 5: DELIVERY & CLOSURE */}
+                {
+                    isDelivery && (
+                        <div className="space-y-8 animate-fade-in">
+                            <div className="text-center space-y-4">
+                                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 text-green-600 rounded-full mb-4">
+                                    <CheckCircle size={32} />
+                                </div>
+                                <h2 className="text-3xl font-bold text-gray-900">Cierre y Entrega</h2>
+                                <p className="text-lg text-gray-600 max-w-xl mx-auto">
+                                    ¡Tu proyecto está listo! {project.paymentStatus === 'Pagado (100%)' ? 'Aquí tienes tus accesos.' : 'Completa el pago final para acceder a tus credenciales.'}
+                                </p>
+                            </div>
+
+                            {project.paymentStatus !== 'Pagado (100%)' ? (
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center max-w-lg mx-auto">
+                                    <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Lock size={32} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Esperando Confirmación de Saldo</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        Para liberar las credenciales de acceso y el informe final, es necesario registrar el pago del saldo restante.
+                                    </p>
+                                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-500">
+                                        Si ya realizaste el pago, por favor avísanos para actualizar el estado.
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Premium Website Showcase */}
+                                    {project.deliveryData?.finalUrl && (
+                                        <div className="mb-12 animate-slide-up">
+                                            <div className="relative group cursor-pointer" onClick={() => window.open(project.deliveryData?.finalUrl, '_blank')}>
+                                                {/* Glow Effect */}
+                                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+
+                                                <div className="relative bg-white rounded-xl overflow-hidden shadow-2xl border border-gray-100">
+                                                    {/* Browser Bar */}
+                                                    <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center gap-4">
+                                                        <div className="flex gap-1.5">
+                                                            <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                                                            <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                                            <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                                                        </div>
+                                                        <div className="flex-1 bg-white rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-400 flex items-center justify-center font-mono truncate">
+                                                            <Lock size={10} className="mr-1.5 text-green-500" />
+                                                            {project.deliveryData.finalUrl}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="p-8 md:p-12 text-center bg-gradient-to-b from-white to-gray-50">
+                                                        <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                                            <Globe size={40} />
+                                                        </div>
+                                                        <h3 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
+                                                            Esta es tu nueva web
+                                                        </h3>
+                                                        <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                                                            Diseñada profesionalmente, optimizada y lista para el mundo.
+                                                        </p>
+
+                                                        <button className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-black hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 mx-auto">
+                                                            Visitar Sitio Web <ExternalLink size={20} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-6 max-w-4xl mx-auto">
+                                        {/* Warning */}
+                                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
+                                            <div className="text-yellow-600 mt-0.5"><Lock size={20} /></div>
+                                            <div>
+                                                <h4 className="font-bold text-yellow-800">Importante: Copia estos datos ahora</h4>
+                                                <p className="text-sm text-yellow-700 mt-1">
+                                                    Por seguridad, el acceso a este portal se cerrará en unos días. Asegúrate de copiar y guardar todas tus contraseñas en un lugar seguro.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Web Credentials */}
+                                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                                <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                                                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                                        <ExternalLink size={18} className="text-blue-600" /> Credenciales Web
+                                                    </h3>
+                                                </div>
+                                                <div className="p-6 space-y-4">
+                                                    <div>
+                                                        <label className="text-xs font-bold text-gray-500 uppercase block mb-1">URL de Acceso</label>
+                                                        <div className="flex gap-2">
+                                                            <input readOnly value={project.deliveryData?.webUrl || ''} className="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                            <a href={project.deliveryData?.webUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded"><ExternalLink size={18} /></a>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Usuario</label>
+                                                            <div className="relative">
+                                                                <input readOnly value={project.deliveryData?.webUser || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Contraseña</label>
+                                                            <div className="relative">
+                                                                <input readOnly value={project.deliveryData?.webPass || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Email Credentials */}
+                                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                                <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                                                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                                        <Send size={18} className="text-blue-600" /> Email Corporativo
+                                                    </h3>
+                                                </div>
+                                                <div className="p-6 space-y-4">
+                                                    <div>
+                                                        <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Webmail URL</label>
+                                                        <div className="flex gap-2">
+                                                            <input readOnly value={project.deliveryData?.emailUrl || ''} className="flex-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                            <a href={project.deliveryData?.emailUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-blue-600 hover:bg-blue-50 rounded"><ExternalLink size={18} /></a>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Email</label>
+                                                            <div className="relative">
+                                                                <input readOnly value={project.deliveryData?.emailUser || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Contraseña</label>
+                                                            <div className="relative">
+                                                                <input readOnly value={project.deliveryData?.emailPass || ''} className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Final Report */}
+                                        <div className="bg-blue-600 rounded-xl shadow-lg p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+                                            <div>
+                                                <h3 className="text-2xl font-bold mb-2">Informe Final de Proyecto</h3>
+                                                <p className="text-blue-100">Descarga el reporte completo con métricas, capturas y detalles técnicos de tu nueva web.</p>
+                                            </div>
+                                            <a
+                                                href={project.deliveryData?.reportLink || '#'}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition-colors flex items-center gap-2 whitespace-nowrap"
+                                            >
+                                                <Download size={20} /> Descargar Informe
+                                            </a>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )
+                }
+
+                {/* STAGE 4: FINISHED */}
+                {
+                    isFinished && (
+                        <div className="space-y-8 animate-fade-in text-center">
+                            <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 text-green-600 rounded-full mb-4 animate-bounce">
+                                <CheckCircle size={48} />
+                            </div>
+                            <h2 className="text-4xl font-bold text-gray-900">¡Proyecto Terminado!</h2>
+                            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                                Ha sido un placer trabajar contigo. Tu proyecto ha sido entregado exitosamente.
+                            </p>
+
+                            {/* Premium Website Showcase */}
+                            {project.deliveryData?.finalUrl && (
+                                <div className="mb-12 animate-slide-up text-left max-w-4xl mx-auto">
+                                    <div className="relative group cursor-pointer" onClick={() => window.open(project.deliveryData?.finalUrl, '_blank')}>
+                                        {/* Glow Effect */}
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+
+                                        <div className="relative bg-white rounded-xl overflow-hidden shadow-2xl border border-gray-100">
+                                            {/* Browser Bar */}
+                                            <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center gap-4">
+                                                <div className="flex gap-1.5">
+                                                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                                                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                                                </div>
+                                                <div className="flex-1 bg-white rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-400 flex items-center justify-center font-mono truncate">
+                                                    <Lock size={10} className="mr-1.5 text-green-500" />
+                                                    {project.deliveryData.finalUrl}
+                                                </div>
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="p-8 md:p-12 text-center bg-gradient-to-b from-white to-gray-50">
+                                                <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                                    <Globe size={40} />
+                                                </div>
+                                                <h3 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">
+                                                    Esta es tu nueva web
+                                                </h3>
+                                                <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                                                    Diseñada profesionalmente, optimizada y lista para el mundo.
+                                                </p>
+
+                                                <button className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-black hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 mx-auto">
+                                                    Visitar Sitio Web <ExternalLink size={20} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Credentials Section */}
+                            {(project.deliveryData?.webUrl || project.deliveryData?.emailUrl) && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
+                                    {/* Web Access */}
+                                    {project.deliveryData?.webUrl && (
+                                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                                            <div className="flex items-center gap-3 mb-4 text-blue-600">
+                                                <Globe size={24} />
+                                                <h3 className="font-bold text-gray-900">Acceso Web</h3>
+                                            </div>
+                                            <div className="space-y-3 text-sm">
+                                                <div>
+                                                    <span className="block text-gray-500 mb-1">URL de Acceso</span>
+                                                    <a href={project.deliveryData.webUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                                        {project.deliveryData.webUrl}
+                                                    </a>
+                                                </div>
+                                                {project.deliveryData.webUser && (
+                                                    <div>
+                                                        <span className="block text-gray-500 mb-1">Usuario</span>
+                                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                            {project.deliveryData.webUser}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {project.deliveryData.webPass && (
+                                                    <div>
+                                                        <span className="block text-gray-500 mb-1">Contraseña</span>
+                                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                            {project.deliveryData.webPass}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Email Access */}
+                                    {project.deliveryData?.emailUrl && (
+                                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                                            <div className="flex items-center gap-3 mb-4 text-purple-600">
+                                                <Mail size={24} />
+                                                <h3 className="font-bold text-gray-900">Acceso Correo</h3>
+                                            </div>
+                                            <div className="space-y-3 text-sm">
+                                                <div>
+                                                    <span className="block text-gray-500 mb-1">URL Webmail</span>
+                                                    <a href={project.deliveryData.emailUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                                                        {project.deliveryData.emailUrl}
+                                                    </a>
+                                                </div>
+                                                {project.deliveryData.emailUser && (
+                                                    <div>
+                                                        <span className="block text-gray-500 mb-1">Correo</span>
+                                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                            {project.deliveryData.emailUser}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {project.deliveryData.emailPass && (
+                                                    <div>
+                                                        <span className="block text-gray-500 mb-1">Contraseña</span>
+                                                        <div className="font-mono bg-gray-50 p-2 rounded border border-gray-100 select-all">
+                                                            {project.deliveryData.emailPass}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Drive/Report Link */}
+                            {project.deliveryData?.reportLink && (
+                                <div className="max-w-4xl mx-auto mt-6 text-left">
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3 text-green-600">
+                                            <FileText size={24} />
+                                            <div>
+                                                <h3 className="font-bold text-gray-900">Informe Final / Entregables</h3>
+                                                <p className="text-sm text-gray-500">Enlace a Google Drive o PDF</p>
+                                            </div>
+                                        </div>
+                                        <a
+                                            href={project.deliveryData.reportLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-4 py-2 bg-green-50 text-green-700 rounded-lg font-medium hover:bg-green-100 transition-colors flex items-center gap-2"
+                                        >
+                                            <ExternalLink size={18} /> Abrir
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto mt-8">
+                                <h3 className="font-bold text-gray-900 mb-4">Acciones</h3>
+                                <button
+                                    onClick={() => {
+                                        const data = [
+                                            '--- CREDENCIALES DEL PROYECTO ---',
+                                            '',
+                                            project.deliveryData?.webUrl ? `[ACCESO WEB]\nURL: ${project.deliveryData.webUrl} \nUsuario: ${project.deliveryData.webUser || ''} \nContraseña: ${project.deliveryData.webPass || ''} ` : '',
+                                            '',
+                                            project.deliveryData?.emailUrl ? `[ACCESO CORREO]\nURL: ${project.deliveryData.emailUrl} \nUsuario: ${project.deliveryData.emailUser || ''} \nContraseña: ${project.deliveryData.emailPass || ''} ` : '',
+                                            '',
+                                            project.deliveryData?.reportLink ? `[INFORME FINAL]\nLink: ${project.deliveryData.reportLink} ` : ''
+                                        ].filter(Boolean).join('\n');
+
+                                        navigator.clipboard.writeText(data).then(() => {
+                                            alert('Datos copiados al portapapeles');
+                                        });
+                                    }}
+                                    className="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+                                >
+                                    <Copy size={20} /> Copiar Todos los Datos
+                                </button>
+                            </div>
+
+                            <div className="bg-yellow-50 p-4 rounded-xl inline-block text-yellow-800 text-sm max-w-md">
+                                <strong>Nota:</strong> Este enlace de acceso caducará automáticamente en 10 días por seguridad.
+                            </div>
+                        </div>
+                    )
+                }
+
+            </main >
+        </div >
     );
 };
