@@ -468,15 +468,37 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
 
                                 <div className="bg-gray-50 p-6 border-t border-gray-100">
                                     <button
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (!project.advancePaymentInfo && !advancePaymentInfo.trim()) {
                                                 alert('Por favor completa la información del anticipo antes de continuar.');
                                                 return;
                                             }
-                                            if (!project.advancePaymentInfo) {
-                                                handleConfirmAdvance();
-                                            } else {
-                                                handleActionClick('confirm_resources');
+
+                                            setLoading(true);
+                                            try {
+                                                // Si falta el anticipo, confirmarlo primero
+                                                if (!project.advancePaymentInfo) {
+                                                    await onAction('confirm_advance', { paymentInfo: advancePaymentInfo });
+                                                }
+
+                                                // Luego confirmar recursos
+                                                await onAction('confirm_resources');
+
+                                                // Marcar recursos como confirmados para cambiar de vista
+                                                setResourcesConfirmed(true);
+
+                                                // Mostrar mensaje de éxito
+                                                setConfirmModal({
+                                                    show: true,
+                                                    action: 'success',
+                                                    title: '✅ ¡Confirmación Recibida!',
+                                                    message: 'Hemos notificado al equipo. Revisaremos los archivos y comenzaremos el desarrollo a la brevedad. Te mantendremos informado.'
+                                                });
+                                            } catch (error) {
+                                                console.error('Error:', error);
+                                                alert('Ocurrió un error al procesar la solicitud.');
+                                            } finally {
+                                                setLoading(false);
                                             }
                                         }}
                                         disabled={loading}
