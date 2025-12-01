@@ -5,7 +5,8 @@ import {
     CheckCircle, Clock, FileText, Download, ExternalLink, Send, ChevronRight, Lock, Globe,
     Mail,
     Copy,
-    AlertCircle
+    AlertCircle,
+    Plus
 } from 'lucide-react';
 
 interface PortalDashboardProps {
