@@ -183,6 +183,8 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
                 customHours: parseFloat(project.custom_hours || 0),
                 hourlyRate: parseFloat(project.hourly_rate || 0),
                 addOns: addOns, // Include full add-ons list
+                advancePercentage: project.advance_percentage || 50,
+                advancePaymentInfo: project.advance_payment_info,
                 driveLink: project.drive_link,  // Convert to camelCase
                 requirements: typeof project.requirements === 'string' ? JSON.parse(project.requirements) : project.requirements,
                 deliveryData: typeof project.delivery_data === 'string' ? JSON.parse(project.delivery_data) : project.delivery_data,
@@ -217,6 +219,7 @@ router.post('/:token/action', verifyPortalAuth, async (req, res) => {
             return res.json({ success: true, newStatus: '3. Espera Recursos' });
         }
 
+
         if (action === 'confirm_resources') {
             // Notify Admin (Log)
             await pool.query('INSERT INTO project_logs (user_id, project_id, message) VALUES (?, ?, ?)',
@@ -224,6 +227,19 @@ router.post('/:token/action', verifyPortalAuth, async (req, res) => {
 
             // Do NOT advance status automatically (as per requirements)
             return res.json({ success: true, message: 'Notified' });
+        }
+
+        if (action === 'confirm_advance') {
+            const { paymentInfo } = req.body;
+
+            // Save advance payment info
+            await pool.query('UPDATE projects SET advance_payment_info = ? WHERE id = ?', [paymentInfo, project.id]);
+
+            // Log the action
+            await pool.query('INSERT INTO project_logs (user_id, project_id, message) VALUES (?, ?, ?)',
+                [project.user_id, project.id, `Cliente confirmó anticipo: ${paymentInfo}`]);
+
+            return res.json({ success: true, message: 'Advance payment info saved' });
         }
 
         res.status(400).json({ error: 'Invalid action' });

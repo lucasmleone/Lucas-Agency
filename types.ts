@@ -101,6 +101,8 @@ export interface Project {
   isHourlyQuote?: boolean;
   customHours?: number;
   hourlyRate?: number;
+  advancePercentage?: number; // Percentage of advance payment (default 50)
+  advancePaymentInfo?: string; // Client's payment proof/note
   nextMaintenanceDate?: string; // Next scheduled maintenance task date
 
   // Portal Fields

@@ -49,6 +49,8 @@ router.get('/projects', async (req, res) => {
             isHourlyQuote: Boolean(p.is_hourly_quote),
             customHours: p.custom_hours,
             hourlyRate: p.hourly_rate,
+            advancePercentage: p.advance_percentage,
+            advancePaymentInfo: p.advance_payment_info,
             // Portal fields
             portalToken: p.portal_token,
             portalPin: p.portal_pin,
@@ -187,6 +189,8 @@ router.put('/projects/:id', async (req, res) => {
         addUpdate('is_hourly_quote', p.isHourlyQuote);
         addUpdate('custom_hours', p.customHours);
         addUpdate('hourly_rate', p.hourlyRate);
+        addUpdate('advance_percentage', p.advancePercentage);
+        addUpdate('advance_payment_info', p.advancePaymentInfo);
         addUpdate('portal_token', p.portalToken);
         addUpdate('portal_pin', p.portalPin);
         addUpdate('portal_enabled', p.portalEnabled);

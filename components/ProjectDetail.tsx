@@ -211,7 +211,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         pricingNotes: project.pricingNotes || '',
         customHours: 0,
         hourlyRate: 25,
-        isHourlyQuote: false  // New flag for mutual exclusivity
+        isHourlyQuote: false,  // New flag for mutual exclusivity
+        advancePercentage: project.advancePercentage || 50  // Advance payment percentage
     });
 
     // Update base price when plan type changes OR when config loads
@@ -360,6 +361,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             discountType: pricingData.discount > 0 ? pricingData.discountType : undefined,
             finalPrice: finalPrice,
             pricingNotes: pricingData.pricingNotes || undefined,
+            advancePercentage: pricingData.advancePercentage,
             // Ensure portal data is preserved
             portalToken: project.portalToken,
             portalPin: project.portalPin,
@@ -1140,6 +1142,26 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                     <option value="percentage">%</option>
                                                     <option value="fixed">$</option>
                                                 </select>
+                                            </div>
+                                        </div>
+
+                                        {/* Advance Payment Percentage */}
+                                        <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                            <div>
+                                                <label className="text-sm text-gray-900 font-bold block">Anticipo Requerido</label>
+                                                <span className="text-xs text-gray-600">Porcentaje a pagar por adelantado</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="100"
+                                                    value={pricingData.advancePercentage}
+                                                    onChange={(e) => setPricingData({ ...pricingData, advancePercentage: Number(e.target.value) })}
+                                                    className="border border-gray-300 rounded-lg p-1.5 w-20 text-right font-medium"
+                                                    placeholder="50"
+                                                />
+                                                <span className="text-gray-600 font-medium">%</span>
                                             </div>
                                         </div>
 

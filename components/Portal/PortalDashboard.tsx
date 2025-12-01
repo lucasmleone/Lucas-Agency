@@ -21,6 +21,8 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
     const [resourcesConfirmed, setResourcesConfirmed] = useState(project.resourcesSent || false);
 
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; action: string; title: string; message: string } | null>(null);
+    const [showAdvanceModal, setShowAdvanceModal] = useState(!project.advancePaymentInfo && project.advancePercentage > 0);
+    const [advancePaymentInfo, setAdvancePaymentInfo] = useState('');
 
     const toggleRequirement = (index: number) => {
         const newChecked = new Set(checkedRequirements);
@@ -73,6 +75,38 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
         }
     };
 
+    const handleConfirmAdvance = async () => {
+        if (!advancePaymentInfo.trim()) {
+            alert('Por favor indica cómo realizaste el pago.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Call backend with custom action
+            const response = await fetch(`/api/portal/${project.portalToken}/action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'confirm_advance', paymentInfo: advancePaymentInfo })
+            });
+
+            if (!response.ok) throw new Error('Failed to confirm advance');
+
+            setShowAdvanceModal(false);
+            setConfirmModal({
+                show: true,
+                action: 'success',
+                title: '✅ ¡Anticipo Confirmado!',
+                message: 'Hemos recibido la confirmación de tu pago. Procederemos con el proyecto a la brevedad.'
+            });
+        } catch (error) {
+            console.error(error);
+            alert('Error al confirmar el anticipo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Determine View based on Status
     // Simplified mapping for the 4 requested views
     const isProposal = project.status === '2. Propuesta'; // Or '1. Discovery'
@@ -111,6 +145,62 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
                                     Cerrar
                                 </button>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Advance Payment Modal */}
+            {showAdvanceModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
+                        <div className="text-center mb-6">
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-4">
+                                <AlertCircle size={32} />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-2">Anticipo Requerido</h3>
+                            <p className="text-gray-600">Para comenzar el proyecto necesitamos que realices un anticipo.</p>
+                        </div>
+
+                        {/* Amount Display */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border-2 border-blue-200">
+                            <p className="text-sm text-gray-600 mb-2">Monto del Anticipo ({project.advancePercentage}%):</p>
+                            <p className="text-4xl font-black text-gray-900">
+                                ${((project.finalPrice || 0) * (project.advancePercentage || 50) / 100).toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-2">De un total de ${(project.finalPrice || 0).toFixed(2)}</p>
+                        </div>
+
+                        {/* Payment Info Input */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">
+                                ¿Cómo realizaste el pago?
+                            </label>
+                            <textarea
+                                rows={4}
+                                value={advancePaymentInfo}
+                                onChange={(e) => setAdvancePaymentInfo(e.target.value)}
+                                className="w-full border-2 border-gray-300 rounded-lg p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
+                                placeholder="Ejemplo: Transferencia bancaria a cuenta XXXX, número de referencia: 123456&#10;&#10;O puedes pegar un link a tu comprobante aquí."
+                            />
+                            <p className="text-xs text-gray-500 mt-2">
+                                Indícanos el método de pago, número de referencia, o link al comprobante.
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleConfirmAdvance}
+                                disabled={loading || !advancePaymentInfo.trim()}
+                                className="w-full px-6 py-3.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                {loading ? 'Procesando...' : 'Confirmar Pago'}
+                            </button>
+                            <button
+                                onClick={() => setShowAdvanceModal(false)}
+                                className="w-full px-6 py-3 rounded-xl text-gray-600 font-medium hover:bg-gray-100 transition-colors">
+                                Cerrar (Podré hacerlo después)
+                            </button>
                         </div>
                     </div>
                 </div>
