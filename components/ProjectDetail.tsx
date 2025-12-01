@@ -905,7 +905,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                     type="radio"
                                                     name="productType"
                                                     checked={!pricingData.isHourlyQuote}
-                                                    onChange={() => setPricingData({ ...pricingData, isHourlyQuote: false, customHours: 0 })}
+                                                    onChange={() => {
+                                                        setPricingData({ ...pricingData, isHourlyQuote: false, basePrice: 200, customHours: 0 });
+                                                        setGeneralData({ ...generalData, planType: PlanType.LANDING });
+                                                    }}
                                                     className="mt-1 mr-3"
                                                 />
                                                 <div className="flex-1">
@@ -923,7 +926,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                     type="radio"
                                                     name="productType"
                                                     checked={pricingData.isHourlyQuote}
-                                                    onChange={() => setPricingData({ ...pricingData, isHourlyQuote: true })}
+                                                    onChange={() => {
+                                                        setPricingData({ ...pricingData, isHourlyQuote: true, basePrice: 0 });
+                                                        setGeneralData({ ...generalData, planType: PlanType.CUSTOM });
+                                                    }}
                                                     className="mt-1 mr-3"
                                                 />
                                                 <div className="flex-1">
