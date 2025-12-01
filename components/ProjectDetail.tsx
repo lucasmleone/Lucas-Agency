@@ -210,7 +210,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         discountType: project.discountType || 'percentage' as 'percentage' | 'fixed',
         pricingNotes: project.pricingNotes || '',
         customHours: 0,
-        hourlyRate: 25
+        hourlyRate: 25,
+        isHourlyQuote: false  // New flag for mutual exclusivity
     });
 
     // Update base price when plan type changes OR when config loads
@@ -866,100 +867,196 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             {/* Left Column: Configuration */}
                             <div className="flex-1 space-y-8 overflow-y-auto pr-2 pb-20">
 
+
                                 {/* 1. Base Product Selection */}
                                 <section>
                                     <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                                         <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
                                         Producto Base
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Landing Page Card */}
-                                        <div
-                                            onClick={() => {
-                                                setGeneralData({ ...generalData, planType: PlanType.LANDING });
-                                                setPricingData({ ...pricingData, basePrice: 200 });
-                                            }}
-                                            className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.LANDING ? 'border-green-500 bg-green-50 ring-2 ring-green-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
-                                        >
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="font-bold text-gray-900 text-lg">Landing Page</span>
-                                                {generalData.planType === PlanType.LANDING && <CheckCircle className="text-green-600 w-6 h-6" />}
-                                            </div>
-                                            <p className="text-sm text-gray-500 mb-4">One Page. Ideal para campañas y conversión rápida.</p>
-                                            <p className="text-3xl font-black text-gray-900">$200 <span className="text-sm font-normal text-gray-500">USD</span></p>
-                                        </div>
 
-                                        {/* Corporate Web Card */}
-                                        <div
-                                            onClick={() => {
-                                                setGeneralData({ ...generalData, planType: PlanType.CORPORATE });
-                                                setPricingData({ ...pricingData, basePrice: 350 });
-                                            }}
-                                            className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.CORPORATE ? 'border-green-500 bg-green-50 ring-2 ring-green-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
-                                        >
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="font-bold text-gray-900 text-lg">Web Corporativa</span>
-                                                {generalData.planType === PlanType.CORPORATE && <CheckCircle className="text-green-600 w-6 h-6" />}
-                                            </div>
-                                            <p className="text-sm text-gray-500 mb-4">Multi-page. Sitio completo institucional.</p>
-                                            <p className="text-3xl font-black text-gray-900">$350 <span className="text-sm font-normal text-gray-500">USD</span></p>
-                                        </div>
-                                    </div>
-                                </section>
-
-                                {/* 2. Add-ons Modules */}
-                                <section>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h4 className="text-lg font-bold text-gray-900 flex items-center">
-                                            <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">2</span>
-                                            Módulos Adicionales (Add-ons)
-                                        </h4>
-                                        <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-sm text-indigo-600 font-bold hover:underline flex items-center">
-                                            <Settings className="w-4 h-4 mr-1" /> Gestionar Librería
-                                        </button>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {/* Render existing project add-ons with active state */}
-                                        {projectAddOns.map(addon => (
-                                            <div key={addon.id} className="border-2 border-purple-500 bg-purple-50 rounded-xl p-4 flex justify-between items-center transition-all shadow-sm">
-                                                <div>
-                                                    <p className="font-bold text-gray-900">{addon.name}</p>
-                                                    <p className="text-xs font-bold text-purple-700">{formatCurrency(addon.price)}</p>
+                                    {/* Radio Button Selection: Plan vs Hourly */}
+                                    <div className="space-y-4 mb-6">
+                                        {/* Option A: Standard Plan */}
+                                        <div className="border-2 rounded-xl p-4"
+                                            style={{ borderColor: !pricingData.isHourlyQuote ? '#10b981' : '#e5e7eb' }}>
+                                            <label className="flex items-start cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="productType"
+                                                    checked={!pricingData.isHourlyQuote}
+                                                    onChange={() => setPricingData({ ...pricingData, isHourlyQuote: false, customHours: 0 })}
+                                                    className="mt-1 mr-3"
+                                                />
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-gray-900 text-base">Plan Estándar</span>
+                                                    <p className="text-sm text-gray-500 mt-1">Selecciona un plan predefinido y agrega módulos adicionales</p>
                                                 </div>
-                                                <button onClick={() => handleRemoveAddOn(addon.id)} className="text-white bg-purple-600 hover:bg-purple-700 p-1.5 rounded-full transition-colors">
-                                                    <CheckCircle className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        ))}
+                                            </label>
+                                        </div>
 
-                                        {/* Render suggested templates that are NOT added yet */}
-                                        {addOnTemplates.filter(t => !projectAddOns.some(pa => pa.name === t.name)).map(template => (
-                                            <div key={template.id}
-                                                onClick={() => handleAddAddOn(template)}
-                                                className="cursor-pointer border border-gray-200 bg-white rounded-xl p-4 flex justify-between items-center hover:border-purple-300 hover:shadow-md transition-all group"
+                                        {/* Option B: Hourly Quote */}
+                                        <div className="border-2 rounded-xl p-4"
+                                            style={{ borderColor: pricingData.isHourlyQuote ? '#10b981' : '#e5e7eb' }}>
+                                            <label className="flex items-start cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="productType"
+                                                    checked={pricingData.isHourlyQuote}
+                                                    onChange={() => setPricingData({ ...pricingData, isHourlyQuote: true })}
+                                                    className="mt-1 mr-3"
+                                                />
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-gray-900 text-base">Cotización por Horas</span>
+                                                    <p className="text-sm text-gray-500 mt-1">Para proyectos personalizados fuera del alcance estándar</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Show Plan Cards if Standard Plan is selected */}
+                                    {!pricingData.isHourlyQuote && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Landing Page Card */}
+                                            <div
+                                                onClick={() => {
+                                                    setGeneralData({ ...generalData, planType: PlanType.LANDING });
+                                                    setPricingData({ ...pricingData, basePrice: 200 });
+                                                }}
+                                                className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.LANDING ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
                                             >
-                                                <div>
-                                                    <p className="font-bold text-gray-700 group-hover:text-purple-700">{template.name}</p>
-                                                    <p className="text-xs text-gray-500 group-hover:text-purple-600">+{formatCurrency(template.default_price)}</p>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="font-bold text-gray-900 text-lg">Landing Page</span>
+                                                    {generalData.planType === PlanType.LANDING && <CheckCircle className="text-indigo-600 w-6 h-6" />}
                                                 </div>
-                                                <div className="text-gray-300 group-hover:text-purple-500 bg-gray-50 group-hover:bg-purple-50 p-1.5 rounded-full">
-                                                    <Plus className="w-5 h-5" />
-                                                </div>
+                                                <p className="text-sm text-gray-500 mb-4">One Page. Ideal para campañas y conversión rápida.</p>
+                                                <p className="text-3xl font-black text-gray-900">$200 <span className="text-sm font-normal text-gray-500">USD</span></p>
                                             </div>
-                                        ))}
 
-                                        {/* Empty state if no templates */}
-                                        {addOnTemplates.length === 0 && (
-                                            <div className="col-span-2 text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                                                <p className="text-gray-500 mb-2">No hay plantillas disponibles.</p>
-                                                <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-indigo-600 font-bold text-sm">
-                                                    Cargar plantillas base
-                                                </button>
+                                            {/* Corporate Web Card */}
+                                            <div
+                                                onClick={() => {
+                                                    setGeneralData({ ...generalData, planType: PlanType.CORPORATE });
+                                                    setPricingData({ ...pricingData, basePrice: 350 });
+                                                }}
+                                                className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.CORPORATE ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                                            >
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="font-bold text-gray-900 text-lg">Web Corporativa</span>
+                                                    {generalData.planType === PlanType.CORPORATE && <CheckCircle className="text-indigo-600 w-6 h-6" />}
+                                                </div>
+                                                <p className="text-sm text-gray-500 mb-4">Multi-page. Sitio completo institucional.</p>
+                                                <p className="text-3xl font-black text-gray-900">$350 <span className="text-sm font-normal text-gray-500">USD</span></p>
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
+
+                                    {/* Show Hourly Input if Hourly Quote is selected */}
+                                    {pricingData.isHourlyQuote && (
+                                        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-6">
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <label className="text-sm text-gray-900 font-bold block">Horas Estimadas</label>
+                                                        <span className="text-xs text-gray-500">Total de horas de desarrollo</span>
+                                                    </div>
+                                                    <input
+                                                        type="number"
+                                                        value={pricingData.customHours || 0}
+                                                        onChange={(e) => setPricingData({ ...pricingData, customHours: Number(e.target.value) })}
+                                                        className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <label className="text-sm text-gray-900 font-bold block">Tarifa por Hora</label>
+                                                        <span className="text-xs text-gray-500">USD por hora</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-gray-500 font-bold">$</span>
+                                                        <input
+                                                            type="number"
+                                                            value={pricingData.hourlyRate || 25}
+                                                            onChange={(e) => setPricingData({ ...pricingData, hourlyRate: Number(e.target.value) })}
+                                                            className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
+                                                            placeholder="25"
+                                                            min="0"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {(pricingData.customHours || 0) > 0 && (
+                                                    <div className="pt-4 border-t border-purple-300 flex justify-between items-center">
+                                                        <span className="text-sm font-bold text-purple-900">Subtotal por Horas</span>
+                                                        <span className="text-2xl font-black text-purple-700">
+                                                            {formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </section>
+
+
+                                {/* 2. Add-ons Modules - Only show if NOT hourly quote */}
+                                {!pricingData.isHourlyQuote && (
+                                    <section>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h4 className="text-lg font-bold text-gray-900 flex items-center">
+                                                <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">2</span>
+                                                Módulos Adicionales (Add-ons)
+                                            </h4>
+                                            <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-sm text-indigo-600 font-bold hover:underline flex items-center">
+                                                <Settings className="w-4 h-4 mr-1" /> Gestionar Librería
+                                            </button>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {/* Render existing project add-ons with active state */}
+                                            {projectAddOns.map(addon => (
+                                                <div key={addon.id} className="border-2 border-purple-500 bg-purple-50 rounded-xl p-4 flex justify-between items-center transition-all shadow-sm">
+                                                    <div>
+                                                        <p className="font-bold text-gray-900">{addon.name}</p>
+                                                        <p className="text-xs font-bold text-purple-700">{formatCurrency(addon.price)}</p>
+                                                    </div>
+                                                    <button onClick={() => handleRemoveAddOn(addon.id)} className="text-white bg-purple-600 hover:bg-purple-700 p-1.5 rounded-full transition-colors">
+                                                        <CheckCircle className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            {/* Render suggested templates that are NOT added yet */}
+                                            {addOnTemplates.filter(t => !projectAddOns.some(pa => pa.name === t.name)).map(template => (
+                                                <div key={template.id}
+                                                    onClick={() => handleAddAddOn(template)}
+                                                    className="cursor-pointer border border-gray-200 bg-white rounded-xl p-4 flex justify-between items-center hover:border-purple-300 hover:shadow-md transition-all group"
+                                                >
+                                                    <div>
+                                                        <p className="font-bold text-gray-700 group-hover:text-purple-700">{template.name}</p>
+                                                        <p className="text-xs text-gray-500 group-hover:text-purple-600">+{formatCurrency(template.default_price)}</p>
+                                                    </div>
+                                                    <div className="text-gray-300 group-hover:text-purple-500 bg-gray-50 group-hover:bg-purple-50 p-1.5 rounded-full">
+                                                        <Plus className="w-5 h-5" />
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Empty state if no templates */}
+                                            {addOnTemplates.length === 0 && (
+                                                <div className="col-span-2 text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                                    <p className="text-gray-500 mb-2">No hay plantillas disponibles.</p>
+                                                    <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-indigo-600 font-bold text-sm">
+                                                        Cargar plantillas base
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </section>
+                                )}
 
                                 {/* 3. Custom Adjustments */}
                                 <section className="bg-gray-50 rounded-xl p-6 border border-gray-200">
@@ -1030,56 +1127,6 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                                                 placeholder="Detalles sobre el precio..."
                                             />
-                                        </div>
-
-                                        {/* Hourly Quote System */}
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-3">Cotización por Horas</label>
-                                            <p className="text-xs text-gray-600 mb-4">Para proyectos personalizados fuera del alcance estándar</p>
-
-                                            <div className="space-y-3 bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <label className="text-sm text-gray-900 font-bold block">Horas Estimadas</label>
-                                                        <span className="text-xs text-gray-500">Total de horas de desarrollo</span>
-                                                    </div>
-                                                    <input
-                                                        type="number"
-                                                        value={pricingData.customHours || 0}
-                                                        onChange={(e) => setPricingData({ ...pricingData, customHours: Number(e.target.value) })}
-                                                        className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
-                                                        placeholder="0"
-                                                        min="0"
-                                                    />
-                                                </div>
-
-                                                <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <label className="text-sm text-gray-900 font-bold block">Tarifa por Hora</label>
-                                                        <span className="text-xs text-gray-500">USD por hora</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <span className="text-gray-500 font-bold">$</span>
-                                                        <input
-                                                            type="number"
-                                                            value={pricingData.hourlyRate || 25}
-                                                            onChange={(e) => setPricingData({ ...pricingData, hourlyRate: Number(e.target.value) })}
-                                                            className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
-                                                            placeholder="25"
-                                                            min="0"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {(pricingData.customHours || 0) > 0 && (
-                                                    <div className="pt-3 border-t border-purple-300 flex justify-between items-center">
-                                                        <span className="text-sm font-bold text-purple-900">Subtotal por Horas</span>
-                                                        <span className="text-lg font-black text-purple-700">
-                                                            {formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
                                         </div>
 
                                         {/* Free Benefits Section */}

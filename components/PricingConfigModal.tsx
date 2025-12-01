@@ -61,13 +61,10 @@ export const PricingConfigModal: React.FC<PricingConfigModalProps> = ({ onClose 
 
                     <div className="space-y-4">
                         {localConfig && (() => {
-                            // Sort plans by logical order (ascending price)
+                            // Only 3 plans now
                             const planOrder = [
                                 'Landing Page',
                                 'Web Corporativa',
-                                'Single Page',
-                                'Multipage',
-                                'E-commerce',
                                 'Personalizado'
                             ];
 
@@ -75,9 +72,6 @@ export const PricingConfigModal: React.FC<PricingConfigModalProps> = ({ onClose 
                             const completeConfig = {
                                 'Landing Page': 200,
                                 'Web Corporativa': 350,
-                                'Single Page': 300,
-                                'Multipage': 600,
-                                'E-commerce': 900,
                                 'Personalizado': 0,
                                 ...localConfig
                             };

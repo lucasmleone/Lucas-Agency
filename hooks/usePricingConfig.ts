@@ -6,9 +6,6 @@ const API_URL = process.env.NODE_ENV === 'production'
     : (import.meta.env.VITE_API_URL || '/api');
 
 export interface PricingConfig {
-    "Single Page": number;
-    "Multipage": number;
-    "E-commerce": number;
     "Landing Page": number;
     "Web Corporativa": number;
     "Personalizado": number;

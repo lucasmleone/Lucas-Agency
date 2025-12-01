@@ -17,12 +17,9 @@ export enum PaymentStatus {
 }
 
 export enum PlanType {
-  SINGLE = 'Single Page',
-  MULTI = 'Multipage',
-  ECOMMERCE = 'E-commerce',
-  CUSTOM = 'Personalizado',
   LANDING = 'Landing Page',
-  CORPORATE = 'Web Corporativa'
+  CORPORATE = 'Web Corporativa',
+  CUSTOM = 'Personalizado'
 }
 
 export enum MaintenanceStatus {

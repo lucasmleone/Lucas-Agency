@@ -9,12 +9,6 @@ export const getBasePriceForPlan = (plan: PlanType, config?: Record<string, numb
     }
 
     switch (plan) {
-        case PlanType.SINGLE:
-            return 300;
-        case PlanType.MULTI:
-            return 600;
-        case PlanType.ECOMMERCE:
-            return 900;
         case PlanType.LANDING:
             return 200;
         case PlanType.CORPORATE:
