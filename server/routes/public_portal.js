@@ -165,11 +165,7 @@ router.get('/:token/data', verifyPortalAuth, async (req, res) => {
         calculatedFinalPrice = Math.max(0, Math.round(calculatedFinalPrice * 100) / 100);
 
         // Check if resources were confirmed
-        const [logs] = await pool.query(
-            'SELECT id FROM project_logs WHERE project_id = ? AND message = ? LIMIT 1',
-            [project.id, 'Cliente confirmó envío de recursos y pago desde el Portal']
-        );
-        const resourcesSent = logs.length > 0;
+        const resourcesSent = !!project.resources_sent;
 
         // Filter milestones for "Fog of War"
         // Show all 'completed' and 'active'.
@@ -230,6 +226,9 @@ router.post('/:token/action', verifyPortalAuth, async (req, res) => {
 
 
         if (action === 'confirm_resources') {
+            // Update project status
+            await pool.query('UPDATE projects SET resources_sent = TRUE WHERE id = ?', [project.id]);
+
             // Notify Admin (Log)
             await pool.query('INSERT INTO project_logs (user_id, project_id, message) VALUES (?, ?, ?)',
                 [project.user_id, project.id, 'Cliente confirmó envío de recursos y pago desde el Portal']);

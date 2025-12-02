@@ -20,6 +20,12 @@ export const PortalDashboard: React.FC<PortalDashboardProps> = ({ project, miles
     const [checkedRequirements, setCheckedRequirements] = useState<Set<number>>(new Set());
     const [resourcesConfirmed, setResourcesConfirmed] = useState(project.resourcesSent || false);
 
+    React.useEffect(() => {
+        if (project.resourcesSent) {
+            setResourcesConfirmed(true);
+        }
+    }, [project.resourcesSent]);
+
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; action: string; title: string; message: string } | null>(null);
 
     const [advancePaymentInfo, setAdvancePaymentInfo] = useState('');
