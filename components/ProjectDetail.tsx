@@ -1304,39 +1304,40 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             )}</span>
                                         </div>
                                     )}
-                                </div>
 
-                                <div className="mt-8 pt-6 border-t border-gray-700">
-                                    <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
-                                        <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
-                                        <span>{formatCurrency(
-                                            (calculateFinalPrice(
+
+                                    <div className="mt-8 pt-6 border-t border-gray-700">
+                                        <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
+                                            <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
+                                            <span>{formatCurrency(
+                                                (calculateFinalPrice(
+                                                    pricingData.basePrice,
+                                                    pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
+                                                    pricingData.discount,
+                                                    pricingData.discountType
+                                                ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
+                                            )}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
+                                        <p className="text-4xl font-black text-white tracking-tight">
+                                            {formatCurrency(calculateFinalPrice(
                                                 pricingData.basePrice,
                                                 pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
                                                 pricingData.discount,
                                                 pricingData.discountType
-                                            ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
-                                        )}</span>
+                                            ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
                                     </div>
-                                    <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
-                                    <p className="text-4xl font-black text-white tracking-tight">
-                                        {formatCurrency(calculateFinalPrice(
-                                            pricingData.basePrice,
-                                            pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
-                                            pricingData.discount,
-                                            pricingData.discountType
-                                        ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
-                                    </p>
-                                    <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
-                                </div>
 
-                                <button
-                                    onClick={handleSaveData}
-                                    className="mt-4 w-full bg-white text-gray-900 font-bold py-3 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] text-sm"
-                                >
-                                    <Save size={16} />
-                                    Guardar Cotización
-                                </button>
+                                    <button
+                                        onClick={handleSaveData}
+                                        className="mt-4 w-full bg-white text-gray-900 font-bold py-3 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] text-sm"
+                                    >
+                                        <Save size={16} />
+                                        Guardar Cotización
+                                    </button>
+                                </div>
 
                                 {/* Delivery Projection - Below Resumen */}
                                 <div className="mt-6">
