@@ -52,7 +52,7 @@ export const BUFFER_CONFIG = {
 export const WORK_CONFIG = {
     DEFAULT_DAILY_HOURS: 4,
     MIN_DAILY_HOURS: 1,
-    MAX_DAILY_HOURS: 8,
+    MAX_DAILY_HOURS: 6, // Updated to 6h per user request
     WORK_DAYS_PER_WEEK: 5, // Mon-Fri by default
 };
 

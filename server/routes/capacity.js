@@ -457,9 +457,9 @@ router.post('/generate-project-blocks', async (req, res) => {
             if (dayOfWeek !== 0 && dayOfWeek !== 6) {
                 const dateKey = currentDate.toISOString().split('T')[0];
                 const occupiedHours = occupiedDates.get(dateKey) || 0;
-                const MAX_DAILY_HOURS = 8; // Global limit from WORK_CONFIG
+                const MAX_DAILY_HOURS = 6; // User defined global limit (6h)
 
-                // Calculate real available hours in the day (Global 8h - Occupied)
+                // Calculate real available hours in the day (Global 6h - Occupied)
                 const globalAvailable = Math.max(0, MAX_DAILY_HOURS - occupiedHours);
 
                 // Calculate how much we can book for THIS project (Project Limit)
