@@ -846,7 +846,13 @@ function App() {
                           <span className="text-xs text-gray-400">
                             {project.status === ProjectStatus.DELIVERED && project.nextMaintenanceDate
                               ? `Próximo mantenimiento: ${new Date(project.nextMaintenanceDate).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`
-                              : `Entrega: ${new Date(project.deadline).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`}
+                              : project.estimatedHours
+                                ? `Entrega estimada: ${(() => {
+                                  const projectedDate = new Date();
+                                  projectedDate.setDate(projectedDate.getDate() + projection.days);
+                                  return projectedDate.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' });
+                                })()}`
+                                : `Entrega: ${new Date(project.deadline).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`}
                           </span>
                           <span className="text-xs font-medium text-blue-600 group-hover:text-blue-700 flex items-center gap-1">
                             Ver detalles
