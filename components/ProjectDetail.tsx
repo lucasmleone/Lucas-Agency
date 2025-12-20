@@ -399,6 +399,38 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         onAddLog(`Fecha de entrega actualizada: ${formatDateForDisplay(newDeadline)}`);
     };
 
+    // Smart Start: Trigger when starting production
+    const handleStartProduction = async () => {
+        try {
+            // First update payment status
+            await safeUpdateProject({ paymentStatus: PaymentStatus.DEPOSIT_PAID });
+
+            // Call Smart Start API to handle date logic and block generation
+            const response = await fetch(`/api/capacity/smart-start/${project.id}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                onAddLog(`Smart Start activado (Escenario ${result.scenario}): ${result.message}`);
+
+                // Update local state with confirmed date
+                if (result.confirmedDate) {
+                    setGeneralData(prev => ({ ...prev, deadline: result.confirmedDate }));
+                }
+            }
+
+            // Change stage to production
+            handleStageChange(ProjectStatus.PRODUCTION);
+
+        } catch (error) {
+            console.error('Error in smart start:', error);
+            // Still proceed with stage change even if smart start fails
+            handleStageChange(ProjectStatus.PRODUCTION);
+        }
+    };
+
     const copyToClipboard = async (text: string) => {
         try {
             // Try modern Clipboard API first
@@ -1464,10 +1496,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
                                         <button
                                             disabled={!checklists.depositPaid || (!checklists.infoReceived && !checklists.fillerAccepted)}
-                                            onClick={() => {
-                                                safeUpdateProject({ paymentStatus: PaymentStatus.DEPOSIT_PAID });
-                                                handleStageChange(ProjectStatus.PRODUCTION);
-                                            }}
+                                            onClick={handleStartProduction}
                                             className={`w-full px-4 py-3 rounded-lg font-bold text-sm flex items-center justify-center transition-colors ${(checklists.depositPaid && (checklists.infoReceived || checklists.fillerAccepted))
                                                 ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
