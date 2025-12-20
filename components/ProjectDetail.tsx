@@ -207,7 +207,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     // Pricing state
     const [pricingData, setPricingData] = useState({
         basePrice: getBasePriceForPlan(project.planType, pricingConfig || undefined), // Always use current plan price
-        customPrice: project.customPrice || 0,
+        customPrice: project.customPrice ?? 0,
+        isCustomPriceActive: project.customPrice !== undefined && project.customPrice !== null, // Enable if exists (even if 0)
         discount: project.discount || 0,
         discountType: project.discountType || 'percentage' as 'percentage' | 'fixed',
         pricingNotes: project.pricingNotes || '',
@@ -216,6 +217,19 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         isHourlyQuote: false,  // New flag for mutual exclusivity
         advancePercentage: project.advancePercentage || 50  // Advance payment percentage
     });
+
+    // CRITICAL: Sync pricing data when project updates (internal save or external refresh)
+    useEffect(() => {
+        setPricingData(prev => ({
+            ...prev,
+            customPrice: project.customPrice ?? 0,
+            isCustomPriceActive: project.customPrice !== undefined && project.customPrice !== null,
+            discount: project.discount || 0,
+            discountType: project.discountType || 'percentage',
+            pricingNotes: project.pricingNotes || '',
+            advancePercentage: project.advancePercentage || 50
+        }));
+    }, [project.customPrice, project.discount, project.discountType, project.pricingNotes, project.advancePercentage]);
 
     // Update base price when plan type changes OR when config loads
     useEffect(() => {
@@ -358,7 +372,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             status,
             // Add pricing fields
             basePrice: pricingData.basePrice,
-            customPrice: pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
+            customPrice: pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
             discount: pricingData.discount > 0 ? pricingData.discount : undefined,
             discountType: pricingData.discount > 0 ? pricingData.discountType : undefined,
             finalPrice: finalPrice,
@@ -1130,14 +1144,13 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 <section className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                                     <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Ajustes Finales</h4>
                                     <div className="space-y-4">
-                                        {/* Custom Price Override */}
                                         <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
                                             <div>
                                                 <label className="text-sm text-gray-900 font-bold block">Precio Personalizado</label>
                                                 <span className="text-xs text-gray-500">Sobreescribe el precio base</span>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                {pricingData.customPrice > 0 && (
+                                                {pricingData.isCustomPriceActive && (
                                                     <div className="relative">
                                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                                                         <input
@@ -1145,14 +1158,19 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                             value={pricingData.customPrice}
                                                             onChange={(e) => setPricingData({ ...pricingData, customPrice: Number(e.target.value) })}
                                                             className="border-2 border-green-500 rounded-lg py-1.5 pl-6 pr-2 w-28 text-right font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200"
+                                                            placeholder="0"
                                                         />
                                                     </div>
                                                 )}
                                                 <label className="relative inline-flex items-center cursor-pointer">
                                                     <input
                                                         type="checkbox"
-                                                        checked={pricingData.customPrice > 0}
-                                                        onChange={(e) => setPricingData({ ...pricingData, customPrice: e.target.checked ? pricingData.basePrice : 0 })}
+                                                        checked={pricingData.isCustomPriceActive}
+                                                        onChange={(e) => setPricingData({
+                                                            ...pricingData,
+                                                            isCustomPriceActive: e.target.checked,
+                                                            customPrice: e.target.checked ? pricingData.customPrice : 0
+                                                        })}
                                                         className="sr-only peer"
                                                     />
                                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
@@ -1248,87 +1266,86 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     </h3>
 
                                     <div className="space-y-3 flex-1">
-                                        <div className="flex justify-between items-center text-sm opacity-90">
-                                            <span className="font-medium">{getPlanDisplayName(generalData.planType)}</span>
-                                            <span className="font-bold">{formatCurrency(pricingData.customPrice > 0 ? pricingData.customPrice : pricingData.basePrice)}</span>
-                                        </div>
-
-                                        {projectAddOns.length > 0 && (
-                                            <div className="space-y-2 pt-4 border-t border-gray-700">
-                                                <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Add-ons</p>
-                                                {projectAddOns.map(addon => (
-                                                    <div key={addon.id} className="flex justify-between items-center text-sm">
-                                                        <span className="truncate pr-2 text-gray-300">{addon.name}</span>
-                                                        <span className="font-medium">{formatCurrency(addon.price)}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {(pricingData.customHours || 0) > 0 && (
-                                            <div className="space-y-2 pt-4 border-t border-gray-700">
-                                                <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Cotización por Horas</p>
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-gray-300">{pricingData.customHours}h @ ${pricingData.hourlyRate || 25}/h</span>
-                                                    <span className="font-medium">{formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {pricingData.discount > 0 && (
-                                            <div className="flex justify-between items-center text-sm text-yellow-300 pt-4 border-t border-gray-700">
-                                                <span>Descuento</span>
-                                                <span>- {formatCurrency(pricingData.discountType === 'percentage' ?
-                                                    ((pricingData.customPrice && pricingData.customPrice > 0 ? pricingData.customPrice : (pricingData.basePrice + addOnsTotal)) * pricingData.discount / 100) :
-                                                    pricingData.discount
-                                                )}</span>
-                                            </div>
-                                        )}
+                                        <span className="font-medium">{getPlanDisplayName(generalData.planType)}</span>
+                                        <span className="font-bold">{formatCurrency(pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice)}</span>
                                     </div>
 
-                                    <div className="mt-8 pt-6 border-t border-gray-700">
-                                        <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
-                                            <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
-                                            <span>{formatCurrency(
-                                                (calculateFinalPrice(
-                                                    pricingData.basePrice,
-                                                    pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
-                                                    pricingData.discount,
-                                                    pricingData.discountType
-                                                ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
+                                    {projectAddOns.length > 0 && (
+                                        <div className="space-y-2 pt-4 border-t border-gray-700">
+                                            <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Add-ons</p>
+                                            {projectAddOns.map(addon => (
+                                                <div key={addon.id} className="flex justify-between items-center text-sm">
+                                                    <span className="truncate pr-2 text-gray-300">{addon.name}</span>
+                                                    <span className="font-medium">{formatCurrency(addon.price)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {(pricingData.customHours || 0) > 0 && (
+                                        <div className="space-y-2 pt-4 border-t border-gray-700">
+                                            <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Cotización por Horas</p>
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-300">{pricingData.customHours}h @ ${pricingData.hourlyRate || 25}/h</span>
+                                                <span className="font-medium">{formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {pricingData.discount > 0 && (
+                                        <div className="flex justify-between items-center text-sm text-yellow-300 pt-4 border-t border-gray-700">
+                                            <span>Descuento</span>
+                                            <span>- {formatCurrency(pricingData.discountType === 'percentage' ?
+                                                ((pricingData.isCustomPriceActive ? pricingData.customPrice : (pricingData.basePrice + addOnsTotal)) * pricingData.discount / 100) :
+                                                pricingData.discount
                                             )}</span>
                                         </div>
-                                        <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
-                                        <p className="text-4xl font-black text-white tracking-tight">
-                                            {formatCurrency(calculateFinalPrice(
+                                    )}
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-gray-700">
+                                    <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
+                                        <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
+                                        <span>{formatCurrency(
+                                            (calculateFinalPrice(
                                                 pricingData.basePrice,
-                                                pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
+                                                pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
                                                 pricingData.discount,
                                                 pricingData.discountType
-                                            ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
+                                            ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
+                                        )}</span>
                                     </div>
-
-                                    <button
-                                        onClick={handleSaveData}
-                                        className="mt-4 w-full bg-white text-gray-900 font-bold py-3 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] text-sm"
-                                    >
-                                        <Save size={16} />
-                                        Guardar Cotización
-                                    </button>
+                                    <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
+                                    <p className="text-4xl font-black text-white tracking-tight">
+                                        {formatCurrency(calculateFinalPrice(
+                                            pricingData.basePrice,
+                                            pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
+                                            pricingData.discount,
+                                            pricingData.discountType
+                                        ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
                                 </div>
 
-                                {/* Delivery Projection - Below Resumen */}
-                                <div className="mt-6">
-                                    <DeliveryProjection
-                                        project={project}
-                                        addons={projectAddOns}
-                                        onUpdate={safeUpdateProject}
-                                    />
-                                </div>
+                                <button
+                                    onClick={handleSaveData}
+                                    className="mt-4 w-full bg-white text-gray-900 font-bold py-3 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] text-sm"
+                                >
+                                    <Save size={16} />
+                                    Guardar Cotización
+                                </button>
+                            </div>
+
+                            {/* Delivery Projection - Below Resumen */}
+                            <div className="mt-6">
+                                <DeliveryProjection
+                                    project={project}
+                                    addons={projectAddOns}
+                                    onUpdate={safeUpdateProject}
+                                />
                             </div>
                         </div>
+
                     )}
 
                     {activeTab === 'workflow' && (
@@ -1648,92 +1665,88 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             }}
                         />
                     )}
-                </div>
-            </div>
-            {/* Add-ons Library Modal */}
-            {
-                isLibraryOpen && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                            <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                                <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                                    <Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> Librería de Añadidos
-                                </h3>
-                                <button onClick={() => setIsLibraryOpen(false)} className="text-gray-400 hover:text-gray-600">
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            <div className="p-6 space-y-6">
-                                {/* Create New Template */}
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Crear Nuevo Añadido</h4>
-                                    <form onSubmit={handleCreateTemplate} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-500 mb-1">Nombre</label>
-                                            <input
-                                                required
-                                                value={newTemplate.name}
-                                                onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                                                className="w-full border rounded p-2 text-sm"
-                                                placeholder="Ej: Hosting Extra"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-500 mb-1">Precio Sugerido</label>
-                                            <input
-                                                type="number"
-                                                required
-                                                value={newTemplate.defaultPrice}
-                                                onChange={e => setNewTemplate({ ...newTemplate, defaultPrice: Number(e.target.value) })}
-                                                className="w-full border rounded p-2 text-sm"
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                        <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700">
-                                            Crear
+                    {/* Add-ons Library Modal */}
+                    {
+                        isLibraryOpen && (
+                            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                                <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                                    <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                                        <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                                            <Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> Librería de Añadidos
+                                        </h3>
+                                        <button onClick={() => setIsLibraryOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                            <X size={24} />
                                         </button>
-                                    </form>
-                                </div>
+                                    </div>
 
-                                {/* Template List */}
-                                <div>
-                                    <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Disponibles</h4>
-                                    {addOnTemplates.length === 0 ? (
-                                        <p className="text-gray-500 italic text-sm">No hay plantillas guardadas.</p>
-                                    ) : (
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {addOnTemplates.map(template => (
-                                                <div key={template.id} className="flex justify-between items-center p-3 border rounded hover:bg-gray-50 transition-colors">
-                                                    <div>
-                                                        <p className="font-bold text-gray-900">{template.name}</p>
-                                                        <p className="text-xs text-gray-500">{formatCurrency(template.default_price)}</p>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => handleAddAddOn(template)}
-                                                            className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 flex items-center"
-                                                        >
-                                                            <Plus size={14} className="mr-1" /> Usar
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteTemplate(template.id)}
-                                                            className="p-1.5 text-gray-400 hover:text-red-600"
-                                                            title="Eliminar de librería"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
+                                    <div className="p-6 space-y-6">
+                                        {/* Create New Template */}
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Crear Nuevo Añadido</h4>
+                                            <form onSubmit={handleCreateTemplate} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-xs font-bold text-gray-500 mb-1">Nombre</label>
+                                                    <input
+                                                        required
+                                                        value={newTemplate.name}
+                                                        onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                                                        className="w-full border rounded p-2 text-sm"
+                                                        placeholder="Ej: Hosting Extra"
+                                                    />
                                                 </div>
-                                            ))}
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-500 mb-1">Precio Sugerido</label>
+                                                    <input
+                                                        type="number"
+                                                        required
+                                                        value={newTemplate.defaultPrice}
+                                                        onChange={e => setNewTemplate({ ...newTemplate, defaultPrice: Number(e.target.value) })}
+                                                        className="w-full border rounded p-2 text-sm"
+                                                        placeholder="0.00"
+                                                    />
+                                                </div>
+                                                <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700">
+                                                    Crear
+                                                </button>
+                                            </form>
                                         </div>
-                                    )}
+
+                                        {/* Template List */}
+                                        <div>
+                                            <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Disponibles</h4>
+                                            {addOnTemplates.length === 0 ? (
+                                                <p className="text-gray-500 italic text-sm">No hay plantillas guardadas.</p>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-3">
+                                                    {addOnTemplates.map(template => (
+                                                        <div key={template.id} className="flex justify-between items-center p-3 border rounded hover:bg-gray-50 transition-colors">
+                                                            <div>
+                                                                <p className="font-bold text-gray-900">{template.name}</p>
+                                                                <p className="text-xs text-gray-500">{formatCurrency(template.default_price)}</p>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <button
+                                                                    onClick={() => handleAddAddOn(template)}
+                                                                    className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 flex items-center"
+                                                                >
+                                                                    <Plus size={14} className="mr-1" /> Usar
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteTemplate(template.id)}
+                                                                    className="p-1.5 text-gray-400 hover:text-red-600"
+                                                                    title="Eliminar de librería"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                    </div>
                                 </div>
+                                    )}
                             </div>
-                        </div>
-                    </div>
-                )
-            }
-        </div >
-    );
-};
+                            </div>
+                );
+    };

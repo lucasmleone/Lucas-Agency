@@ -14,6 +14,7 @@ import {
     Trash2,
     Eraser // New icon for bulk delete
 } from 'lucide-react';
+import { WeekBoard } from './Calendar/WeekBoard';
 
 interface CalendarViewProps {
     onClose?: () => void;
@@ -356,6 +357,79 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
         return currentDate.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
     };
 
+    // --- NEW HANDLERS FOR WEEK BOARD ---
+
+    const handleMoveToNextDay = async (blockId: number) => {
+        const block = blocks.find(b => b.id === blockId);
+        if (!block) return;
+        const current = new Date(block.date);
+        current.setDate(current.getDate() + 1);
+        const nextDateStr = current.toISOString().split('T')[0];
+
+        try {
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: nextDateStr })
+            });
+            fetchBlocks();
+        } catch (err) {
+            console.error('Failed to move block', err);
+        }
+    };
+
+    const handleDuplicateBlock = async (block: CapacityBlock) => {
+        try {
+            await fetch('/api/capacity/blocks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: block.title,
+                    blockType: block.blockType,
+                    date: block.date, // Same day duplicate
+                    hours: block.hours,
+                    startTime: block.startTime,
+                    projectId: block.projectId,
+                    isShadow: false
+                })
+            });
+            fetchBlocks();
+        } catch (err) {
+            console.error('Failed to duplicate block', err);
+        }
+    };
+
+    const handleSmartAdd = (dateStr: string, project?: Project) => {
+        if (project) {
+            createInstantBlock(dateStr, project);
+        } else {
+            setSelectedDate(dateStr);
+            setNewBlock({ title: '', blockType: 'manual', hours: 2, startTime: '', notes: '', projectId: '' });
+            setShowAddModal(true);
+        }
+    };
+
+    const createInstantBlock = async (dateStr: string, project: Project) => {
+        try {
+            await fetch('/api/capacity/blocks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: `Trabajo en: ${project.clientName}`,
+                    blockType: 'production',
+                    hours: 2,
+                    date: dateStr,
+                    startTime: '',
+                    projectId: project.id,
+                    isShadow: false
+                })
+            });
+            fetchBlocks();
+        } catch (err) {
+            console.error('Instant Add Failed', err);
+        }
+    };
+
     const days = getDays();
 
     // Block color based on type
@@ -370,646 +444,238 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
     return (
         <div className="h-full flex flex-col bg-gray-50">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-6 py-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                            <CalendarIcon className="w-6 h-6 text-indigo-600" />
-                            <h1 className="text-2xl font-bold text-gray-900">Calendario de Capacidad</h1>
-                        </div>
-
-                        {/* View Toggle */}
-                        <div className="flex bg-gray-100 rounded-lg p-1">
-                            <button
-                                onClick={() => setViewMode('week')}
-                                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'week'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
-                                    }`}
-                            >
-                                Semana
-                            </button>
-                            <button
-                                onClick={() => setViewMode('month')}
-                                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'month'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
-                                    }`}
-                            >
-                                Mes
-                            </button>
-                        </div>
+            <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
+                <div className="flex items-center gap-4">
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+                        <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                    <div className="flex items-center gap-2">
+                        <CalendarIcon className="w-6 h-6 text-indigo-600" />
+                        <h1 className="text-2xl font-bold text-gray-900">Planificación Semanal</h1>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center bg-gray-100 rounded-lg p-1 ml-6">
+                        <button
+                            onClick={() => navigate('prev')}
+                            className="p-1 hover:bg-white rounded shadow-sm transition-all"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
                         <button
                             onClick={goToToday}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                            className="px-3 py-1 text-sm font-medium hover:bg-white rounded transition-all"
                         >
-                            Hoy
+                            Esta Semana
                         </button>
+                        <button
+                            onClick={() => navigate('next')}
+                            className="p-1 hover:bg-white rounded shadow-sm transition-all"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
 
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => navigate('prev')}
-                                className="p-2 hover:bg-gray-100 rounded-lg"
-                            >
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <span className="min-w-[200px] text-center font-medium text-gray-900">
-                                {formatHeader()}
-                            </span>
-                            <button
-                                onClick={() => navigate('next')}
-                                className="p-2 hover:bg-gray-100 rounded-lg"
-                            >
-                                <ChevronRight className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        {onClose && (
-                            <button
-                                onClick={onClose}
-                                className="p-2 hover:bg-gray-100 rounded-lg"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
+                    <div className="text-sm font-medium text-gray-500 ml-2">
+                        {days.length > 0 && (
+                            `${new Date(days[0].date).toLocaleDateString('es-AR', { month: 'long', day: 'numeric' })} - ${new Date(days[days.length - 1].date).toLocaleDateString('es-AR', { month: 'long', day: 'numeric' })}`
                         )}
                     </div>
                 </div>
 
-                {/* Legend */}
-                <div className="flex items-center gap-6 mt-4 text-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-blue-100 border border-blue-300"></div>
-                        <span className="text-gray-600">Producción</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-gray-100 border border-gray-300 border-dashed"></div>
-                        <span className="text-gray-600">Propuesta (Shadow)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-purple-100 border border-purple-300"></div>
-                        <span className="text-gray-600">Bloque de Tiempo</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-amber-100 border border-amber-300"></div>
-                        <span className="text-gray-600">Manual</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded bg-green-100 border border-green-300"></div>
-                        <span className="text-gray-600">Completado</span>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div> Producción
+                        <div className="w-2 h-2 rounded-full bg-purple-500 ml-2"></div> Reunión
+                        <div className="w-2 h-2 rounded-full bg-amber-500 ml-2"></div> Manual
                     </div>
                 </div>
             </div>
 
-            {/* Calendar Grid */}
-            <div className="flex-1 overflow-auto p-6">
-                {loading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                    </div>
-                ) : (
-                    <div className={`grid gap-4 ${viewMode === 'week' ? 'grid-cols-7' : 'grid-cols-7'}`}>
-                        {/* Day Headers */}
-                        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
-                            <div key={day} className="text-center text-sm font-medium text-gray-500 pb-2">
-                                {day}
-                            </div>
-                        ))}
-
-                        {/* Days */}
-                        {days.map(day => (
-                            <div
-                                key={day.dateStr}
-                                className={`min-h-[120px] rounded-xl border-2 p-2 transition-all ${day.isToday
-                                    ? 'border-indigo-500 bg-indigo-50/50'
-                                    : day.isWeekend
-                                        ? 'border-gray-200 bg-gray-100/50'
-                                        : 'border-gray-200 bg-white hover:border-gray-300'
-                                    } ${day.hasOverlap ? 'ring-2 ring-yellow-400' : ''}`}
-                            >
-                                {/* Day Header */}
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className={`text-sm font-bold ${day.isToday ? 'text-indigo-600' : 'text-gray-700'}`}>
-                                        {day.date.getDate()}
-                                    </span>
-                                    <div className="flex items-center gap-1">
-                                        {day.totalHours > 0 && (
-                                            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${day.totalHours >= 8
-                                                ? 'bg-red-100 text-red-700'
-                                                : day.totalHours >= 6
-                                                    ? 'bg-amber-100 text-amber-700'
-                                                    : 'bg-blue-100 text-blue-700'
-                                                }`}>
-                                                {day.totalHours}h
-                                            </span>
-                                        )}
-                                        {day.hasOverlap && (
-                                            <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" />
-                                        )}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedDate(day.dateStr);
-                                                setShowDayDetail(true);
-                                            }}
-                                            className="p-1 hover:bg-gray-200 rounded-full transition-colors"
-                                        >
-                                            <Layers className="w-3.5 h-3.5 text-gray-400" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Blocks Preview */}
-                                <div
-                                    className="space-y-1 cursor-pointer flex-1"
-                                    onClick={() => {
-                                        setSelectedDate(day.dateStr);
-                                        setShowDayDetail(true);
-                                    }}
-                                >
-                                    {day.blocks.slice(0, viewMode === 'week' ? 4 : 2).map(block => (
-                                        <div
-                                            key={block.id}
-                                            className={`w-full text-left px-2 py-1 rounded border text-xs truncate ${getBlockColor(block)}`}
-                                        >
-                                            <div className="flex items-center gap-1">
-                                                {block.completed && <CheckCircle className="w-3 h-3" />}
-                                                <span className="truncate">{block.title}</span>
-                                                <span className="ml-auto text-[10px] opacity-70">{block.hours}h</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {day.blocks.length > (viewMode === 'week' ? 4 : 2) && (
-                                        <div className="text-xs text-gray-400 text-center">
-                                            +{day.blocks.length - (viewMode === 'week' ? 4 : 2)} más
-                                        </div>
-                                    )}
-                                    {day.blocks.length === 0 && (
-                                        <div className="h-full flex items-center justify-center text-gray-300">
-                                            <Plus className="w-5 h-5 opacity-0 group-hover:opacity-50" />
-                                        </div>
-                                    )}
-                                </div>
-
-                            </div>
-                        ))}
-                    </div>
-                )}
+            {/* Main Week Board */}
+            <div className="flex-1 overflow-hidden">
+                <WeekBoard
+                    days={days}
+                    projects={projects}
+                    onAddBlock={handleSmartAdd}
+                    onEditBlock={(block) => { setSelectedBlock(block); setShowDayDetail(true); }} // Reusing Detail Modal for edit
+                    onDeleteBlock={(id) => { setSelectedBlock(blocks.find(b => b.id === id) || null); setShowDeleteOptions(true); }}
+                    onMoveToNextDay={handleMoveToNextDay}
+                    onDuplicateBlock={handleDuplicateBlock}
+                />
             </div>
 
-            {/* Day Detail Modal */}
-            {
-                showDayDetail && selectedDate && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowDayDetail(false)}>
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                            {/* Header */}
-                            <div className="p-6 border-b flex justify-between items-start bg-gray-50 rounded-t-2xl">
-                                <div>
-                                    <h3 className="text-2xl font-bold text-gray-900 capitalize">
-                                        {new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long' })}
-                                    </h3>
-                                    <p className="text-gray-500">
-                                        {new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                    </p>
-                                </div>
-                                <button onClick={() => setShowDayDetail(false)} className="p-2 hover:bg-gray-200 rounded-full">
-                                    <X className="w-5 h-5 text-gray-500" />
-                                </button>
+            {/* ---------------- MODALS ---------------- */}
+
+            {/* DELETE MODAL */}
+            {showDeleteOptions && selectedBlock && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={() => setShowDeleteOptions(false)}>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all scale-100" onClick={e => e.stopPropagation()}>
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                                <Trash2 className="w-6 h-6 text-red-600" />
                             </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Eliminar Bloque</h3>
 
-                            {/* Content */}
-                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                                {/* Stats */}
-                                <div className="flex gap-4">
-                                    <div className="flex-1 bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
-                                        <div className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">Ocupado</div>
-                                        <div className="text-3xl font-bold text-blue-700">
-                                            {days.find(d => d.dateStr === selectedDate)?.totalHours || 0}h
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 bg-green-50 border border-green-100 p-4 rounded-xl text-center">
-                                        <div className="text-xs text-green-600 font-bold uppercase tracking-wider mb-1">Disponible</div>
-                                        <div className="text-3xl font-bold text-green-700">
-                                            {Math.max(0, 8 - (days.find(d => d.dateStr === selectedDate)?.totalHours || 0))}h
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Scheduled Times (Agenda) */}
-                                <div>
-                                    <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide opacity-70">
-                                        <Clock className="w-4 h-4" />
-                                        Agenda y Horarios
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {days.find(d => d.dateStr === selectedDate)?.blocks
-                                            .filter(b => b.startTime)
-                                            .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
-                                            .map(block => (
-                                                <div
-                                                    key={block.id}
-                                                    onClick={() => {
-                                                        setShowDayDetail(false);
-                                                        setSelectedBlock(block);
-                                                    }}
-                                                    className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer hover:shadow-md transition-all ${getBlockColor(block)}`}
-                                                >
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-sm">{block.title}</span>
-                                                        <div className="flex items-center gap-2 text-xs opacity-80">
-                                                            {block.completed && <CheckCircle className="w-3 h-3" />}
-                                                            <span className="font-mono bg-black/5 px-1 rounded">{block.startTime}</span>
-                                                            <span>• {block.hours}h</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="p-2 hover:bg-black/5 rounded-full">
-                                                        <Edit3 className="w-4 h-4" />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        {(!days.find(d => d.dateStr === selectedDate)?.blocks.some(b => b.startTime)) && (
-                                            <div className="text-center py-4 text-gray-400 text-xs italic">
-                                                No hay bloques con horario fijo
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Production Queue (Flexible) */}
-                                <div>
-                                    <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide opacity-70">
-                                        <Layers className="w-4 h-4" />
-                                        Cola de Producción (Flexible)
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {days.find(d => d.dateStr === selectedDate)?.blocks
-                                            .filter(b => !b.startTime)
-                                            .map(block => (
-                                                <div
-                                                    key={block.id}
-                                                    onClick={() => {
-                                                        setShowDayDetail(false);
-                                                        setSelectedBlock(block);
-                                                    }}
-                                                    className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer hover:shadow-md transition-all ${getBlockColor(block)}`}
-                                                >
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-sm">{block.title}</span>
-                                                        <div className="flex items-center gap-2 text-xs opacity-80">
-                                                            {block.completed && <CheckCircle className="w-3 h-3" />}
-                                                            <span>{block.hours}h</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="p-2 hover:bg-black/5 rounded-full">
-                                                        <Edit3 className="w-4 h-4" />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        {(!days.find(d => d.dateStr === selectedDate)?.blocks.some(b => !b.startTime)) && (
-                                            <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl text-sm">
-                                                No hay tareas flexibles pendientes
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Footer - Add Button */}
-                            <div className="p-4 border-t bg-gray-50 rounded-b-2xl">
+                            <div className="grid grid-cols-1 gap-3 w-full mt-4">
                                 <button
-                                    onClick={() => {
-                                        setShowDayDetail(false);
-                                        setShowAddModal(true);
-                                    }}
-                                    className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-indigo-200"
+                                    onClick={() => { handleDeleteBlock(selectedBlock.id); setShowDeleteOptions(false); }}
+                                    className="w-full py-3 bg-white border border-gray-300 shadow-sm rounded-xl font-medium text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2"
                                 >
-                                    <Plus className="w-5 h-5" />
-                                    Agregar Nuevo Bloque
+                                    Solo este bloque
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Block Detail Modal */}
-            {
-                selectedBlock && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setSelectedBlock(null)}>
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-                            <div className={`p-6 rounded-t-2xl ${getBlockColor(selectedBlock)}`}>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-xl font-bold">{selectedBlock.title}</h3>
-                                        <p className="text-sm opacity-80">
-                                            {new Date(selectedBlock.date + 'T12:00:00').toLocaleDateString('es-AR', {
-                                                weekday: 'long',
-                                                day: 'numeric',
-                                                month: 'long'
-                                            })}
-                                        </p>
-                                    </div>
-                                    <button onClick={() => setSelectedBlock(null)} className="p-1 hover:bg-white/20 rounded">
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="p-6 space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-5 h-5 text-gray-400" />
-                                        <span className="font-bold text-2xl">{selectedBlock.hours}h</span>
-                                    </div>
-                                    {selectedBlock.startTime && (
-                                        <span className="text-gray-500">@ {selectedBlock.startTime}</span>
-                                    )}
-                                    {selectedBlock.isShadow && (
-                                        <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
-                                            Shadow (Propuesta)
-                                        </span>
-                                    )}
-                                </div>
-
-                                {selectedBlock.clientName && (
-                                    <div className="text-sm text-gray-600">
-                                        Cliente: <span className="font-medium">{selectedBlock.clientName}</span>
-                                    </div>
-                                )}
-
-                                {selectedBlock.notes && (
-                                    <div className="bg-gray-50 rounded-lg p-4">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">Notas</h4>
-                                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{selectedBlock.notes}</p>
-                                    </div>
-                                )}
-
-                                {/* Tasks Section */}
-                                <div className="border-t pt-4">
-                                    <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm">
-                                        <CheckCircle className="w-4 h-4 text-indigo-600" />
-                                        Checklist del Bloque
-                                    </h4>
-
-                                    <div className="space-y-2 mb-3">
-                                        {selectedBlock.tasks?.map(task => (
-                                            <div key={task.id} className="flex items-center gap-3 group">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={task.completed}
-                                                    onChange={(e) => toggleTask(selectedBlock.id, task.id, e.target.checked)}
-                                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                                                />
-                                                <span className={`flex-1 text-sm ${task.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
-                                                    {task.text}
-                                                </span>
-                                                <button
-                                                    onClick={() => deleteTask(selectedBlock.id, task.id)}
-                                                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1"
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
-                                        <Plus className="w-4 h-4 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Agregar sub-tarea..."
-                                            className="bg-transparent border-none text-sm w-full focus:ring-0 p-0 placeholder-gray-400"
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                                                    addTask(selectedBlock.id, e.currentTarget.value.trim());
-                                                    e.currentTarget.value = '';
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-3 pt-4 border-t">
-                                    {!selectedBlock.completed && !selectedBlock.isShadow && (
-                                        <button
-                                            onClick={() => handleCompleteShift(selectedBlock.id)}
-                                            className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 flex items-center justify-center gap-2"
-                                        >
-                                            <CheckCircle className="w-5 h-5" />
-                                            Completar Turno
-                                        </button>
-                                    )}
+                                {selectedBlock.projectId && (
                                     <button
-                                        onClick={() => {
-                                            if (!selectedBlock.projectId) {
-                                                // If no project (manual block), just delete
-                                                if (window.confirm('¿Borrar este bloque?')) handleDeleteBlock(selectedBlock.id);
-                                            } else {
-                                                // If project, show custom confirmation UI or use window.confirm heavily
-                                                // For a quick cleaner implementation let's use a small state-driven UI within this modal or a new modal.
-                                                // Let's use a simple window.confirm workflow for now as Step 1 to clean UI, or better:
-                                                // Trigger a specific interaction.
-                                                // User requested: "uno por bloque y otro planificacion futura prefiero que sea uno y me aaprezca un modal que me pregunte"
-
-                                                // I will implement a custom `showDeleteOptions` state to render the options IN PLACE of the buttons.
-                                                setShowDeleteOptions(true);
-                                            }
-                                        }}
-                                        className="p-3 text-red-600 hover:bg-red-50 rounded-xl"
-                                        title="Eliminar"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-
-                                {showDeleteOptions && selectedBlock.projectId && (
-                                    // Hidden, handled by global modal
-                                    null
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Delete Confirmation Dialog */}
-            {
-                showDeleteOptions && selectedBlock && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={() => setShowDeleteOptions(false)}>
-                        <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all scale-100" onClick={e => e.stopPropagation()}>
-                            <div className="flex flex-col items-center text-center">
-                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                                    <Trash2 className="w-6 h-6 text-red-600" />
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2">Eliminar Bloque</h3>
-                                <p className="text-sm text-gray-500 mb-6">
-                                    Este bloque es parte de un proyecto. ¿Deseas eliminar solo este bloque o toda la planificación futura?
-                                </p>
-
-                                <div className="grid grid-cols-1 gap-3 w-full">
-                                    <button
-                                        onClick={() => {
-                                            handleDeleteBlock(selectedBlock.id);
-                                            setShowDeleteOptions(false);
-                                        }}
-                                        className="w-full py-3 bg-white border border-gray-300 shadow-sm rounded-xl font-medium text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors"
-                                    >
-                                        Solo este bloque
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            handleDeleteFuture(selectedBlock.id, selectedBlock.projectId!, new Date(selectedBlock.date).toISOString().split('T')[0]);
-                                            setShowDeleteOptions(false);
-                                        }}
-                                        className="w-full py-3 bg-red-600 shadow-sm rounded-xl font-medium text-white hover:bg-red-700 flex items-center justify-center gap-2 transition-colors"
+                                        onClick={() => { handleDeleteFuture(selectedBlock.id, selectedBlock.projectId!, new Date(selectedBlock.date).toISOString().split('T')[0]); setShowDeleteOptions(false); }}
+                                        className="w-full py-3 bg-red-600 shadow-sm rounded-xl font-medium text-white hover:bg-red-700 flex items-center justify-center gap-2"
                                     >
                                         <Eraser className="w-4 h-4" />
-                                        Este y futuras (Serie)
+                                        Este y futuras
                                     </button>
-                                </div>
+                                )}
+                            </div>
+                            <button onClick={() => setShowDeleteOptions(false)} className="mt-4 text-sm text-gray-500 hover:text-gray-800">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                                <button
-                                    onClick={() => setShowDeleteOptions(false)}
-                                    className="mt-4 text-sm text-gray-500 hover:text-gray-800 font-medium"
-                                >
-                                    Cancelar
+            {/* ADD BLOCK MODAL */}
+            {showAddModal && selectedDate && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowAddModal(false)}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b flex justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold">Agregar Bloque</h3>
+                                <p className="text-sm text-gray-500">
+                                    {new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-AR', {
+                                        weekday: 'long',
+                                        day: 'numeric',
+                                        month: 'long'
+                                    })}
+                                </p>
+                            </div>
+                            <button onClick={() => setShowAddModal(false)}><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Título</label>
+                                <input
+                                    value={newBlock.title}
+                                    onChange={e => setNewBlock({ ...newBlock, title: e.target.value })}
+                                    className="w-full border rounded-lg px-3 py-2"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Tipo</label>
+                                    <select value={newBlock.blockType} onChange={e => setNewBlock({ ...newBlock, blockType: e.target.value as BlockType })} className="w-full border rounded-lg px-3 py-2">
+                                        <option value="manual">Manual</option>
+                                        <option value="production">Producción</option>
+                                        <option value="meeting">Reunión</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Horas</label>
+                                    <input type="number" value={newBlock.hours} onChange={e => setNewBlock({ ...newBlock, hours: Number(e.target.value) })} className="w-full border rounded-lg px-3 py-2" step={0.5} />
+                                </div>
+                            </div>
+
+                            {newBlock.blockType === 'production' && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Proyecto</label>
+                                    <select
+                                        value={newBlock.projectId}
+                                        onChange={e => {
+                                            const pid = e.target.value;
+                                            const p = projects.find(pr => pr.id === pid);
+                                            setNewBlock({
+                                                ...newBlock,
+                                                projectId: pid,
+                                                title: p ? `Trabajo en: ${p.clientName}` : newBlock.title
+                                            });
+                                        }}
+                                        className="w-full border rounded-lg px-3 py-2"
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        {projects.filter(p => !['7. Entregado', '6. Cancelado'].includes(p.status)).map(p => (
+                                            <option key={p.id} value={p.id}>{p.clientName}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Notas</label>
+                                <textarea value={newBlock.notes} onChange={e => setNewBlock({ ...newBlock, notes: e.target.value })} className="w-full border rounded-lg px-3 py-2" rows={2} />
+                            </div>
+
+                            <button onClick={handleCreateBlock} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold mt-4">Crear Bloque</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* DETAIL / EDIT MODAL */}
+            {showDayDetail && selectedBlock && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowDayDetail(false)}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+                        <div className={`p-6 rounded-t-2xl ${getBlockColor(selectedBlock)}`}>
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-bold text-gray-900">{selectedBlock.title}</h3>
+                                <button onClick={() => setShowDayDetail(false)} className="p-1 hover:bg-white/20 rounded">
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>
-                    </div>
-                )
-            }
 
-            {/* Add Block Modal */}
-            {
-                showAddModal && selectedDate && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowAddModal(false)}>
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-                            <div className="p-6 border-b">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-xl font-bold">Agregar Bloque</h3>
-                                        <p className="text-sm text-gray-500">
-                                            {new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-AR', {
-                                                weekday: 'long',
-                                                day: 'numeric',
-                                                month: 'long'
-                                            })}
-                                        </p>
+                        <div className="p-6">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-gray-400" />
+                                    <span className="font-bold text-2xl">{selectedBlock.hours}h</span>
+                                </div>
+                                {selectedBlock.clientName && (
+                                    <div className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                        {selectedBlock.clientName}
                                     </div>
-                                    <button onClick={() => setShowAddModal(false)} className="p-1 hover:bg-gray-100 rounded">
-                                        <X className="w-5 h-5" />
+                                )}
+                            </div>
+
+                            {selectedBlock.notes && (
+                                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                                    <p className="text-sm text-gray-600">{selectedBlock.notes}</p>
+                                </div>
+                            )}
+
+                            <div className="border-t pt-4 mt-2">
+                                <h4 className="font-bold text-sm mb-2">Acciones</h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() => setShowDayDetail(false)}
+                                        className="w-full bg-gray-100 hover:bg-gray-200 py-2 rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                        Cerrar
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowDayDetail(false);
+                                            setShowDeleteOptions(true);
+                                        }}
+                                        className="w-full bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg text-sm font-medium transition-colors"
+                                    >
+                                        Eliminar
                                     </button>
                                 </div>
                             </div>
-
-                            <div className="p-6 space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                                    <input
-                                        type="text"
-                                        value={newBlock.title}
-                                        onChange={e => setNewBlock({ ...newBlock, title: e.target.value })}
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                                        placeholder="Ej: Estudiar React, Reunión con cliente..."
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                                        <select
-                                            value={newBlock.blockType}
-                                            onChange={e => setNewBlock({ ...newBlock, blockType: e.target.value as BlockType })}
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                        >
-                                            <option value="manual">Manual / Tarea</option>
-                                            <option value="meeting">Bloque de Tiempo / Reunión</option>
-                                            <option value="production">Producción (Cliente)</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-span-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Horas</label>
-                                        <input
-                                            type="number"
-                                            value={newBlock.hours}
-                                            onChange={e => setNewBlock({ ...newBlock, hours: Number(e.target.value) })}
-                                            min={0.5}
-                                            max={8}
-                                            step={0.5}
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Project Selector (Dynamic) */}
-                                {newBlock.blockType === 'production' && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Proyecto Asociado <span className="text-red-500">*</span>
-                                        </label>
-                                        <select
-                                            value={newBlock.projectId || ''}
-                                            onChange={e => {
-                                                const pid = e.target.value;
-                                                const proj = projects.find(p => p.id === pid);
-                                                setNewBlock({
-                                                    ...newBlock,
-                                                    projectId: pid,
-                                                    title: proj ? `Trabajo en: ${proj.clientName}` : newBlock.title
-                                                });
-                                            }}
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                        >
-                                            <option value="">-- Seleccionar Proyecto --</option>
-                                            {projects.filter(p => p.status !== '7. Entregado' && p.status !== '6. Cancelado').map(p => (
-                                                <option key={p.id} value={p.id}>
-                                                    {p.clientName} ({p.planType})
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
-
-                                {newBlock.blockType === 'meeting' && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Hora Inicio</label>
-                                        <input
-                                            type="time"
-                                            value={newBlock.startTime}
-                                            onChange={e => setNewBlock({ ...newBlock, startTime: e.target.value })}
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                        />
-                                    </div>
-                                )}
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Notas (opcional)</label>
-                                    <textarea
-                                        value={newBlock.notes}
-                                        onChange={e => setNewBlock({ ...newBlock, notes: e.target.value })}
-                                        rows={3}
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                                        placeholder="Detalles adicionales..."
-                                    />
-                                </div>
-
-                                <button
-                                    onClick={handleCreateBlock}
-                                    disabled={!newBlock.title}
-                                    className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                >
-                                    Crear Bloque
-                                </button>
-                            </div>
                         </div>
                     </div>
-                )
-            }
-        </div >
+                </div>
+            )}
+        </div>
     );
 };
 
 export default CalendarView;
+

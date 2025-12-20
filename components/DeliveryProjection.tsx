@@ -171,8 +171,8 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
         });
     };
 
-    // Don't show if plan is custom without hours
-    if (project.planType === 'Personalizado' && !project.customHours && !project.isHourlyQuote) {
+    // Only hide if there are no hours to project
+    if (hoursData.bufferedHours <= 0) {
         return null;
     }
 
