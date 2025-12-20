@@ -420,8 +420,27 @@ router.post('/generate-project-blocks', async (req, res) => {
             [projectId, req.user.id]
         );
 
-        // Generate blocks
+        // Generate blocks intelligently
         const start = startDate ? new Date(startDate) : new Date();
+        const endSearch = new Date(start);
+        endSearch.setMonth(endSearch.getMonth() + 12); // Look ahead 1 year max
+
+        // Get existing blocks to find gaps
+        const [existingBlocks] = await pool.query(`
+            SELECT date, SUM(hours) as total_hours
+            FROM capacity_blocks
+            WHERE user_id = ?
+            AND date BETWEEN ? AND ?
+            AND is_shadow = FALSE
+            GROUP BY date
+        `, [req.user.id, start.toISOString().split('T')[0], endSearch.toISOString().split('T')[0]]);
+
+        const occupiedDates = new Map();
+        existingBlocks.forEach(b => {
+            const dateStr = new Date(b.date).toISOString().split('T')[0];
+            occupiedDates.set(dateStr, parseFloat(b.total_hours));
+        });
+
         let remainingHours = totalHours;
         const currentDate = new Date(start);
         const blocksToInsert = [];
@@ -431,22 +450,28 @@ router.post('/generate-project-blocks', async (req, res) => {
         while (remainingHours > 0 && iterations < maxIterations) {
             const dayOfWeek = currentDate.getDay();
 
-            // Skip weekends
+            // Skip weekends (TODO: Make configurable)
             if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-                const hoursToday = Math.min(remainingHours, dailyDedication);
-                remainingHours -= hoursToday;
+                const dateKey = currentDate.toISOString().split('T')[0];
+                const occupiedHours = occupiedDates.get(dateKey) || 0;
+                const availableHours = Math.max(0, dailyDedication - occupiedHours);
 
-                blocksToInsert.push([
-                    req.user.id,
-                    projectId,
-                    title,
-                    'production',
-                    currentDate.toISOString().split('T')[0],
-                    hoursToday,
-                    null,
-                    isShadow,
-                    null
-                ]);
+                if (availableHours > 0) {
+                    const hoursToBook = Math.min(remainingHours, availableHours);
+                    remainingHours -= hoursToBook;
+
+                    blocksToInsert.push([
+                        req.user.id,
+                        projectId,
+                        title,
+                        'production',
+                        dateKey,
+                        hoursToBook,
+                        null,
+                        isShadow,
+                        null
+                    ]);
+                }
             }
 
             currentDate.setDate(currentDate.getDate() + 1);
