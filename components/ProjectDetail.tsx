@@ -357,10 +357,11 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const addOnsTotal = projectAddOns.reduce((sum, item) => sum + Number(item.price), 0);
 
     const handleSaveData = () => {
-        // Calculate final price
+        // Calculate final price using the isCustomPriceActive flag
         const finalPrice = calculateFinalPrice(
             pricingData.basePrice,
-            pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
+            pricingData.customPrice,
+            pricingData.isCustomPriceActive,
             pricingData.discount,
             pricingData.discountType
         );
@@ -1315,7 +1316,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                             <span>{formatCurrency(
                                                 (calculateFinalPrice(
                                                     pricingData.basePrice,
-                                                    pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
+                                                    pricingData.customPrice,
+                                                    pricingData.isCustomPriceActive,
                                                     pricingData.discount,
                                                     pricingData.discountType
                                                 ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
@@ -1325,7 +1327,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                         <p className="text-4xl font-black text-white tracking-tight">
                                             {formatCurrency(calculateFinalPrice(
                                                 pricingData.basePrice,
-                                                pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
+                                                pricingData.customPrice,
+                                                pricingData.isCustomPriceActive,
                                                 pricingData.discount,
                                                 pricingData.discountType
                                             ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}

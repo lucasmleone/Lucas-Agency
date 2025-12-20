@@ -38,14 +38,21 @@ export const getPlanDisplayName = (plan: PlanType, config?: Record<string, numbe
 
 /**
  * Calculate the final price after discounts
+ * @param basePrice - The base price for the plan
+ * @param customPrice - Custom price override (can be 0 for free projects)
+ * @param isCustomPriceActive - Whether custom price should be used (handles $0 case)
+ * @param discount - Discount amount
+ * @param discountType - Type of discount (percentage or fixed)
  */
 export const calculateFinalPrice = (
     basePrice: number,
-    customPrice?: number,
+    customPrice: number | undefined,
+    isCustomPriceActive: boolean,
     discount?: number,
     discountType?: 'percentage' | 'fixed'
 ): number => {
-    const startingPrice = customPrice && customPrice > 0 ? customPrice : basePrice;
+    // Use custom price if explicitly active, otherwise use base price
+    const startingPrice = isCustomPriceActive && customPrice !== undefined ? customPrice : basePrice;
 
     if (!discount || discount <= 0) {
         return startingPrice;
@@ -69,14 +76,15 @@ export const calculateFinalPrice = (
 export const calculateTotalWithAddOns = (
     basePrice: number,
     addOnsTotal: number,
-    customPrice?: number,
+    customPrice: number | undefined,
+    isCustomPriceActive: boolean,
     discount?: number,
     discountType?: 'percentage' | 'fixed'
 ): number => {
-    // If custom price is set and greater than 0, use it as override (ignores base + addons)
+    // If custom price is explicitly active, use it as override (ignores base + addons)
     // Otherwise, start with base price + add-ons
     const subtotal = basePrice + addOnsTotal;
-    const startingPrice = customPrice && customPrice > 0 ? customPrice : subtotal;
+    const startingPrice = isCustomPriceActive && customPrice !== undefined ? customPrice : subtotal;
 
     // Apply discount to the starting price
     if (!discount || discount <= 0) {
