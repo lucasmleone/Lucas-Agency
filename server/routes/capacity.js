@@ -113,15 +113,17 @@ router.put('/blocks/:id', async (req, res) => {
         const { id } = req.params;
         const { title, blockType, date, hours, startTime, notes, completed, tasks, actualHours, trackingStartTime } = req.body;
 
-        // Verify ownership
+        // Verify ownership and get block details
         const [existing] = await pool.query(
-            'SELECT id FROM capacity_blocks WHERE id = ? AND user_id = ?',
+            'SELECT id, project_id FROM capacity_blocks WHERE id = ? AND user_id = ?',
             [id, req.user.id]
         );
 
         if (existing.length === 0) {
             return res.status(404).json({ error: 'Block not found' });
         }
+
+        const block = existing[0];
 
         // Build dynamic SET clause for tracking fields that may be null
         let setClause = `
@@ -162,6 +164,31 @@ router.put('/blocks/:id', async (req, res) => {
             UPDATE capacity_blocks SET ${setClause}
             WHERE id = ? AND user_id = ?
         `, params);
+
+        // SYNC PROJECT HOURS: If this block has a projectId, recalculate project's total hours
+        if (block.project_id && actualHours !== undefined) {
+            try {
+                // Sum all actualHours from completed/tracked blocks for this project
+                const [hoursResult] = await pool.query(`
+                    SELECT COALESCE(SUM(actual_hours), 0) as total_actual, 
+                           COALESCE(SUM(hours), 0) as total_planned
+                    FROM capacity_blocks 
+                    WHERE project_id = ? AND user_id = ?
+                `, [block.project_id, req.user.id]);
+
+                const totalActual = parseFloat(hoursResult[0].total_actual) || 0;
+
+                // Update project's hoursCompleted
+                await pool.query(`
+                    UPDATE projects SET hours_completed = ? WHERE id = ? AND user_id = ?
+                `, [totalActual, block.project_id, req.user.id]);
+
+                console.log(`Synced project ${block.project_id} hours: ${totalActual}h completed`);
+            } catch (syncErr) {
+                console.error('Error syncing project hours:', syncErr);
+                // Don't fail the request, just log the error
+            }
+        }
 
         res.json({ message: 'Block updated successfully' });
     } catch (err) {

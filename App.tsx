@@ -73,6 +73,27 @@ const getDaysRemaining = (deadline: string) => {
 };
 
 /**
+ * Calcula los días restantes de entrega basado en horas de trabajo
+ * Usa la proyección dinámica en lugar del deadline manual
+ * @param project - El proyecto con campos estimatedHours, hoursCompleted, dailyDedication
+ * @returns Número de días proyectados para terminar (redondeado arriba)
+ */
+const getProjectedDeliveryDays = (project: Project): { days: number; hoursRemaining: number; hoursAhead: number } => {
+  const estimatedHours = project.estimatedHours || 0;
+  const hoursCompleted = project.hoursCompleted || 0;
+  const dailyDedication = project.dailyDedication || 4; // Default 4h per day
+
+  const hoursRemaining = Math.max(0, estimatedHours - hoursCompleted);
+  const daysNeeded = Math.ceil(hoursRemaining / dailyDedication);
+
+  // Calculate how many hours ahead/behind compared to if we started today
+  // Positive = ahead of schedule, Negative = behind
+  const hoursAhead = hoursCompleted; // Simply show completed hours
+
+  return { days: daysNeeded, hoursRemaining, hoursAhead };
+};
+
+/**
  * Obtiene el color de urgencia basado en días restantes y estado
  * @param days - Días restantes
  * @param status - Estado del proyecto
@@ -689,7 +710,9 @@ function App() {
                     }
                   })
                   .map((project) => {
-                    const daysLeft = getDaysRemaining(project.deadline);
+                    // Use projected days based on hours, not manual deadline
+                    const projection = getProjectedDeliveryDays(project);
+                    const daysLeft = project.estimatedHours ? projection.days : getDaysRemaining(project.deadline);
                     const urgencyClass = getUrgencyColor(daysLeft, project.status);
                     const income = finances.filter(f => f.projectId === project.id && f.type === 'Ingreso').reduce((a, b) => a + Number(b.amount), 0);
                     const expenses = finances.filter(f => f.projectId === project.id && f.type === 'Gasto').reduce((a, b) => a + Number(b.amount), 0);
