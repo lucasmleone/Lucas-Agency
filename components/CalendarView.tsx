@@ -520,8 +520,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         <button
                             onClick={() => setViewMode('week')}
                             className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${viewMode === 'week'
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                ? 'bg-white text-indigo-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                         >
                             Semana
@@ -529,8 +529,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         <button
                             onClick={() => setViewMode('month')}
                             className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${viewMode === 'month'
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
+                                ? 'bg-white text-indigo-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
                                 }`}
                         >
                             Mes
@@ -569,6 +569,36 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {/* Weekly Stats Summary */}
+                    {viewMode === 'week' && days.length > 0 && (() => {
+                        const totalHours = days.reduce((sum, d) => sum + d.totalHours, 0);
+                        const maxWeekHours = days.length * 8;
+                        const utilizationPct = Math.round((totalHours / maxWeekHours) * 100);
+                        const overloadedDays = days.filter(d => d.totalHours > 8).length;
+
+                        return (
+                            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border">
+                                <div className={`text-sm font-bold ${utilizationPct > 100 ? 'text-red-600' :
+                                        utilizationPct >= 75 ? 'text-green-600' :
+                                            utilizationPct >= 50 ? 'text-yellow-600' : 'text-gray-500'
+                                    }`}>
+                                    {totalHours.toFixed(0)}h / {maxWeekHours}h
+                                </div>
+                                <div className={`text-xs px-1.5 py-0.5 rounded ${utilizationPct > 100 ? 'bg-red-100 text-red-700' :
+                                        utilizationPct >= 75 ? 'bg-green-100 text-green-700' :
+                                            utilizationPct >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                    {utilizationPct}%
+                                </div>
+                                {overloadedDays > 0 && (
+                                    <div className="text-xs text-red-600 font-medium">
+                                        ⚠️ {overloadedDays} día{overloadedDays > 1 ? 's' : ''} sobrecargado{overloadedDays > 1 ? 's' : ''}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
+
                     <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border">
                         <div className="w-2 h-2 rounded-full bg-blue-500"></div> Producción
                         <div className="w-2 h-2 rounded-full bg-purple-500 ml-2"></div> Reunión

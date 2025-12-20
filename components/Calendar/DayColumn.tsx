@@ -99,14 +99,24 @@ export const DayColumn: React.FC<DayColumnProps> = ({
                 </div>
 
                 {/* Capacity Bar */}
-                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div
-                        className={`h-full transition-all duration-500 rounded-full ${isOverCapacity ? 'bg-red-500' :
-                            totalHours >= maxCapacity ? 'bg-green-500' : 'bg-indigo-500'
+                        className={`h-full transition-all duration-500 rounded-full ${isOverCapacity
+                                ? 'bg-gradient-to-r from-red-500 to-red-600'
+                                : capacityPercentage >= 75
+                                    ? 'bg-gradient-to-r from-green-400 to-green-500'
+                                    : capacityPercentage >= 50
+                                        ? 'bg-gradient-to-r from-yellow-400 to-yellow-500'
+                                        : 'bg-gradient-to-r from-indigo-300 to-indigo-400'
                             }`}
-                        style={{ width: `${capacityPercentage}%` }}
+                        style={{ width: `${Math.min(capacityPercentage, 100)}%` }}
                     />
                 </div>
+                {isOverCapacity && (
+                    <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-red-600 animate-pulse">
+                        <span>⚠️</span> Sobrecarga: +{(totalHours - maxCapacity).toFixed(1)}h
+                    </div>
+                )}
             </div>
 
             {/* Scrollable Block List */}
