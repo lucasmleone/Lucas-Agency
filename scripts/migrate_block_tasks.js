@@ -9,11 +9,13 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '../.env') });
 
 const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || 'db', // Default to 'db' service name in Docker
     user: process.env.DB_USER || 'admin',
     password: process.env.DB_PASSWORD || 'Opalina.1884',
     database: process.env.DB_NAME || 'agency_flow'
 };
+
+console.log('DB Config:', { ...dbConfig, password: '***' });
 
 async function migrate() {
     let connection;
