@@ -143,9 +143,17 @@ router.put('/blocks/:id', async (req, res) => {
         }
 
         // Handle trackingStartTime - can be null to stop tracking
+        // Convert ISO string to MySQL datetime format
         if (trackingStartTime !== undefined) {
             setClause += `, tracking_start_time = ?`;
-            params.push(trackingStartTime);
+            if (trackingStartTime === null) {
+                params.push(null);
+            } else {
+                // Convert ISO string to MySQL datetime format: 'YYYY-MM-DD HH:MM:SS'
+                const dt = new Date(trackingStartTime);
+                const mysqlDatetime = dt.toISOString().slice(0, 19).replace('T', ' ');
+                params.push(mysqlDatetime);
+            }
         }
 
         params.push(id, req.user.id);

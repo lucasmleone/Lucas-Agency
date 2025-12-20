@@ -371,17 +371,17 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             discoveryData,
             checklists,
             status,
-            // Add pricing fields
+            // Add pricing fields - use null (not undefined) to clear values in DB
             basePrice: pricingData.basePrice,
-            customPrice: pricingData.isCustomPriceActive ? pricingData.customPrice : undefined,
-            discount: pricingData.discount > 0 ? pricingData.discount : undefined,
-            discountType: pricingData.discount > 0 ? pricingData.discountType : undefined,
+            customPrice: pricingData.isCustomPriceActive ? pricingData.customPrice : null,
+            discount: pricingData.discount > 0 ? pricingData.discount : null,
+            discountType: pricingData.discount > 0 ? pricingData.discountType : null,
             finalPrice: finalPrice,
-            pricingNotes: pricingData.pricingNotes || undefined,
+            pricingNotes: pricingData.pricingNotes || null,
             advancePercentage: pricingData.advancePercentage,
             // Hourly quote fields
-            customHours: pricingData.isHourlyQuote ? pricingData.customHours : undefined,
-            hourlyRate: pricingData.isHourlyQuote ? pricingData.hourlyRate : undefined,
+            customHours: pricingData.isHourlyQuote ? pricingData.customHours : null,
+            hourlyRate: pricingData.isHourlyQuote ? pricingData.hourlyRate : null,
             // Ensure portal data is preserved
             portalToken: project.portalToken,
             portalPin: project.portalPin,

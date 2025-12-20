@@ -180,7 +180,11 @@ router.put('/projects/:id', async (req, res) => {
         }
 
         const addUpdate = (field, value, isJson = false, isDate = false) => {
-            if (value !== undefined) {
+            // Special handling: if value is explicitly null, set to NULL in DB
+            // This allows clearing fields like customPrice
+            if (value === null) {
+                updates.push(`${field} = NULL`);
+            } else if (value !== undefined) {
                 updates.push(`${field} = ?`);
                 if (isJson) values.push(JSON.stringify(value));
                 else if (isDate) values.push(toMySQLDate(value));
