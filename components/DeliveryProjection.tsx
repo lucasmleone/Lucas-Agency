@@ -77,9 +77,50 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
         fetchDeliveryDate();
     }, [fetchDeliveryDate]);
 
+    // Generate shadow blocks for calendar
+    const [blocksGenerated, setBlocksGenerated] = useState(false);
+    const [generatingBlocks, setGeneratingBlocks] = useState(false);
+
+    const generateBlocks = async () => {
+        if (!hoursData.bufferedHours || hoursData.bufferedHours <= 0) return;
+
+        setGeneratingBlocks(true);
+        try {
+            const response = await fetch('/api/capacity/generate-project-blocks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    projectId: project.id,
+                    totalHours: hoursData.bufferedHours,
+                    dailyDedication,
+                    startDate: new Date().toISOString().split('T')[0],
+                    isShadow: true // Shadow because not confirmed yet
+                })
+            });
+
+            if (response.ok) {
+                setBlocksGenerated(true);
+                // Update project with estimated hours and quoted date
+                if (estimatedDate) {
+                    await onUpdate({
+                        estimatedHours: hoursData.bufferedHours,
+                        quotedDeliveryDate: estimatedDate,
+                        dailyDedication
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Error generating blocks:', err);
+        } finally {
+            setGeneratingBlocks(false);
+        }
+    };
+
     // Handle slider change with debounce
     const handleDedicationChange = async (value: number) => {
         setDailyDedication(value);
+        setBlocksGenerated(false); // Reset so user can regenerate
 
         // Save to project after a delay
         try {
@@ -215,6 +256,29 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                         Se <strong>congela únicamente al confirmar el pago</strong> del anticipo.
                     </span>
                 </div>
+
+                {/* Generate Blocks Button */}
+                {estimatedDate && hoursData.bufferedHours > 0 && (
+                    <button
+                        onClick={generateBlocks}
+                        disabled={generatingBlocks || blocksGenerated}
+                        className={`w-full py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${blocksGenerated
+                                ? 'bg-green-100 text-green-700 border border-green-300 cursor-default'
+                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            }`}
+                    >
+                        {generatingBlocks ? (
+                            'Generando...'
+                        ) : blocksGenerated ? (
+                            <>✓ Bloques reservados en calendario</>
+                        ) : (
+                            <>
+                                <Calendar className="w-4 h-4" />
+                                Reservar en Calendario (Propuesta)
+                            </>
+                        )}
+                    </button>
+                )}
 
                 {/* Progress (if project has started) */}
                 {project.hoursCompleted && project.hoursCompleted > 0 && (
