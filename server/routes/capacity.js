@@ -434,7 +434,6 @@ router.post('/generate-project-blocks', async (req, res) => {
             FROM capacity_blocks
             WHERE user_id = ?
             AND date BETWEEN ? AND ?
-            AND is_shadow = FALSE
             GROUP BY date
         `, [req.user.id, start.toISOString().split('T')[0], endSearch.toISOString().split('T')[0]]);
 
