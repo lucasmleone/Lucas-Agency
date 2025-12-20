@@ -854,7 +854,13 @@ function App() {
                               : project.estimatedHours
                                 ? `Entrega estimada: ${(() => {
                                   const projectedDate = new Date();
-                                  projectedDate.setDate(projectedDate.getDate() + projection.days);
+                                  let daysToAdd = projection.days;
+                                  // Skip weekends (Saturday = 6, Sunday = 0)
+                                  while (daysToAdd > 0) {
+                                    projectedDate.setDate(projectedDate.getDate() + 1);
+                                    const day = projectedDate.getDay();
+                                    if (day !== 0 && day !== 6) daysToAdd--;
+                                  }
                                   return projectedDate.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' });
                                 })()}`
                                 : `Entrega: ${new Date(project.deadline).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`}
