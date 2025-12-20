@@ -1232,10 +1232,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                 </section>
                             </div>
 
-                            {/* Right Column: Sticky Summary */}
-                            <div className="w-full md:w-80 shrink-0 pb-20 md:pb-0">
-                                <div className="sticky top-6 bg-gray-900 text-white rounded-xl shadow-2xl p-6 flex flex-col h-fit border border-gray-800">
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-white">
+                            {/* Right Column: Summary + Delivery Projection */}
+                            <div className="w-full md:w-72 shrink-0 pb-20 md:pb-0 overflow-y-auto">
+                                <div className="bg-gray-900 text-white rounded-xl shadow-2xl p-5 flex flex-col border border-gray-800">
+                                    <h3 className="text-base font-bold mb-4 flex items-center gap-2 text-white">
                                         <Sparkles className="text-yellow-400 w-5 h-5" />
                                         Resumen
                                     </h3>
@@ -1305,21 +1305,21 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
                                     <button
                                         onClick={handleSaveData}
-                                        className="mt-6 w-full bg-white text-gray-900 font-bold py-3.5 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                                        className="mt-4 w-full bg-white text-gray-900 font-bold py-3 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] text-sm"
                                     >
-                                        <Save size={18} />
+                                        <Save size={16} />
                                         Guardar Cotización
                                     </button>
                                 </div>
-                            </div>
 
-                            {/* Delivery Projection - As third column on desktop, or below on mobile */}
-                            <div className="w-full md:w-96 shrink-0 mt-6 md:mt-0">
-                                <DeliveryProjection
-                                    project={project}
-                                    addons={projectAddOns}
-                                    onUpdate={safeUpdateProject}
-                                />
+                                {/* Delivery Projection - Below Resumen */}
+                                <div className="mt-6">
+                                    <DeliveryProjection
+                                        project={project}
+                                        addons={projectAddOns}
+                                        onUpdate={safeUpdateProject}
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}
