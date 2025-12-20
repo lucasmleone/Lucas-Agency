@@ -357,14 +357,21 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const addOnsTotal = projectAddOns.reduce((sum, item) => sum + Number(item.price), 0);
 
     const handleSaveData = () => {
-        // Calculate final price using the isCustomPriceActive flag
-        const finalPrice = calculateFinalPrice(
-            pricingData.basePrice,
-            pricingData.customPrice,
-            pricingData.isCustomPriceActive,
-            pricingData.discount,
-            pricingData.discountType
-        );
+        // Calculate final price including hourly quote, applying discount to full subtotal
+        const hourlyTotal = (pricingData.customHours || 0) * (pricingData.hourlyRate || 25);
+        const planPrice = pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice;
+        const subtotal = planPrice + addOnsTotal + hourlyTotal;
+
+        // Apply discount to the full subtotal
+        let finalPrice = subtotal;
+        if (pricingData.discount > 0) {
+            if (pricingData.discountType === 'percentage') {
+                finalPrice = subtotal * (1 - pricingData.discount / 100);
+            } else {
+                finalPrice = subtotal - pricingData.discount;
+            }
+        }
+        finalPrice = Math.max(0, Math.round(finalPrice * 100) / 100);
 
         onUpdateProject({
             ...generalData,
@@ -382,6 +389,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             // Hourly quote fields
             customHours: pricingData.isHourlyQuote ? pricingData.customHours : null,
             hourlyRate: pricingData.isHourlyQuote ? pricingData.hourlyRate : null,
+            // Also save estimatedHours for delivery projection (same as customHours if hourly quote)
+            estimatedHours: pricingData.isHourlyQuote ? pricingData.customHours : null,
             // Ensure portal data is preserved
             portalToken: project.portalToken,
             portalPin: project.portalPin,
@@ -1314,24 +1323,48 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                         <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
                                             <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
                                             <span>{formatCurrency(
-                                                (calculateFinalPrice(
-                                                    pricingData.basePrice,
-                                                    pricingData.customPrice,
-                                                    pricingData.isCustomPriceActive,
-                                                    pricingData.discount,
-                                                    pricingData.discountType
-                                                ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
+                                                (() => {
+                                                    // Calculate full subtotal first
+                                                    const hourlyTotal = (pricingData.customHours || 0) * (pricingData.hourlyRate || 25);
+                                                    const planPrice = pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice;
+                                                    const subtotal = planPrice + addOnsTotal + hourlyTotal;
+
+                                                    // Apply discount to the full subtotal
+                                                    let finalTotal = subtotal;
+                                                    if (pricingData.discount > 0) {
+                                                        if (pricingData.discountType === 'percentage') {
+                                                            finalTotal = subtotal * (1 - pricingData.discount / 100);
+                                                        } else {
+                                                            finalTotal = subtotal - pricingData.discount;
+                                                        }
+                                                    }
+
+                                                    return Math.max(0, finalTotal) * (pricingData.advancePercentage || 50) / 100;
+                                                })()
                                             )}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
                                         <p className="text-4xl font-black text-white tracking-tight">
-                                            {formatCurrency(calculateFinalPrice(
-                                                pricingData.basePrice,
-                                                pricingData.customPrice,
-                                                pricingData.isCustomPriceActive,
-                                                pricingData.discount,
-                                                pricingData.discountType
-                                            ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
+                                            {formatCurrency(
+                                                (() => {
+                                                    // Calculate full subtotal first
+                                                    const hourlyTotal = (pricingData.customHours || 0) * (pricingData.hourlyRate || 25);
+                                                    const planPrice = pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice;
+                                                    const subtotal = planPrice + addOnsTotal + hourlyTotal;
+
+                                                    // Apply discount to the full subtotal
+                                                    let finalTotal = subtotal;
+                                                    if (pricingData.discount > 0) {
+                                                        if (pricingData.discountType === 'percentage') {
+                                                            finalTotal = subtotal * (1 - pricingData.discount / 100);
+                                                        } else {
+                                                            finalTotal = subtotal - pricingData.discount;
+                                                        }
+                                                    }
+
+                                                    return Math.max(0, finalTotal);
+                                                })()
+                                            )}
                                         </p>
                                         <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
                                     </div>
