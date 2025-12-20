@@ -183,56 +183,51 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
 
     return (
         <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 overflow-hidden">
-            {/* Header */}
-            <div className="px-6 py-4 bg-indigo-600 text-white">
-                <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5" />
-                    <h3 className="font-bold text-lg">Proyección de Entrega</h3>
+            {/* Header - Compact */}
+            <div className="px-4 py-3 bg-indigo-600 text-white">
+                <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <h3 className="font-bold text-sm">Proyección de Entrega</h3>
                 </div>
             </div>
 
-            <div className="p-6 space-y-6">
-                {/* Hours Breakdown */}
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                        <div className="text-sm text-gray-500 mb-1">Horas Base</div>
-                        <div className="text-2xl font-bold text-gray-900">{hoursData.rawHours}h</div>
+            <div className="p-4 space-y-4">
+                {/* Hours Breakdown - Compact Grid */}
+                <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
+                        <div className="text-xs text-gray-500">Horas Base</div>
+                        <div className="text-lg font-bold text-gray-900">{hoursData.rawHours}h</div>
                     </div>
-                    <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                        <div className="text-sm text-gray-500 mb-1">+ Buffer (30%)</div>
-                        <div className="text-2xl font-bold text-indigo-600">{hoursData.bufferedHours}h</div>
+                    <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
+                        <div className="text-xs text-gray-500">+ Buffer</div>
+                        <div className="text-lg font-bold text-indigo-600">{hoursData.bufferedHours}h</div>
                     </div>
-                    <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                        <div className="text-sm text-gray-500 mb-1">Días Laborales</div>
-                        <div className="text-2xl font-bold text-gray-900">{workDays}</div>
-                    </div>
-                </div>
-
-                {/* Buffer Breakdown */}
-                <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                    <div className="text-sm font-medium text-gray-700 mb-2">Desglose del Buffer:</div>
-                    <div className="flex gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-orange-400"></div>
-                            <span>Técnico: {hoursData.breakdown.technical}h (20%)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-                            <span>Colchón Venta: {hoursData.breakdown.admin}h (10%)</span>
-                        </div>
+                    <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
+                        <div className="text-xs text-gray-500">Días</div>
+                        <div className="text-lg font-bold text-gray-900">{workDays}</div>
                     </div>
                 </div>
 
-                {/* Daily Dedication Slider */}
-                <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                    <div className="flex items-center justify-between mb-3">
-                        <div>
-                            <div className="font-medium text-gray-900">Dedicación Diaria Máxima</div>
-                            <div className="text-sm text-gray-500">
-                                ¿Cuántas horas al día le vas a dedicar a ESTE proyecto?
-                            </div>
-                        </div>
-                        <div className="text-2xl font-bold text-indigo-600">{dailyDedication}h</div>
+                {/* Buffer Breakdown - Inline */}
+                <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                    <div className="text-xs font-medium text-gray-600 mb-1">Buffer 30%:</div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                        <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-orange-400"></span>
+                            Técnico: {hoursData.breakdown.technical}h
+                        </span>
+                        <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                            Venta: {hoursData.breakdown.admin}h
+                        </span>
+                    </div>
+                </div>
+
+                {/* Daily Dedication Slider - Compact */}
+                <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-medium text-gray-900">Dedicación Máx/Día</div>
+                        <div className="text-lg font-bold text-indigo-600">{dailyDedication}h</div>
                     </div>
                     <input
                         type="range"
@@ -249,42 +244,28 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                     </div>
                 </div>
 
-                {/* Estimated Date - The Promise */}
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
-                    <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <TrendingUp className="w-6 h-6" />
+                {/* Estimated Date - Compact */}
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-4 text-white">
+                    <div className="text-indigo-200 text-xs mb-1">Estimación de Entrega</div>
+                    {loading ? (
+                        <div className="text-lg font-bold">Calculando...</div>
+                    ) : estimatedDate ? (
+                        <div className="text-lg font-bold capitalize">
+                            {formatDate(estimatedDate)}
                         </div>
-                        <div className="flex-1">
-                            <div className="text-indigo-200 text-sm mb-1">Estimación de Entrega</div>
-                            {loading ? (
-                                <div className="text-xl font-bold">Calculando...</div>
-                            ) : estimatedDate ? (
-                                <>
-                                    <div className="text-2xl font-bold capitalize">
-                                        {formatDate(estimatedDate)}
-                                    </div>
-                                    {project.confirmedDeliveryDate && (
-                                        <div className="mt-2 flex items-center gap-2 text-sm bg-white/10 rounded-lg px-3 py-1.5 w-fit">
-                                            <Clock className="w-4 h-4" />
-                                            Fecha confirmada: {formatDate(project.confirmedDeliveryDate)}
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-xl">No disponible</div>
-                            )}
+                    ) : (
+                        <div className="text-base">No disponible</div>
+                    )}
+                    {project.confirmedDeliveryDate && (
+                        <div className="mt-2 text-xs text-indigo-200">
+                            ✓ Confirmada: {formatDate(project.confirmedDeliveryDate)}
                         </div>
-                    </div>
+                    )}
                 </div>
 
-                {/* Disclaimer */}
-                <div className="flex items-start gap-2 text-sm text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                    <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                    <span>
-                        Fecha calculada con tu disponibilidad actual.
-                        Se <strong>congela únicamente al confirmar el pago</strong> del anticipo.
-                    </span>
+                {/* Disclaimer - Compact */}
+                <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                    <span className="text-amber-500">⚠</span> Se congela al confirmar el pago del anticipo.
                 </div>
 
                 {/* Generate Blocks Button */}
@@ -293,8 +274,8 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                         onClick={() => generateBlocks()}
                         disabled={generatingBlocks}
                         className={`w-full py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${blocksGenerated
-                                ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
                             }`}
                     >
                         {generatingBlocks ? (
