@@ -1311,15 +1311,15 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                         Guardar Cotización
                                     </button>
                                 </div>
+                            </div>
 
-                                {/* Delivery Projection */}
-                                <div className="mt-6">
-                                    <DeliveryProjection
-                                        project={project}
-                                        addons={projectAddOns}
-                                        onUpdate={safeUpdateProject}
-                                    />
-                                </div>
+                            {/* Delivery Projection - Below the flex row */}
+                            <div className="mt-6 col-span-full">
+                                <DeliveryProjection
+                                    project={project}
+                                    addons={projectAddOns}
+                                    onUpdate={safeUpdateProject}
+                                />
                             </div>
                         </div>
                     )}
@@ -1644,87 +1644,89 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 </div>
             </div>
             {/* Add-ons Library Modal */}
-            {isLibraryOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                            <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                                <Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> Librería de Añadidos
-                            </h3>
-                            <button onClick={() => setIsLibraryOpen(false)} className="text-gray-400 hover:text-gray-600">
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            {/* Create New Template */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Crear Nuevo Añadido</h4>
-                                <form onSubmit={handleCreateTemplate} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-                                    <div className="md:col-span-2">
-                                        <label className="block text-xs font-bold text-gray-500 mb-1">Nombre</label>
-                                        <input
-                                            required
-                                            value={newTemplate.name}
-                                            onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                                            className="w-full border rounded p-2 text-sm"
-                                            placeholder="Ej: Hosting Extra"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 mb-1">Precio Sugerido</label>
-                                        <input
-                                            type="number"
-                                            required
-                                            value={newTemplate.defaultPrice}
-                                            onChange={e => setNewTemplate({ ...newTemplate, defaultPrice: Number(e.target.value) })}
-                                            className="w-full border rounded p-2 text-sm"
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                    <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700">
-                                        Crear
-                                    </button>
-                                </form>
+            {
+                isLibraryOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                                <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                                    <Sparkles className="w-5 h-5 mr-2 text-indigo-600" /> Librería de Añadidos
+                                </h3>
+                                <button onClick={() => setIsLibraryOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                    <X size={24} />
+                                </button>
                             </div>
 
-                            {/* Template List */}
-                            <div>
-                                <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Disponibles</h4>
-                                {addOnTemplates.length === 0 ? (
-                                    <p className="text-gray-500 italic text-sm">No hay plantillas guardadas.</p>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {addOnTemplates.map(template => (
-                                            <div key={template.id} className="flex justify-between items-center p-3 border rounded hover:bg-gray-50 transition-colors">
-                                                <div>
-                                                    <p className="font-bold text-gray-900">{template.name}</p>
-                                                    <p className="text-xs text-gray-500">{formatCurrency(template.default_price)}</p>
+                            <div className="p-6 space-y-6">
+                                {/* Create New Template */}
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Crear Nuevo Añadido</h4>
+                                    <form onSubmit={handleCreateTemplate} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-bold text-gray-500 mb-1">Nombre</label>
+                                            <input
+                                                required
+                                                value={newTemplate.name}
+                                                onChange={e => setNewTemplate({ ...newTemplate, name: e.target.value })}
+                                                className="w-full border rounded p-2 text-sm"
+                                                placeholder="Ej: Hosting Extra"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 mb-1">Precio Sugerido</label>
+                                            <input
+                                                type="number"
+                                                required
+                                                value={newTemplate.defaultPrice}
+                                                onChange={e => setNewTemplate({ ...newTemplate, defaultPrice: Number(e.target.value) })}
+                                                className="w-full border rounded p-2 text-sm"
+                                                placeholder="0.00"
+                                            />
+                                        </div>
+                                        <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-indigo-700">
+                                            Crear
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {/* Template List */}
+                                <div>
+                                    <h4 className="font-bold text-gray-700 mb-3 text-sm uppercase">Disponibles</h4>
+                                    {addOnTemplates.length === 0 ? (
+                                        <p className="text-gray-500 italic text-sm">No hay plantillas guardadas.</p>
+                                    ) : (
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {addOnTemplates.map(template => (
+                                                <div key={template.id} className="flex justify-between items-center p-3 border rounded hover:bg-gray-50 transition-colors">
+                                                    <div>
+                                                        <p className="font-bold text-gray-900">{template.name}</p>
+                                                        <p className="text-xs text-gray-500">{formatCurrency(template.default_price)}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleAddAddOn(template)}
+                                                            className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 flex items-center"
+                                                        >
+                                                            <Plus size={14} className="mr-1" /> Usar
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteTemplate(template.id)}
+                                                            className="p-1.5 text-gray-400 hover:text-red-600"
+                                                            title="Eliminar de librería"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => handleAddAddOn(template)}
-                                                        className="px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 flex items-center"
-                                                    >
-                                                        <Plus size={14} className="mr-1" /> Usar
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteTemplate(template.id)}
-                                                        className="p-1.5 text-gray-400 hover:text-red-600"
-                                                        title="Eliminar de librería"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
