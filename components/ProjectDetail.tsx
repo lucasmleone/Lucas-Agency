@@ -1311,9 +1311,18 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     {pricingData.discount > 0 && (
                                         <div className="flex justify-between items-center text-sm text-yellow-300 pt-4 border-t border-gray-700">
                                             <span>Descuento</span>
-                                            <span>- {formatCurrency(pricingData.discountType === 'percentage' ?
-                                                ((pricingData.isCustomPriceActive ? pricingData.customPrice : (pricingData.basePrice + addOnsTotal)) * pricingData.discount / 100) :
-                                                pricingData.discount
+                                            <span>- {formatCurrency(
+                                                (() => {
+                                                    const hourlyTotal = (pricingData.customHours || 0) * (pricingData.hourlyRate || 25);
+                                                    const planPrice = pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice;
+                                                    const subtotal = planPrice + addOnsTotal + hourlyTotal;
+
+                                                    if (pricingData.discountType === 'percentage') {
+                                                        return subtotal * pricingData.discount / 100;
+                                                    } else {
+                                                        return pricingData.discount;
+                                                    }
+                                                })()
                                             )}</span>
                                         </div>
                                     )}
