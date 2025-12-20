@@ -639,7 +639,12 @@ function App() {
                       </div>
                       <div className="grid grid-cols-1 gap-4">
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Entrega</label>
+                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                            Fecha Objetivo (Opcional)
+                            <span className="block text-[10px] font-normal text-gray-400 normal-case mt-0.5">
+                              Si se deja vacío, se calculará automáticamente según las horas.
+                            </span>
+                          </label>
                           <input
                             type="date"
                             className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-gray-900 focus:border-gray-900"

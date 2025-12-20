@@ -40,6 +40,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
     const [selectedBlock, setSelectedBlock] = useState<CapacityBlock | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showDayDetail, setShowDayDetail] = useState(false);
+    const [showDeleteOptions, setShowDeleteOptions] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     // New block form
@@ -738,22 +739,48 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                                         </button>
                                     )}
                                     <button
-                                        onClick={() => handleDeleteBlock(selectedBlock.id)}
+                                        onClick={() => {
+                                            if (!selectedBlock.projectId) {
+                                                // If no project (manual block), just delete
+                                                if (window.confirm('¿Borrar este bloque?')) handleDeleteBlock(selectedBlock.id);
+                                            } else {
+                                                // If project, show custom confirmation UI or use window.confirm heavily
+                                                // For a quick cleaner implementation let's use a small state-driven UI within this modal or a new modal.
+                                                // Let's use a simple window.confirm workflow for now as Step 1 to clean UI, or better:
+                                                // Trigger a specific interaction.
+                                                // User requested: "uno por bloque y otro planificacion futura prefiero que sea uno y me aaprezca un modal que me pregunte"
+
+                                                // I will implement a custom `showDeleteOptions` state to render the options IN PLACE of the buttons.
+                                                setShowDeleteOptions(true);
+                                            }
+                                        }}
                                         className="p-3 text-red-600 hover:bg-red-50 rounded-xl"
-                                        title="Eliminar solo este bloque"
+                                        title="Eliminar"
                                     >
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 </div>
 
-                                {selectedBlock.projectId && (
-                                    <div className="pt-2 border-t border-gray-100 mt-2">
+                                {showDeleteOptions && selectedBlock.projectId && (
+                                    <div className="absolute inset-0 bg-white/95 z-10 flex flex-col items-center justify-center p-6 text-center space-y-3 rounded-2xl">
+                                        <h4 className="font-bold text-gray-900">¿Qué deseas borrar?</h4>
+                                        <button
+                                            onClick={() => handleDeleteBlock(selectedBlock.id)}
+                                            className="w-full py-3 bg-white border border-gray-200 shadow-sm rounded-xl font-medium text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2"
+                                        >
+                                            Solo este bloque
+                                        </button>
                                         <button
                                             onClick={() => handleDeleteFuture(selectedBlock.id, selectedBlock.projectId!, new Date(selectedBlock.date).toISOString().split('T')[0])}
-                                            className="w-full py-2 text-xs font-medium text-red-500 hover:text-red-700 flex items-center justify-center gap-1 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="w-full py-3 bg-red-50 border border-red-100 shadow-sm rounded-xl font-medium text-red-600 hover:bg-red-100 flex items-center justify-center gap-2"
                                         >
-                                            <Eraser className="w-3.5 h-3.5" />
-                                            Borrar planificación futura (desde aquí)
+                                            Este y futuras (Serie)
+                                        </button>
+                                        <button
+                                            onClick={() => setShowDeleteOptions(false)}
+                                            className="text-sm text-gray-400 hover:text-gray-600 mt-2"
+                                        >
+                                            Cancelar
                                         </button>
                                     </div>
                                 )}

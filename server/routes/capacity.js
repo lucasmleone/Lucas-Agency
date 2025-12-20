@@ -458,14 +458,14 @@ router.post('/generate-project-blocks', async (req, res) => {
         const endSearch = new Date(start);
         endSearch.setMonth(endSearch.getMonth() + 12); // Look ahead 1 year max
 
-        // Get existing blocks to find gaps
+        // 1. Get existing blocks to find gaps
         const [existingBlocks] = await pool.query(`
             SELECT date, SUM(hours) as total_hours
             FROM capacity_blocks
             WHERE user_id = ?
-            AND date BETWEEN ? AND ?
+            AND date >= ?
             GROUP BY date
-        `, [req.user.id, start.toISOString().split('T')[0], endSearch.toISOString().split('T')[0]]);
+        `, [req.user.id, start.toISOString().split('T')[0]]);
 
         const occupiedDates = new Map();
         existingBlocks.forEach(b => {
@@ -473,26 +473,64 @@ router.post('/generate-project-blocks', async (req, res) => {
             occupiedDates.set(dateStr, parseFloat(b.total_hours));
         });
 
-        let remainingHours = totalHours;
+        // 2. Intelligent Scope Compression Logic
+        // If the project has a hard deadline (Target Date), we must check if the scope fits.
+        // If it doesn't fit naturally, we compress the scope (reduce total hours) to fit available slots.
+
+        const targetDate = project.end_date ? new Date(project.end_date) : null;
+        let effectiveTotalHours = totalHours;
+        let isCompressed = false;
+
+        const MAX_DAILY_HOURS = 6; // Global limit
+
+        if (targetDate) {
+            // Calculate max available capacity between Start and Target
+            let availableCapacity = 0;
+            const tempDate = new Date(start);
+
+            while (tempDate <= targetDate) {
+                const day = tempDate.getDay();
+                if (day !== 0 && day !== 6) { // Skip weekends
+                    const dateKey = tempDate.toISOString().split('T')[0];
+                    const occupied = occupiedDates.get(dateKey) || 0;
+                    const dailyAvailable = Math.max(0, MAX_DAILY_HOURS - occupied);
+                    // We can use up to dailyDedication or whatever is left in the day
+                    const canBookToday = Math.min(dailyDedication, dailyAvailable);
+                    availableCapacity += canBookToday;
+                }
+                tempDate.setDate(tempDate.getDate() + 1);
+            }
+
+            // If scope exceeds available capacity in the window, compress it
+            if (totalHours > availableCapacity) {
+                console.log(`⚠️ Scope Compression Triggered for Project ${projectId}: Requested ${totalHours}h, Available ${availableCapacity}h`);
+                effectiveTotalHours = availableCapacity;
+                isCompressed = true;
+
+                // Update project's estimated hours to reflect reality
+                await pool.query('UPDATE projects SET estimated_hours = ? WHERE id = ?', [effectiveTotalHours, projectId]);
+            }
+        }
+
+        // 3. Generate Blocks with (potentially compressed) hours
+        let remainingHours = effectiveTotalHours;
         const currentDate = new Date(start);
         const blocksToInsert = [];
-        const maxIterations = 365;
+        const maxIterations = 365; // Safety break
         let iterations = 0;
 
         while (remainingHours > 0 && iterations < maxIterations) {
             const dayOfWeek = currentDate.getDay();
 
-            // Skip weekends (TODO: Make configurable)
+            // Skip weekends
             if (dayOfWeek !== 0 && dayOfWeek !== 6) {
                 const dateKey = currentDate.toISOString().split('T')[0];
                 const occupiedHours = occupiedDates.get(dateKey) || 0;
-                const MAX_DAILY_HOURS = 6; // User defined global limit (6h)
 
-                // Calculate real available hours in the day (Global 6h - Occupied)
+                // Calculate real available hours in the day
                 const globalAvailable = Math.max(0, MAX_DAILY_HOURS - occupiedHours);
 
-                // Calculate how much we can book for THIS project (Project Limit)
-                // We can book up to project's dailyDedication, but not more than globalAvailable
+                // Calculate how much we can book for THIS project
                 const canBook = Math.min(dailyDedication, globalAvailable);
 
                 if (canBook > 0) {
@@ -513,11 +551,19 @@ router.post('/generate-project-blocks', async (req, res) => {
                 }
             }
 
-            currentDate.setDate(currentDate.getDate() + 1);
+            // If we have a target date and we passed it, we stop (HARD STOP)
+            // Ideally this shouldn't happen if compression logic worked, but as safety.
+            if (targetDate && currentDate > targetDate && remainingHours > 0) {
+                break; // Force stop at deadline
+            }
+
+            if (remainingHours > 0) {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
             iterations++;
         }
 
-        // Bulk insert
+        // 4. Bulk insert
         if (blocksToInsert.length > 0) {
             await pool.query(`
                 INSERT INTO capacity_blocks 
@@ -526,10 +572,20 @@ router.post('/generate-project-blocks', async (req, res) => {
             `, [blocksToInsert]);
         }
 
+        // 5. Update Project End Date to the actual final block date
+        const finalDate = blocksToInsert.length > 0
+            ? blocksToInsert[blocksToInsert.length - 1][4] // Get date from last block
+            : start.toISOString().split('T')[0];
+
+        await pool.query('UPDATE projects SET end_date = ? WHERE id = ?', [finalDate, projectId]);
+
         res.json({
             message: 'Blocks generated',
             blocksCreated: blocksToInsert.length,
-            estimatedEndDate: currentDate.toISOString().split('T')[0]
+            isCompressed,
+            originalScope: totalHours,
+            finalScope: effectiveTotalHours,
+            estimatedEndDate: finalDate
         });
     } catch (err) {
         console.error('Error generating project blocks:', err);
