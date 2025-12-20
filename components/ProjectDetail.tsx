@@ -1337,18 +1337,17 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     <Save size={16} />
                                     Guardar Cotización
                                 </button>
-                            </div>
 
-                            {/* Delivery Projection - Below Resumen */}
-                            <div className="mt-6">
-                                <DeliveryProjection
-                                    project={project}
-                                    addons={projectAddOns}
-                                    onUpdate={safeUpdateProject}
-                                />
+                                {/* Delivery Projection - Below Resumen */}
+                                <div className="mt-6">
+                                    <DeliveryProjection
+                                        project={project}
+                                        addons={projectAddOns}
+                                        onUpdate={safeUpdateProject}
+                                    />
+                                </div>
                             </div>
                         </div>
-
                     )}
 
                     {activeTab === 'workflow' && (
@@ -1752,6 +1751,6 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
