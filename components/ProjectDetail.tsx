@@ -1258,7 +1258,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                             </div>
 
                             {/* Right Column: Summary + Delivery Projection */}
-                            <div className="w-full md:w-72 shrink-0 pb-20 md:pb-0 overflow-y-auto">
+                            <div className="w-full md:w-96 shrink-0 pb-20 md:pb-0 overflow-y-auto">
                                 <div className="bg-gray-900 text-white rounded-xl shadow-2xl p-5 flex flex-col border border-gray-800">
                                     <h3 className="text-base font-bold mb-4 flex items-center gap-2 text-white">
                                         <Sparkles className="text-yellow-400 w-5 h-5" />
