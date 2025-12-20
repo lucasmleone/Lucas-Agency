@@ -253,7 +253,9 @@ export interface CapacityBlock {
   title: string;
   blockType: BlockType;
   date: string; // YYYY-MM-DD
-  hours: number;
+  hours: number; // Planned hours
+  actualHours?: number; // Tracked actual hours
+  trackingStartTime?: string; // ISO timestamp when tracking started
   startTime?: string; // HH:MM for meetings
   isShadow: boolean;
   notes?: string;

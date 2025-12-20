@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CapacityBlock } from '../../types';
-import { Clock, CheckCircle, MoreVertical, ArrowRight, Trash2, Edit3, Copy, Play, Square, Check } from 'lucide-react';
+import { Clock, CheckCircle, MoreVertical, ArrowRight, Trash2, Edit3, Copy, Play, Square, Check, RotateCcw } from 'lucide-react';
 
 interface SmartBlockProps {
     block: CapacityBlock;
@@ -8,7 +8,9 @@ interface SmartBlockProps {
     onDelete: (blockId: number) => void;
     onMoveToNextDay: (blockId: number) => void;
     onDuplicate: (block: CapacityBlock) => void;
-    onComplete?: (blockId: number) => void;
+    onToggleComplete?: (blockId: number, completed: boolean) => void;
+    onStartTracking?: (blockId: number) => void;
+    onStopTracking?: (blockId: number, elapsedMinutes: number) => void;
     className?: string;
 }
 
@@ -18,13 +20,59 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
     onDelete,
     onMoveToNextDay,
     onDuplicate,
-    onComplete,
+    onToggleComplete,
+    onStartTracking,
+    onStopTracking,
     className = ''
 }) => {
     const [showMenu, setShowMenu] = useState(false);
-    const [isTracking, setIsTracking] = useState(false);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-    // Color logic (aligned with CalendarView)
+    // Calculate if currently tracking based on trackingStartTime
+    const isTracking = !!block.trackingStartTime;
+
+    // Timer effect - update every second when tracking
+    useEffect(() => {
+        if (!isTracking || !block.trackingStartTime) {
+            setElapsedSeconds(0);
+            return;
+        }
+
+        const startTime = new Date(block.trackingStartTime).getTime();
+
+        const updateElapsed = () => {
+            const now = Date.now();
+            const elapsed = Math.floor((now - startTime) / 1000);
+            setElapsedSeconds(elapsed);
+        };
+
+        updateElapsed(); // Initial update
+        const timer = setInterval(updateElapsed, 1000);
+
+        return () => clearInterval(timer);
+    }, [isTracking, block.trackingStartTime]);
+
+    // Format elapsed time
+    const formatTime = (totalSeconds: number) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        }
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    // Format actual hours display
+    const formatActualHours = (hours: number) => {
+        if (hours < 1) {
+            return `${Math.round(hours * 60)}m`;
+        }
+        return `${hours.toFixed(1)}h`;
+    };
+
+    // Color logic
     const getColors = () => {
         if (block.completed) return 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100';
         if (block.blockType === 'production') return 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100';
@@ -32,16 +80,25 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
         return 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100';
     };
 
-    const handleComplete = (e: React.MouseEvent) => {
+    const handleToggleComplete = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (onComplete) {
-            onComplete(block.id);
+        if (onToggleComplete) {
+            onToggleComplete(block.id, !block.completed);
         }
     };
 
-    const toggleTracking = (e: React.MouseEvent) => {
+    const handleToggleTracking = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setIsTracking(!isTracking);
+        if (isTracking) {
+            if (onStopTracking) {
+                const elapsedMinutes = Math.round(elapsedSeconds / 60);
+                onStopTracking(block.id, elapsedMinutes);
+            }
+        } else {
+            if (onStartTracking) {
+                onStartTracking(block.id);
+            }
+        }
     };
 
     return (
@@ -49,6 +106,7 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
             className={`
                 group relative p-3 rounded-xl border transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer
                 ${getColors()} ${className}
+                ${isTracking ? 'ring-2 ring-red-400 ring-offset-1' : ''}
             `}
             onClick={() => onEdit(block)}
         >
@@ -58,13 +116,13 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
                     {block.title}
                 </span>
 
-                {/* Quick Action Buttons (visible on hover) */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Quick Action Buttons (visible on hover or when tracking) */}
+                <div className={`flex items-center gap-1 transition-opacity ${isTracking ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                     {/* Timer Button */}
                     <button
-                        onClick={toggleTracking}
+                        onClick={handleToggleTracking}
                         className={`p-1.5 rounded-lg transition-colors ${isTracking
-                                ? 'bg-red-500 text-white shadow-md'
+                                ? 'bg-red-500 text-white shadow-md animate-pulse'
                                 : 'bg-white/70 hover:bg-white text-current shadow-sm'
                             }`}
                         title={isTracking ? "Detener Timer" : "Iniciar Timer"}
@@ -72,14 +130,17 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
                         {isTracking ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                     </button>
 
-                    {/* Complete Button */}
-                    {!block.completed && onComplete && (
+                    {/* Complete/Uncomplete Button */}
+                    {onToggleComplete && (
                         <button
-                            onClick={handleComplete}
-                            className="p-1.5 rounded-lg bg-white/70 hover:bg-green-500 hover:text-white text-current shadow-sm transition-colors"
-                            title="Marcar Completado"
+                            onClick={handleToggleComplete}
+                            className={`p-1.5 rounded-lg shadow-sm transition-colors ${block.completed
+                                    ? 'bg-green-500 text-white hover:bg-amber-500'
+                                    : 'bg-white/70 hover:bg-green-500 hover:text-white text-current'
+                                }`}
+                            title={block.completed ? "Desmarcar Completado" : "Marcar Completado"}
                         >
-                            <Check className="w-3 h-3" />
+                            {block.completed ? <RotateCcw className="w-3 h-3" /> : <Check className="w-3 h-3" />}
                         </button>
                     )}
 
@@ -97,14 +158,23 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
             </div>
 
             {/* Details Row */}
-            <div className="flex items-center gap-2 text-xs opacity-80 mt-1">
+            <div className="flex items-center gap-2 text-xs opacity-80 mt-1 flex-wrap">
                 {block.startTime && (
                     <span className="flex items-center gap-1 bg-white/50 px-1.5 py-0.5 rounded-md">
                         <Clock className="w-3 h-3" />
                         {block.startTime}
                     </span>
                 )}
-                <span className="font-medium">{block.hours}h</span>
+
+                {/* Planned vs Actual hours */}
+                <span className="font-medium">
+                    {block.hours}h
+                    {block.actualHours !== undefined && block.actualHours > 0 && (
+                        <span className={`ml-1 ${block.actualHours > block.hours ? 'text-red-600' : 'text-green-600'}`}>
+                            ({formatActualHours(block.actualHours)} real)
+                        </span>
+                    )}
+                </span>
 
                 {block.clientName && (
                     <span className="truncate max-w-[80px]">
@@ -112,11 +182,11 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
                     </span>
                 )}
 
-                {/* Timer indicator */}
+                {/* Live Timer indicator */}
                 {isTracking && (
-                    <span className="flex items-center gap-1 bg-red-500 text-white px-1.5 py-0.5 rounded-md animate-pulse">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                        Tracking
+                    <span className="flex items-center gap-1 bg-red-500 text-white px-2 py-0.5 rounded-md font-mono text-xs">
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        {formatTime(elapsedSeconds)}
                     </span>
                 )}
             </div>
@@ -160,13 +230,14 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
                             <ArrowRight className="w-4 h-4 text-gray-400" />
                             Mover a Mañana
                         </button>
-                        {!block.completed && onComplete && (
+                        {onToggleComplete && (
                             <button
-                                onClick={(e) => { e.stopPropagation(); onComplete(block.id); setShowMenu(false); }}
-                                className="w-full text-left px-4 py-2 hover:bg-green-50 text-green-600 flex items-center gap-2"
+                                onClick={(e) => { e.stopPropagation(); onToggleComplete(block.id, !block.completed); setShowMenu(false); }}
+                                className={`w-full text-left px-4 py-2 flex items-center gap-2 ${block.completed ? 'hover:bg-amber-50 text-amber-600' : 'hover:bg-green-50 text-green-600'
+                                    }`}
                             >
-                                <Check className="w-4 h-4" />
-                                Marcar Completado
+                                {block.completed ? <RotateCcw className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                                {block.completed ? 'Desmarcar Completado' : 'Marcar Completado'}
                             </button>
                         )}
                         <div className="h-px bg-gray-100 my-1" />

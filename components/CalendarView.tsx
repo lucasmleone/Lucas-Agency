@@ -458,16 +458,53 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
             console.error('Failed to duplicate block', err);
         }
     };
-
-    const handleCompleteBlock = async (blockId: number) => {
+    const handleToggleComplete = async (blockId: number, completed: boolean) => {
         try {
-            await fetch(`/api/capacity/complete-shift/${blockId}`, {
-                method: 'POST',
-                credentials: 'include'
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ completed })
             });
             fetchBlocks();
         } catch (err) {
-            console.error('Failed to complete block', err);
+            console.error('Failed to toggle complete', err);
+        }
+    };
+
+    const handleStartTracking = async (blockId: number) => {
+        try {
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ trackingStartTime: new Date().toISOString() })
+            });
+            fetchBlocks();
+        } catch (err) {
+            console.error('Failed to start tracking', err);
+        }
+    };
+
+    const handleStopTracking = async (blockId: number, elapsedMinutes: number) => {
+        try {
+            // Get current block to add to existing actualHours
+            const block = blocks.find(b => b.id === blockId);
+            const currentActual = block?.actualHours || 0;
+            const newActual = currentActual + (elapsedMinutes / 60);
+
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    trackingStartTime: null,
+                    actualHours: Number(newActual.toFixed(2))
+                })
+            });
+            fetchBlocks();
+        } catch (err) {
+            console.error('Failed to stop tracking', err);
         }
     };
 
@@ -631,7 +668,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                     onDeleteBlock={(id) => { setSelectedBlock(blocks.find(b => b.id === id) || null); setShowDeleteOptions(true); }}
                     onMoveToNextDay={handleMoveToNextDay}
                     onDuplicateBlock={handleDuplicateBlock}
-                    onCompleteBlock={handleCompleteBlock}
+                    onToggleComplete={handleToggleComplete}
+                    onStartTracking={handleStartTracking}
+                    onStopTracking={handleStopTracking}
                     onScheduleInboxBlock={handleScheduleInboxBlock}
                     onInboxAdd={handleInboxAdd}
                     onInboxDelete={handleInboxDelete}

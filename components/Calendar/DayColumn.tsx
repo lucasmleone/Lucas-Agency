@@ -13,7 +13,9 @@ interface DayColumnProps {
     onDeleteBlock: (blockId: number) => void;
     onMoveToNextDay: (blockId: number) => void;
     onDuplicateBlock: (block: CapacityBlock) => void;
-    onCompleteBlock?: (blockId: number) => void;
+    onToggleComplete?: (blockId: number, completed: boolean) => void;
+    onStartTracking?: (blockId: number) => void;
+    onStopTracking?: (blockId: number, elapsedMinutes: number) => void;
     onProjectDrop?: (dateStr: string, projectId: number) => void;
     onInboxBlockDrop?: (dateStr: string, blockId: number) => void;
 }
@@ -28,7 +30,9 @@ export const DayColumn: React.FC<DayColumnProps> = ({
     onDeleteBlock,
     onMoveToNextDay,
     onDuplicateBlock,
-    onCompleteBlock,
+    onToggleComplete,
+    onStartTracking,
+    onStopTracking,
     onProjectDrop,
     onInboxBlockDrop
 }) => {
@@ -131,7 +135,9 @@ export const DayColumn: React.FC<DayColumnProps> = ({
                         onDelete={onDeleteBlock}
                         onMoveToNextDay={onMoveToNextDay}
                         onDuplicate={onDuplicateBlock}
-                        onComplete={onCompleteBlock}
+                        onToggleComplete={onToggleComplete}
+                        onStartTracking={onStartTracking}
+                        onStopTracking={onStopTracking}
                         className={block.isShadow ? 'opacity-50 border-dashed' : ''}
                     />
                 ))}
