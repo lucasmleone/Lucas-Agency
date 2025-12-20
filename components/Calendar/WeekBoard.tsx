@@ -6,38 +6,43 @@ import { BacklogSidebar } from './BacklogSidebar';
 interface WeekBoardProps {
     days: { date: Date; blocks: CapacityBlock[] }[];
     projects: Project[];
+    inboxBlocks: CapacityBlock[];
     onAddBlock: (dateStr: string, project?: Project) => void;
     onEditBlock: (block: CapacityBlock) => void;
     onDeleteBlock: (blockId: number) => void;
     onMoveToNextDay: (blockId: number) => void;
     onDuplicateBlock: (block: CapacityBlock) => void;
+    onScheduleInboxBlock: (blockId: number, dateStr: string) => void;
+    onInboxAdd: (title: string, hours: number) => void;
+    onInboxDelete: (blockId: number) => void;
+    onRefreshInbox: () => void;
 }
 
 export const WeekBoard: React.FC<WeekBoardProps> = ({
     days,
     projects,
+    inboxBlocks,
     onAddBlock,
     onEditBlock,
     onDeleteBlock,
     onMoveToNextDay,
-    onDuplicateBlock
+    onDuplicateBlock,
+    onScheduleInboxBlock,
+    onInboxAdd,
+    onInboxDelete,
+    onRefreshInbox
 }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-    // Handle interaction: Selecting a project from bench puts us in "Placement Mode"
     const handleProjectSelect = (project: Project) => {
         setSelectedProject(prev => prev?.id === project.id ? null : project);
     };
 
     const handleColumnAdd = (dateStr: string) => {
         if (selectedProject) {
-            // Quick Add Mode: Add block for this project immediately
             onAddBlock(dateStr, selectedProject);
-            // Optional: clear selection after add if we want one-off
-            // setSelectedProject(null); 
         } else {
-            // Default Mode: Open empty modal
             onAddBlock(dateStr);
         }
     };
@@ -47,6 +52,10 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
         if (project) {
             onAddBlock(dateStr, project);
         }
+    };
+
+    const handleInboxBlockDrop = (dateStr: string, blockId: number) => {
+        onScheduleInboxBlock(blockId, dateStr);
     };
 
     return (
@@ -59,10 +68,10 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
                 </div>
             )}
 
-            {/* Main Board - Scrollable horizontally */}
+            {/* Main Board */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
-                <div className="flex h-full gap-5 min-w-max">
-                    {days.map((day, index) => (
+                <div className="flex h-full gap-4 min-w-max">
+                    {days.map((day) => (
                         <DayColumn
                             key={day.date.toISOString()}
                             date={day.date}
@@ -74,6 +83,7 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
                             onMoveToNextDay={onMoveToNextDay}
                             onDuplicateBlock={onDuplicateBlock}
                             onProjectDrop={handleProjectDrop}
+                            onInboxBlockDrop={handleInboxBlockDrop}
                         />
                     ))}
                 </div>
@@ -82,9 +92,13 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
             {/* Right Sidebar */}
             <BacklogSidebar
                 projects={projects}
+                inboxBlocks={inboxBlocks}
                 isOpen={isSidebarOpen}
                 onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
                 onProjectSelect={handleProjectSelect}
+                onInboxAdd={onInboxAdd}
+                onInboxDelete={onInboxDelete}
+                onRefreshInbox={onRefreshInbox}
             />
         </div>
     );

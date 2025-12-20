@@ -166,6 +166,87 @@ router.delete('/blocks/:id', async (req, res) => {
 });
 
 // =============================================================================
+// INBOX - UNSCHEDULED BLOCKS
+// =============================================================================
+
+/**
+ * Get unscheduled blocks (inbox items)
+ * These are blocks with date = NULL
+ */
+router.get('/inbox', async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                cb.*,
+                p.plan as project_plan,
+                c.name as client_name
+            FROM capacity_blocks cb
+            LEFT JOIN projects p ON cb.project_id = p.id
+            LEFT JOIN clients c ON p.client_id = c.id
+            WHERE cb.user_id = ?
+            AND cb.date IS NULL
+            ORDER BY cb.created_at DESC
+        `, [req.user.id]);
+
+        const blocks = rows.map(b => ({
+            id: b.id,
+            projectId: b.project_id ? String(b.project_id) : null,
+            title: b.title,
+            blockType: b.block_type,
+            date: null,
+            hours: parseFloat(b.hours),
+            startTime: b.start_time,
+            isShadow: Boolean(b.is_shadow),
+            notes: b.notes,
+            tasks: b.tasks || [],
+            completed: Boolean(b.completed),
+            createdAt: b.created_at,
+            projectPlan: b.project_plan,
+            clientName: b.client_name,
+        }));
+
+        res.json(blocks);
+    } catch (err) {
+        console.error('Error fetching inbox blocks:', err);
+        res.status(500).json({ error: 'Error fetching inbox' });
+    }
+});
+
+/**
+ * Create an unscheduled block (inbox item)
+ */
+router.post('/inbox', async (req, res) => {
+    try {
+        const { projectId, title, blockType, hours, notes } = req.body;
+
+        if (!title || !hours) {
+            return res.status(400).json({ error: 'title and hours are required' });
+        }
+
+        const [result] = await pool.query(`
+            INSERT INTO capacity_blocks 
+            (user_id, project_id, title, block_type, date, hours, notes)
+            VALUES (?, ?, ?, ?, NULL, ?, ?)
+        `, [
+            req.user.id,
+            projectId || null,
+            title,
+            blockType || 'manual',
+            hours,
+            notes || null
+        ]);
+
+        res.status(201).json({
+            id: result.insertId,
+            message: 'Inbox item created successfully'
+        });
+    } catch (err) {
+        console.error('Error creating inbox item:', err);
+        res.status(500).json({ error: 'Error creating inbox item' });
+    }
+});
+
+// =============================================================================
 // DELETE FUTURE BLOCKS
 // =============================================================================
 

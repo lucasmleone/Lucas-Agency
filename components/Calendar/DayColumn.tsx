@@ -14,6 +14,7 @@ interface DayColumnProps {
     onMoveToNextDay: (blockId: number) => void;
     onDuplicateBlock: (block: CapacityBlock) => void;
     onProjectDrop?: (dateStr: string, projectId: number) => void;
+    onInboxBlockDrop?: (dateStr: string, blockId: number) => void;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = ({
@@ -26,7 +27,8 @@ export const DayColumn: React.FC<DayColumnProps> = ({
     onDeleteBlock,
     onMoveToNextDay,
     onDuplicateBlock,
-    onProjectDrop
+    onProjectDrop,
+    onInboxBlockDrop
 }) => {
     const dateStr = date.toISOString().split('T')[0];
     const [isDragOver, setIsDragOver] = React.useState(false);
@@ -57,6 +59,15 @@ export const DayColumn: React.FC<DayColumnProps> = ({
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragOver(false);
+
+        // Check for inbox block drop first
+        const inboxBlockId = e.dataTransfer.getData('inboxBlockId');
+        if (inboxBlockId && onInboxBlockDrop) {
+            onInboxBlockDrop(dateStr, Number(inboxBlockId));
+            return;
+        }
+
+        // Then check for project drop
         const projectId = e.dataTransfer.getData('projectId');
         if (projectId && onProjectDrop) {
             onProjectDrop(dateStr, Number(projectId));
@@ -68,8 +79,8 @@ export const DayColumn: React.FC<DayColumnProps> = ({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`min-w-[280px] w-full flex-1 flex flex-col h-full rounded-2xl transition-colors ${isDragOver ? 'bg-indigo-100 ring-2 ring-indigo-300' :
-                    isToday ? 'bg-indigo-50/30 ring-1 ring-indigo-100' : 'bg-gray-50/50'
+            className={`min-w-[220px] w-full flex-1 flex flex-col h-full rounded-2xl transition-colors ${isDragOver ? 'bg-indigo-100 ring-2 ring-indigo-300' :
+                isToday ? 'bg-indigo-50/30 ring-1 ring-indigo-100' : 'bg-gray-50/50'
                 }`}
         >
             {/* Header */}

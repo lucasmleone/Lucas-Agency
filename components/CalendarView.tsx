@@ -45,6 +45,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     const [projects, setProjects] = useState<Project[]>([]);
+    const [inboxBlocks, setInboxBlocks] = useState<CapacityBlock[]>([]);
 
     // New block form
     const [newBlock, setNewBlock] = useState({
@@ -103,6 +104,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
     useEffect(() => {
         fetchBlocks();
         fetchProjects();
+        fetchInbox();
     }, [fetchBlocks]);
 
     const fetchProjects = async () => {
@@ -114,6 +116,63 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
             }
         } catch (err) {
             console.error('Failed to fetch projects', err);
+        }
+    };
+
+    // Fetch inbox (unscheduled blocks)
+    const fetchInbox = async () => {
+        try {
+            const response = await fetch('/api/capacity/inbox', {
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setInboxBlocks(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch inbox', err);
+        }
+    };
+
+    // Inbox handlers
+    const handleInboxAdd = async (title: string, hours: number) => {
+        try {
+            await fetch('/api/capacity/inbox', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ title, hours, blockType: 'manual' })
+            });
+            fetchInbox();
+        } catch (err) {
+            console.error('Failed to add inbox item', err);
+        }
+    };
+
+    const handleInboxDelete = async (blockId: number) => {
+        try {
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            fetchInbox();
+        } catch (err) {
+            console.error('Failed to delete inbox item', err);
+        }
+    };
+
+    const handleScheduleInboxBlock = async (blockId: number, dateStr: string) => {
+        try {
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ date: dateStr })
+            });
+            fetchBlocks();
+            fetchInbox();
+        } catch (err) {
+            console.error('Failed to schedule inbox block', err);
         }
     };
 
@@ -496,11 +555,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                 <WeekBoard
                     days={days}
                     projects={projects}
+                    inboxBlocks={inboxBlocks}
                     onAddBlock={handleSmartAdd}
-                    onEditBlock={(block) => { setSelectedBlock(block); setShowDayDetail(true); }} // Reusing Detail Modal for edit
+                    onEditBlock={(block) => { setSelectedBlock(block); setShowDayDetail(true); }}
                     onDeleteBlock={(id) => { setSelectedBlock(blocks.find(b => b.id === id) || null); setShowDeleteOptions(true); }}
                     onMoveToNextDay={handleMoveToNextDay}
                     onDuplicateBlock={handleDuplicateBlock}
+                    onScheduleInboxBlock={handleScheduleInboxBlock}
+                    onInboxAdd={handleInboxAdd}
+                    onInboxDelete={handleInboxDelete}
+                    onRefreshInbox={fetchInbox}
                 />
             </div>
 
