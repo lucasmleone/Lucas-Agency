@@ -166,6 +166,36 @@ router.delete('/blocks/:id', async (req, res) => {
 });
 
 // =============================================================================
+// DELETE FUTURE BLOCKS
+// =============================================================================
+
+router.delete('/future-blocks', async (req, res) => {
+    try {
+        const { projectId, fromDate } = req.body;
+
+        if (!projectId || !fromDate) {
+            return res.status(400).json({ error: 'projectId and fromDate are required' });
+        }
+
+        // Delete all blocks for this project from this date onwards (inclusive)
+        const [result] = await pool.query(`
+            DELETE FROM capacity_blocks 
+            WHERE project_id = ? 
+            AND user_id = ? 
+            AND date >= ?
+        `, [projectId, req.user.id, fromDate]);
+
+        res.json({
+            message: 'Future blocks deleted',
+            deletedCount: result.affectedRows
+        });
+    } catch (err) {
+        console.error('Error deleting future blocks:', err);
+        res.status(500).json({ error: 'Error deleting blocks' });
+    }
+});
+
+// =============================================================================
 // COMPLETE SHIFT
 // =============================================================================
 

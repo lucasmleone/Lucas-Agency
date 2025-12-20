@@ -11,7 +11,8 @@ import {
     Calendar as CalendarIcon,
     Layers,
     Edit3,
-    Trash2
+    Trash2,
+    Eraser // New icon for bulk delete
 } from 'lucide-react';
 
 interface CalendarViewProps {
@@ -206,6 +207,29 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
             fetchBlocks();
         } catch (err) {
             console.error('Error deleting block:', err);
+        }
+    };
+
+    // Delete future blocks
+    const handleDeleteFuture = async (blockId: number, projectId: string, date: string) => {
+        if (!confirm('¿Eliminar este bloque Y TODOS LOS FUTUROS de este proyecto?\n\nEsta acción borrará toda la planificación futura desde esta fecha.')) return;
+
+        try {
+            const response = await fetch('/api/capacity/future-blocks', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ projectId, fromDate: date })
+            });
+
+            if (!response.ok) throw new Error('Failed');
+
+            setSelectedBlock(null);
+            fetchBlocks();
+            alert('Planificación futura eliminada correctamente');
+        } catch (err) {
+            console.error('Error deleting future blocks:', err);
+            alert('Error al eliminar planificación');
         }
     };
 
@@ -716,10 +740,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                                     <button
                                         onClick={() => handleDeleteBlock(selectedBlock.id)}
                                         className="p-3 text-red-600 hover:bg-red-50 rounded-xl"
+                                        title="Eliminar solo este bloque"
                                     >
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 </div>
+
+                                {selectedBlock.projectId && (
+                                    <div className="pt-2 border-t border-gray-100 mt-2">
+                                        <button
+                                            onClick={() => handleDeleteFuture(selectedBlock.id, selectedBlock.projectId!, new Date(selectedBlock.date).toISOString().split('T')[0])}
+                                            className="w-full py-2 text-xs font-medium text-red-500 hover:text-red-700 flex items-center justify-center gap-1 hover:bg-red-50 rounded-lg transition-colors"
+                                        >
+                                            <Eraser className="w-3.5 h-3.5" />
+                                            Borrar planificación futura (desde aquí)
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

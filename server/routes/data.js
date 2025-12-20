@@ -163,6 +163,22 @@ router.put('/projects/:id', async (req, res) => {
         const updates = [];
         const values = [];
 
+        // Auto-cleanup: If project is marked as DELIVERED, remove future production blocks
+        if (p.status === '7. Entregado' || p.status === 'Delivered') {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                await pool.query(`
+                    DELETE FROM capacity_blocks 
+                    WHERE project_id = ? 
+                    AND block_type = 'production' 
+                    AND date > ?
+                `, [id, today]);
+                console.log(`Cleaned up future production blocks for project ${id}`);
+            } catch (cleanupErr) {
+                console.error('Error auto-cleaning blocks:', cleanupErr);
+            }
+        }
+
         const addUpdate = (field, value, isJson = false, isDate = false) => {
             if (value !== undefined) {
                 updates.push(`${field} = ?`);
