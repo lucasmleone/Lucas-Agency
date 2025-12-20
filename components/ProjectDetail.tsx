@@ -212,9 +212,9 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
         discount: project.discount || 0,
         discountType: project.discountType || 'percentage' as 'percentage' | 'fixed',
         pricingNotes: project.pricingNotes || '',
-        customHours: 0,
-        hourlyRate: 25,
-        isHourlyQuote: false,  // New flag for mutual exclusivity
+        customHours: project.customHours || 0,
+        hourlyRate: project.hourlyRate || 25,
+        isHourlyQuote: (project.customHours || 0) > 0,  // Infer from existing data
         advancePercentage: project.advancePercentage || 50  // Advance payment percentage
     });
 
@@ -378,6 +378,9 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
             finalPrice: finalPrice,
             pricingNotes: pricingData.pricingNotes || undefined,
             advancePercentage: pricingData.advancePercentage,
+            // Hourly quote fields
+            customHours: pricingData.isHourlyQuote ? pricingData.customHours : undefined,
+            hourlyRate: pricingData.isHourlyQuote ? pricingData.hourlyRate : undefined,
             // Ensure portal data is preserved
             portalToken: project.portalToken,
             portalPin: project.portalPin,
