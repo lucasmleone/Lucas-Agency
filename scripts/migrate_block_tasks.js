@@ -9,10 +9,10 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '../.env') });
 
 const dbConfig = {
-    host: process.env.DB_HOST || 'db', // Default to 'db' service name in Docker
-    user: process.env.DB_USER || 'admin',
-    password: process.env.DB_PASSWORD || 'Opalina.1884',
-    database: process.env.DB_NAME || 'agency_flow'
+    host: process.env.DB_HOST || 'db',
+    user: process.env.DB_USER || 'user',
+    password: process.env.DB_PASSWORD || process.env.DB_PASS || 'CHANGE_ME_STRONG_PASSWORD',
+    database: process.env.DB_NAME || 'agency_db'
 };
 
 console.log('DB Config:', { ...dbConfig, password: '***' });
