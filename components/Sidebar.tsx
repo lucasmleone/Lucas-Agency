@@ -5,14 +5,15 @@ import {
     Users,
     DollarSign,
     LogOut,
-    X
+    X,
+    Calendar
 } from 'lucide-react';
 
 interface SidebarProps {
     isOpen: boolean;
     onClose: () => void;
     currentView: string;
-    onNavigate: (view: 'dashboard' | 'projects' | 'clients' | 'finance') => void;
+    onNavigate: (view: 'dashboard' | 'projects' | 'clients' | 'finance' | 'calendar') => void;
     onLogout: () => void;
 }
 
@@ -28,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'projects', label: 'Proyectos', icon: Briefcase },
         { id: 'clients', label: 'Clientes', icon: Users },
         { id: 'finance', label: 'Finanzas', icon: DollarSign },
+        { id: 'calendar', label: 'Calendario', icon: Calendar },
     ];
 
     return (

@@ -38,6 +38,7 @@ import NotesBoard from './components/Notes/NotesBoard';
 import { Toast } from './components/Toast';
 import { useProjects } from './hooks/useProjects';
 import { formatCurrency } from './utils/pricing';
+import { CalendarView } from './components/CalendarView';
 
 // Helper to format date from YYYY-MM-DD without timezone conversion
 const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
@@ -234,7 +235,7 @@ function App() {
   };
 
   // --- Estados ---
-  const [view, setView] = useState<'public' | 'dashboard' | 'projects' | 'finance' | 'clients' | 'notes'>('dashboard');
+  const [view, setView] = useState<'public' | 'dashboard' | 'projects' | 'finance' | 'clients' | 'notes' | 'calendar'>('dashboard');
   const [showPricingConfig, setShowPricingConfig] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -1050,6 +1051,10 @@ function App() {
 
           {view === 'notes' && (
             <NotesBoard />
+          )}
+
+          {view === 'calendar' && (
+            <CalendarView />
           )}
         </main>
       </div>
