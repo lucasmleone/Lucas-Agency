@@ -13,6 +13,7 @@ interface DayColumnProps {
     onDeleteBlock: (blockId: number) => void;
     onMoveToNextDay: (blockId: number) => void;
     onDuplicateBlock: (block: CapacityBlock) => void;
+    onCompleteBlock?: (blockId: number) => void;
     onProjectDrop?: (dateStr: string, projectId: number) => void;
     onInboxBlockDrop?: (dateStr: string, blockId: number) => void;
 }
@@ -27,6 +28,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({
     onDeleteBlock,
     onMoveToNextDay,
     onDuplicateBlock,
+    onCompleteBlock,
     onProjectDrop,
     onInboxBlockDrop
 }) => {
@@ -102,12 +104,12 @@ export const DayColumn: React.FC<DayColumnProps> = ({
                 <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div
                         className={`h-full transition-all duration-500 rounded-full ${isOverCapacity
-                                ? 'bg-gradient-to-r from-red-500 to-red-600'
-                                : capacityPercentage >= 75
-                                    ? 'bg-gradient-to-r from-green-400 to-green-500'
-                                    : capacityPercentage >= 50
-                                        ? 'bg-gradient-to-r from-yellow-400 to-yellow-500'
-                                        : 'bg-gradient-to-r from-indigo-300 to-indigo-400'
+                            ? 'bg-gradient-to-r from-red-500 to-red-600'
+                            : capacityPercentage >= 75
+                                ? 'bg-gradient-to-r from-green-400 to-green-500'
+                                : capacityPercentage >= 50
+                                    ? 'bg-gradient-to-r from-yellow-400 to-yellow-500'
+                                    : 'bg-gradient-to-r from-indigo-300 to-indigo-400'
                             }`}
                         style={{ width: `${Math.min(capacityPercentage, 100)}%` }}
                     />
@@ -129,6 +131,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({
                         onDelete={onDeleteBlock}
                         onMoveToNextDay={onMoveToNextDay}
                         onDuplicate={onDuplicateBlock}
+                        onComplete={onCompleteBlock}
                         className={block.isShadow ? 'opacity-50 border-dashed' : ''}
                     />
                 ))}

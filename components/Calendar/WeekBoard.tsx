@@ -12,6 +12,7 @@ interface WeekBoardProps {
     onDeleteBlock: (blockId: number) => void;
     onMoveToNextDay: (blockId: number) => void;
     onDuplicateBlock: (block: CapacityBlock) => void;
+    onCompleteBlock: (blockId: number) => void;
     onScheduleInboxBlock: (blockId: number, dateStr: string) => void;
     onInboxAdd: (title: string, hours: number) => void;
     onInboxDelete: (blockId: number) => void;
@@ -27,6 +28,7 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
     onDeleteBlock,
     onMoveToNextDay,
     onDuplicateBlock,
+    onCompleteBlock,
     onScheduleInboxBlock,
     onInboxAdd,
     onInboxDelete,
@@ -82,6 +84,7 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
                             onDeleteBlock={onDeleteBlock}
                             onMoveToNextDay={onMoveToNextDay}
                             onDuplicateBlock={onDuplicateBlock}
+                            onCompleteBlock={onCompleteBlock}
                             onProjectDrop={handleProjectDrop}
                             onInboxBlockDrop={handleInboxBlockDrop}
                         />

@@ -458,6 +458,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
         }
     };
 
+    const handleCompleteBlock = async (blockId: number) => {
+        try {
+            await fetch(`/api/capacity/complete-shift/${blockId}`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            fetchBlocks();
+        } catch (err) {
+            console.error('Failed to complete block', err);
+        }
+    };
+
     const handleSmartAdd = (dateStr: string, project?: Project) => {
         if (project) {
             createInstantBlock(dateStr, project);
@@ -579,14 +591,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         return (
                             <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border">
                                 <div className={`text-sm font-bold ${utilizationPct > 100 ? 'text-red-600' :
-                                        utilizationPct >= 75 ? 'text-green-600' :
-                                            utilizationPct >= 50 ? 'text-yellow-600' : 'text-gray-500'
+                                    utilizationPct >= 75 ? 'text-green-600' :
+                                        utilizationPct >= 50 ? 'text-yellow-600' : 'text-gray-500'
                                     }`}>
                                     {totalHours.toFixed(0)}h / {maxWeekHours}h
                                 </div>
                                 <div className={`text-xs px-1.5 py-0.5 rounded ${utilizationPct > 100 ? 'bg-red-100 text-red-700' :
-                                        utilizationPct >= 75 ? 'bg-green-100 text-green-700' :
-                                            utilizationPct >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'
+                                    utilizationPct >= 75 ? 'bg-green-100 text-green-700' :
+                                        utilizationPct >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'
                                     }`}>
                                     {utilizationPct}%
                                 </div>
@@ -618,6 +630,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                     onDeleteBlock={(id) => { setSelectedBlock(blocks.find(b => b.id === id) || null); setShowDeleteOptions(true); }}
                     onMoveToNextDay={handleMoveToNextDay}
                     onDuplicateBlock={handleDuplicateBlock}
+                    onCompleteBlock={handleCompleteBlock}
                     onScheduleInboxBlock={handleScheduleInboxBlock}
                     onInboxAdd={handleInboxAdd}
                     onInboxDelete={handleInboxDelete}

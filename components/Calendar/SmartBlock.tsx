@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CapacityBlock } from '../../types';
-import { Clock, CheckCircle, MoreVertical, ArrowRight, Trash2, Edit3, Copy } from 'lucide-react';
+import { Clock, CheckCircle, MoreVertical, ArrowRight, Trash2, Edit3, Copy, Play, Square, Check } from 'lucide-react';
 
 interface SmartBlockProps {
     block: CapacityBlock;
@@ -8,6 +8,7 @@ interface SmartBlockProps {
     onDelete: (blockId: number) => void;
     onMoveToNextDay: (blockId: number) => void;
     onDuplicate: (block: CapacityBlock) => void;
+    onComplete?: (blockId: number) => void;
     className?: string;
 }
 
@@ -17,9 +18,11 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
     onDelete,
     onMoveToNextDay,
     onDuplicate,
+    onComplete,
     className = ''
 }) => {
     const [showMenu, setShowMenu] = useState(false);
+    const [isTracking, setIsTracking] = useState(false);
 
     // Color logic (aligned with CalendarView)
     const getColors = () => {
@@ -27,6 +30,18 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
         if (block.blockType === 'production') return 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100';
         if (block.blockType === 'meeting') return 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100';
         return 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100';
+    };
+
+    const handleComplete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (onComplete) {
+            onComplete(block.id);
+        }
+    };
+
+    const toggleTracking = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsTracking(!isTracking);
     };
 
     return (
@@ -37,22 +52,48 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
             `}
             onClick={() => onEdit(block)}
         >
-            {/* Header: Title & Time */}
+            {/* Header: Title & Quick Actions */}
             <div className="flex justify-between items-start mb-1">
-                <span className="font-bold text-sm leading-tight line-clamp-2">
+                <span className="font-bold text-sm leading-tight line-clamp-2 flex-1 pr-2">
                     {block.title}
                 </span>
 
-                {/* Menu Trigger (Hidden unless hovered) */}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowMenu(!showMenu);
-                    }}
-                    className="p-1 rounded-full hover:bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                    <MoreVertical className="w-4 h-4" />
-                </button>
+                {/* Quick Action Buttons (visible on hover) */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Timer Button */}
+                    <button
+                        onClick={toggleTracking}
+                        className={`p-1.5 rounded-lg transition-colors ${isTracking
+                                ? 'bg-red-500 text-white shadow-md'
+                                : 'bg-white/70 hover:bg-white text-current shadow-sm'
+                            }`}
+                        title={isTracking ? "Detener Timer" : "Iniciar Timer"}
+                    >
+                        {isTracking ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                    </button>
+
+                    {/* Complete Button */}
+                    {!block.completed && onComplete && (
+                        <button
+                            onClick={handleComplete}
+                            className="p-1.5 rounded-lg bg-white/70 hover:bg-green-500 hover:text-white text-current shadow-sm transition-colors"
+                            title="Marcar Completado"
+                        >
+                            <Check className="w-3 h-3" />
+                        </button>
+                    )}
+
+                    {/* Menu Trigger */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowMenu(!showMenu);
+                        }}
+                        className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-current shadow-sm transition-colors"
+                    >
+                        <MoreVertical className="w-3 h-3" />
+                    </button>
+                </div>
             </div>
 
             {/* Details Row */}
@@ -68,6 +109,14 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
                 {block.clientName && (
                     <span className="truncate max-w-[80px]">
                         • {block.clientName}
+                    </span>
+                )}
+
+                {/* Timer indicator */}
+                {isTracking && (
+                    <span className="flex items-center gap-1 bg-red-500 text-white px-1.5 py-0.5 rounded-md animate-pulse">
+                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                        Tracking
                     </span>
                 )}
             </div>
@@ -102,7 +151,7 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
                             className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2"
                         >
                             <Copy className="w-4 h-4 text-gray-400" />
-                            Duplicar
+                            Duplicar (Mismo Día)
                         </button>
                         <button
                             onClick={(e) => { e.stopPropagation(); onMoveToNextDay(block.id); setShowMenu(false); }}
@@ -111,6 +160,15 @@ export const SmartBlock: React.FC<SmartBlockProps> = ({
                             <ArrowRight className="w-4 h-4 text-gray-400" />
                             Mover a Mañana
                         </button>
+                        {!block.completed && onComplete && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onComplete(block.id); setShowMenu(false); }}
+                                className="w-full text-left px-4 py-2 hover:bg-green-50 text-green-600 flex items-center gap-2"
+                            >
+                                <Check className="w-4 h-4" />
+                                Marcar Completado
+                            </button>
+                        )}
                         <div className="h-px bg-gray-100 my-1" />
                         <button
                             onClick={(e) => { e.stopPropagation(); onDelete(block.id); setShowMenu(false); }}
