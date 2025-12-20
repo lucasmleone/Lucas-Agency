@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS notes (
   user_id INT NOT NULL,
   title VARCHAR(255) NOT NULL,
   category VARCHAR(50) DEFAULT 'general',
-  items JSON DEFAULT '[]',
+  items JSON,
   is_pinned BOOLEAN DEFAULT FALSE,
   position INT DEFAULT 0,
   linked_entity_type VARCHAR(50) DEFAULT NULL, -- 'client', 'project'
