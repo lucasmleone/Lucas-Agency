@@ -17,6 +17,7 @@ RUN npm ci --only=production
 # Copy built assets from build stage
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
+COPY --from=build /app/scripts ./scripts
 
 # Environment and Start
 ENV NODE_ENV=production
