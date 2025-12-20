@@ -510,10 +510,34 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                     </button>
                     <div className="flex items-center gap-2">
                         <CalendarIcon className="w-6 h-6 text-indigo-600" />
-                        <h1 className="text-2xl font-bold text-gray-900">Planificación Semanal</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Planificación {viewMode === 'week' ? 'Semanal' : 'Mensual'}
+                        </h1>
                     </div>
 
-                    <div className="flex items-center bg-gray-100 rounded-lg p-1 ml-6">
+                    {/* View Mode Toggle */}
+                    <div className="flex items-center bg-gray-100 rounded-lg p-1 ml-4">
+                        <button
+                            onClick={() => setViewMode('week')}
+                            className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${viewMode === 'week'
+                                    ? 'bg-white text-indigo-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            Semana
+                        </button>
+                        <button
+                            onClick={() => setViewMode('month')}
+                            className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${viewMode === 'month'
+                                    ? 'bg-white text-indigo-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            Mes
+                        </button>
+                    </div>
+
+                    <div className="flex items-center bg-gray-100 rounded-lg p-1 ml-2">
                         <button
                             onClick={() => navigate('prev')}
                             className="p-1 hover:bg-white rounded shadow-sm transition-all"
@@ -524,7 +548,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                             onClick={goToToday}
                             className="px-3 py-1 text-sm font-medium hover:bg-white rounded transition-all"
                         >
-                            Esta Semana
+                            {viewMode === 'week' ? 'Esta Semana' : 'Este Mes'}
                         </button>
                         <button
                             onClick={() => navigate('next')}
@@ -535,8 +559,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                     </div>
 
                     <div className="text-sm font-medium text-gray-500 ml-2">
-                        {days.length > 0 && (
+                        {viewMode === 'week' && days.length > 0 && (
                             `${new Date(days[0].date).toLocaleDateString('es-AR', { month: 'long', day: 'numeric' })} - ${new Date(days[days.length - 1].date).toLocaleDateString('es-AR', { month: 'long', day: 'numeric' })}`
+                        )}
+                        {viewMode === 'month' && (
+                            currentDate.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
                         )}
                     </div>
                 </div>
