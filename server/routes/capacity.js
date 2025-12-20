@@ -457,10 +457,17 @@ router.post('/generate-project-blocks', async (req, res) => {
             if (dayOfWeek !== 0 && dayOfWeek !== 6) {
                 const dateKey = currentDate.toISOString().split('T')[0];
                 const occupiedHours = occupiedDates.get(dateKey) || 0;
-                const availableHours = Math.max(0, dailyDedication - occupiedHours);
+                const MAX_DAILY_HOURS = 8; // Global limit from WORK_CONFIG
 
-                if (availableHours > 0) {
-                    const hoursToBook = Math.min(remainingHours, availableHours);
+                // Calculate real available hours in the day (Global 8h - Occupied)
+                const globalAvailable = Math.max(0, MAX_DAILY_HOURS - occupiedHours);
+
+                // Calculate how much we can book for THIS project (Project Limit)
+                // We can book up to project's dailyDedication, but not more than globalAvailable
+                const canBook = Math.min(dailyDedication, globalAvailable);
+
+                if (canBook > 0) {
+                    const hoursToBook = Math.min(remainingHours, canBook);
                     remainingHours -= hoursToBook;
 
                     blocksToInsert.push([
