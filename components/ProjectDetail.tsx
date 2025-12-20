@@ -25,6 +25,7 @@ import { Toast } from './Toast';
 import { usePricingConfig } from '../hooks/usePricingConfig';
 import { Project, ProjectStatus, PlanType, ProjectLog, Client, PaymentStatus, FinanceRecord, ProjectAddOn, AddOnTemplate } from '../types';
 import { getBasePriceForPlan, calculateFinalPrice, calculateTotalWithAddOns, getPlanDisplayName, formatCurrency } from '../utils/pricing';
+import { DeliveryProjection } from './DeliveryProjection';
 
 // Helper to format date from YYYY-MM-DD without timezone conversion
 const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
@@ -1277,6 +1278,15 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                         <Save size={18} />
                                         Guardar Cotización
                                     </button>
+                                </div>
+
+                                {/* Delivery Projection */}
+                                <div className="mt-6">
+                                    <DeliveryProjection
+                                        project={project}
+                                        addons={projectAddOns}
+                                        onUpdate={safeUpdateProject}
+                                    />
                                 </div>
                             </div>
                         </div>

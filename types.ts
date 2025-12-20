@@ -116,6 +116,13 @@ export interface Project {
   // Delivery Fields
   deliveryData?: DeliveryData;
   resourcesSent?: boolean; // Flag to indicate if client confirmed resources
+
+  // Time Tracking Fields
+  estimatedHours?: number; // Total hours with buffer
+  hoursCompleted?: number; // Hours worked so far
+  quotedDeliveryDate?: string; // Date promised in proposal
+  confirmedDeliveryDate?: string; // Date confirmed after deposit
+  dailyDedication?: number; // Hours per day for this project (default 4)
 }
 
 export interface Milestone {
@@ -230,3 +237,24 @@ export interface ProjectAddOn {
   description?: string;
   price: number;
 }
+
+// Capacity Management Types
+export type BlockType = 'production' | 'meeting' | 'manual';
+
+export interface CapacityBlock {
+  id: number;
+  projectId?: string;
+  title: string;
+  blockType: BlockType;
+  date: string; // YYYY-MM-DD
+  hours: number;
+  startTime?: string; // HH:MM for meetings
+  isShadow: boolean;
+  notes?: string;
+  completed: boolean;
+  createdAt: string;
+  // Related data (from joins)
+  projectPlan?: string;
+  clientName?: string;
+}
+

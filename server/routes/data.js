@@ -68,7 +68,13 @@ router.get('/projects', async (req, res) => {
                     const next = Array.isArray(tasks) ? tasks.find(t => !t.completed) : null;
                     return next ? next.date : undefined;
                 } catch (e) { return undefined; }
-            })()
+            })(),
+            // Time Tracking
+            estimatedHours: p.estimated_hours ? parseFloat(p.estimated_hours) : undefined,
+            hoursCompleted: p.hours_completed ? parseFloat(p.hours_completed) : 0,
+            quotedDeliveryDate: p.quoted_delivery_date,
+            confirmedDeliveryDate: p.confirmed_delivery_date,
+            dailyDedication: p.daily_dedication ? parseFloat(p.daily_dedication) : 4,
         }));
 
         res.json(projects);
@@ -196,6 +202,12 @@ router.put('/projects/:id', async (req, res) => {
         addUpdate('portal_enabled', p.portalEnabled);
         addUpdate('drive_link', p.driveLink);
         addUpdate('requirements', p.requirements, true); // JSON field
+        // Time Tracking Fields
+        addUpdate('estimated_hours', p.estimatedHours);
+        addUpdate('hours_completed', p.hoursCompleted);
+        addUpdate('quoted_delivery_date', p.quotedDeliveryDate, false, true);
+        addUpdate('confirmed_delivery_date', p.confirmedDeliveryDate, false, true);
+        addUpdate('daily_dedication', p.dailyDedication);
 
         if (updates.length === 0) return res.json({ success: true, message: 'No updates provided' });
 
