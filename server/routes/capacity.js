@@ -42,6 +42,8 @@ router.get('/blocks', async (req, res) => {
             blockType: b.block_type,
             date: b.date,
             hours: parseFloat(b.hours),
+            actualHours: b.actual_hours ? parseFloat(b.actual_hours) : 0,
+            trackingStartTime: b.tracking_start_time || null,
             startTime: b.start_time,
             isShadow: Boolean(b.is_shadow),
             notes: b.notes,
@@ -109,7 +111,7 @@ router.post('/blocks', async (req, res) => {
 router.put('/blocks/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, blockType, date, hours, startTime, notes, completed, tasks } = req.body;
+        const { title, blockType, date, hours, startTime, notes, completed, tasks, actualHours, trackingStartTime } = req.body;
 
         // Verify ownership
         const [existing] = await pool.query(
@@ -121,18 +123,37 @@ router.put('/blocks/:id', async (req, res) => {
             return res.status(404).json({ error: 'Block not found' });
         }
 
+        // Build dynamic SET clause for tracking fields that may be null
+        let setClause = `
+            title = COALESCE(?, title),
+            block_type = COALESCE(?, block_type),
+            date = COALESCE(?, date),
+            hours = COALESCE(?, hours),
+            start_time = COALESCE(?, start_time),
+            notes = COALESCE(?, notes),
+            completed = COALESCE(?, completed),
+            tasks = COALESCE(?, tasks)`;
+
+        let params = [title, blockType, date, hours, startTime, notes, completed, tasks ? JSON.stringify(tasks) : null];
+
+        // Handle actualHours - can be 0, so check existence differently
+        if (actualHours !== undefined) {
+            setClause += `, actual_hours = ?`;
+            params.push(actualHours);
+        }
+
+        // Handle trackingStartTime - can be null to stop tracking
+        if (trackingStartTime !== undefined) {
+            setClause += `, tracking_start_time = ?`;
+            params.push(trackingStartTime);
+        }
+
+        params.push(id, req.user.id);
+
         await pool.query(`
-            UPDATE capacity_blocks SET
-                title = COALESCE(?, title),
-                block_type = COALESCE(?, block_type),
-                date = COALESCE(?, date),
-                hours = COALESCE(?, hours),
-                start_time = COALESCE(?, start_time),
-                notes = COALESCE(?, notes),
-                completed = COALESCE(?, completed),
-                tasks = COALESCE(?, tasks)
+            UPDATE capacity_blocks SET ${setClause}
             WHERE id = ? AND user_id = ?
-        `, [title, blockType, date, hours, startTime, notes, completed, tasks ? JSON.stringify(tasks) : null, id, req.user.id]);
+        `, params);
 
         res.json({ message: 'Block updated successfully' });
     } catch (err) {
