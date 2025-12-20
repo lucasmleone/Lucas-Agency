@@ -81,8 +81,37 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
     const [blocksGenerated, setBlocksGenerated] = useState(false);
     const [generatingBlocks, setGeneratingBlocks] = useState(false);
 
-    const generateBlocks = async () => {
+    // Check if blocks already exist for this project
+    useEffect(() => {
+        const checkExistingBlocks = async () => {
+            try {
+                const response = await fetch(`/api/capacity/project/${project.id}/blocks`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.blocks && data.blocks.length > 0) {
+                        setBlocksGenerated(true);
+                    }
+                }
+            } catch (err) {
+                // Ignore errors - just means no blocks yet
+            }
+        };
+        checkExistingBlocks();
+    }, [project.id]);
+
+    const generateBlocks = async (forceRegenerate: boolean = false) => {
         if (!hoursData.bufferedHours || hoursData.bufferedHours <= 0) return;
+
+        // If already generated and not forcing, ask for confirmation
+        if (blocksGenerated && !forceRegenerate) {
+            const confirm = window.confirm(
+                '⚠️ Ya existen bloques para este proyecto.\n\n' +
+                '¿Deseas regenerar los bloques? Esto eliminará los bloques actuales y creará nuevos.'
+            );
+            if (!confirm) return;
+        }
 
         setGeneratingBlocks(true);
         try {
@@ -95,7 +124,8 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                     totalHours: hoursData.bufferedHours,
                     dailyDedication,
                     startDate: new Date().toISOString().split('T')[0],
-                    isShadow: true // Shadow because not confirmed yet
+                    isShadow: true, // Shadow because not confirmed yet
+                    deleteExisting: true // Always delete existing before creating new
                 })
             });
 
@@ -260,17 +290,20 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                 {/* Generate Blocks Button */}
                 {estimatedDate && hoursData.bufferedHours > 0 && (
                     <button
-                        onClick={generateBlocks}
-                        disabled={generatingBlocks || blocksGenerated}
+                        onClick={() => generateBlocks()}
+                        disabled={generatingBlocks}
                         className={`w-full py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${blocksGenerated
-                                ? 'bg-green-100 text-green-700 border border-green-300 cursor-default'
+                                ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
                                 : 'bg-indigo-600 text-white hover:bg-indigo-700'
                             }`}
                     >
                         {generatingBlocks ? (
                             'Generando...'
                         ) : blocksGenerated ? (
-                            <>✓ Bloques reservados en calendario</>
+                            <>
+                                <Calendar className="w-4 h-4" />
+                                ✓ Reservado • Click para regenerar
+                            </>
                         ) : (
                             <>
                                 <Calendar className="w-4 h-4" />

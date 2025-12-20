@@ -25,6 +25,7 @@ import { Toast } from './Toast';
 import { usePricingConfig } from '../hooks/usePricingConfig';
 import { Project, ProjectStatus, PlanType, ProjectLog, Client, PaymentStatus, FinanceRecord, ProjectAddOn, AddOnTemplate } from '../types';
 import { getBasePriceForPlan, calculateFinalPrice, calculateTotalWithAddOns, getPlanDisplayName, formatCurrency } from '../utils/pricing';
+import { getHoursForAddOn } from '../utils/timeConfig';
 import { DeliveryProjection } from './DeliveryProjection';
 
 // Helper to format date from YYYY-MM-DD without timezone conversion
@@ -1082,7 +1083,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 <div key={addon.id} className="border-2 border-purple-500 bg-purple-50 rounded-xl p-4 flex justify-between items-center transition-all shadow-sm">
                                                     <div>
                                                         <p className="font-bold text-gray-900">{addon.name}</p>
-                                                        <p className="text-xs font-bold text-purple-700">{formatCurrency(addon.price)}</p>
+                                                        <div className="flex gap-2 items-center">
+                                                            <span className="text-xs font-bold text-purple-700">{formatCurrency(addon.price)}</span>
+                                                            <span className="text-xs text-purple-500">• {getHoursForAddOn(addon.name)}h</span>
+                                                        </div>
                                                     </div>
                                                     <button onClick={() => handleRemoveAddOn(addon.id)} className="text-white bg-purple-600 hover:bg-purple-700 p-1.5 rounded-full transition-colors">
                                                         <CheckCircle className="w-5 h-5" />
@@ -1098,7 +1102,10 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                                 >
                                                     <div>
                                                         <p className="font-bold text-gray-700 group-hover:text-purple-700">{template.name}</p>
-                                                        <p className="text-xs text-gray-500 group-hover:text-purple-600">+{formatCurrency(template.default_price)}</p>
+                                                        <div className="flex gap-2 items-center">
+                                                            <span className="text-xs text-gray-500 group-hover:text-purple-600">+{formatCurrency(template.default_price)}</span>
+                                                            <span className="text-xs text-gray-400 group-hover:text-purple-500">• {getHoursForAddOn(template.name)}h</span>
+                                                        </div>
                                                     </div>
                                                     <div className="text-gray-300 group-hover:text-purple-500 bg-gray-50 group-hover:bg-purple-50 p-1.5 rounded-full">
                                                         <Plus className="w-5 h-5" />
