@@ -487,13 +487,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
     };
 
     const handleStopTracking = async (blockId: number, elapsedMinutes: number) => {
+        console.log('handleStopTracking called:', { blockId, elapsedMinutes });
         try {
             // Get current block to add to existing actualHours
             const block = blocks.find(b => b.id === blockId);
             const currentActual = block?.actualHours || 0;
             const newActual = currentActual + (elapsedMinutes / 60);
 
-            await fetch(`/api/capacity/blocks/${blockId}`, {
+            console.log('Saving actualHours:', { currentActual, newActual, blockId });
+
+            const response = await fetch(`/api/capacity/blocks/${blockId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -502,6 +505,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                     actualHours: Number(newActual.toFixed(2))
                 })
             });
+
+            console.log('PUT response status:', response.status);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to save tracking:', errorText);
+            }
+
             fetchBlocks();
         } catch (err) {
             console.error('Failed to stop tracking', err);
