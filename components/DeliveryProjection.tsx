@@ -171,15 +171,16 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
         });
     };
 
-    // Only hide if there are no hours to project
-    if (hoursData.bufferedHours <= 0) {
-        return null;
-    }
+    // Only hide if there are no hours to project AND it is not manually forced to show?
+    // User requested "se ropio toda la ui... quedo afuera toda esa seccion".
+    // Better to render the container with "Sin estimación" than hiding it.
 
     // Progress calculation
     const progress = project.hoursCompleted && hoursData.bufferedHours > 0
         ? Math.min(100, Math.round((project.hoursCompleted / hoursData.bufferedHours) * 100))
         : 0;
+
+    const hasHours = hoursData.bufferedHours > 0;
 
     return (
         <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 overflow-hidden">
@@ -192,125 +193,134 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
             </div>
 
             <div className="p-4 space-y-4">
-                {/* Hours Breakdown - Compact Grid */}
-                <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
-                        <div className="text-xs text-gray-500">Horas Base</div>
-                        <div className="text-lg font-bold text-gray-900">{hoursData.rawHours}h</div>
+                {!hasHours ? (
+                    <div className="text-center py-4 text-gray-400 text-xs">
+                        <p>Sin horas para proyectar.</p>
+                        <p>Selecciona un plan o añade horas.</p>
                     </div>
-                    <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
-                        <div className="text-xs text-gray-500">+ Buffer</div>
-                        <div className="text-lg font-bold text-indigo-600">{hoursData.bufferedHours}h</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
-                        <div className="text-xs text-gray-500">Días</div>
-                        <div className="text-lg font-bold text-gray-900">{workDays}</div>
-                    </div>
-                </div>
-
-                {/* Buffer Breakdown - Inline */}
-                <div className="bg-white rounded-lg p-3 border border-indigo-100">
-                    <div className="text-xs font-medium text-gray-600 mb-1">Buffer 30%:</div>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                        <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-orange-400"></span>
-                            Técnico: {hoursData.breakdown.technical}h
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-blue-400"></span>
-                            Venta: {hoursData.breakdown.admin}h
-                        </span>
-                    </div>
-                </div>
-
-                {/* Daily Dedication Slider - Compact */}
-                <div className="bg-white rounded-lg p-3 border border-indigo-100">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm font-medium text-gray-900">Dedicación Máx/Día</div>
-                        <div className="text-lg font-bold text-indigo-600">{dailyDedication}h</div>
-                    </div>
-                    <input
-                        type="range"
-                        min={WORK_CONFIG.MIN_DAILY_HOURS}
-                        max={WORK_CONFIG.MAX_DAILY_HOURS}
-                        step={0.5}
-                        value={dailyDedication}
-                        onChange={(e) => handleDedicationChange(parseFloat(e.target.value))}
-                        className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                    />
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
-                        <span>{WORK_CONFIG.MIN_DAILY_HOURS}h</span>
-                        <span>{WORK_CONFIG.MAX_DAILY_HOURS}h</span>
-                    </div>
-                </div>
-
-                {/* Estimated Date - Compact */}
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-4 text-white">
-                    <div className="text-indigo-200 text-xs mb-1">Estimación de Entrega</div>
-                    {loading ? (
-                        <div className="text-lg font-bold">Calculando...</div>
-                    ) : estimatedDate ? (
-                        <div className="text-lg font-bold capitalize">
-                            {formatDate(estimatedDate)}
+                ) : (
+                    <>
+                        {/* Hours Breakdown - Compact Grid */}
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
+                                <div className="text-xs text-gray-500">Horas Base</div>
+                                <div className="text-lg font-bold text-gray-900">{hoursData.rawHours}h</div>
+                            </div>
+                            <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
+                                <div className="text-xs text-gray-500">+ Buffer</div>
+                                <div className="text-lg font-bold text-indigo-600">{hoursData.bufferedHours}h</div>
+                            </div>
+                            <div className="bg-white rounded-lg p-2 border border-indigo-100 text-center">
+                                <div className="text-xs text-gray-500">Días</div>
+                                <div className="text-lg font-bold text-gray-900">{workDays}</div>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="text-base">No disponible</div>
-                    )}
-                    {project.confirmedDeliveryDate && (
-                        <div className="mt-2 text-xs text-indigo-200">
-                            ✓ Confirmada: {formatDate(project.confirmedDeliveryDate)}
+
+                        {/* Buffer Breakdown - Inline */}
+                        <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                            <div className="text-xs font-medium text-gray-600 mb-1">Buffer 30%:</div>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-orange-400"></span>
+                                    Técnico: {hoursData.breakdown.technical}h
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+                                    Venta: {hoursData.breakdown.admin}h
+                                </span>
+                            </div>
                         </div>
-                    )}
-                </div>
 
-                {/* Disclaimer - Compact */}
-                <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-2">
-                    <span className="text-amber-500">⚠</span> Se congela al confirmar el pago del anticipo.
-                </div>
+                        {/* Daily Dedication Slider - Compact */}
+                        <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-medium text-gray-900">Dedicación Máx/Día</div>
+                                <div className="text-lg font-bold text-indigo-600">{dailyDedication}h</div>
+                            </div>
+                            <input
+                                type="range"
+                                min={WORK_CONFIG.MIN_DAILY_HOURS}
+                                max={WORK_CONFIG.MAX_DAILY_HOURS}
+                                step={0.5}
+                                value={dailyDedication}
+                                onChange={(e) => handleDedicationChange(parseFloat(e.target.value))}
+                                className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                            />
+                            <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>{WORK_CONFIG.MIN_DAILY_HOURS}h</span>
+                                <span>{WORK_CONFIG.MAX_DAILY_HOURS}h</span>
+                            </div>
+                        </div>
 
-                {/* Generate Blocks Button */}
-                {estimatedDate && hoursData.bufferedHours > 0 && (
-                    <button
-                        onClick={() => generateBlocks()}
-                        disabled={generatingBlocks}
-                        className={`w-full py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${blocksGenerated
-                            ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
-                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                            }`}
-                    >
-                        {generatingBlocks ? (
-                            'Generando...'
-                        ) : blocksGenerated ? (
-                            <>
-                                <Calendar className="w-4 h-4" />
-                                ✓ Reservado • Click para regenerar
-                            </>
-                        ) : (
-                            <>
-                                <Calendar className="w-4 h-4" />
-                                Reservar en Calendario (Propuesta)
-                            </>
+                        {/* Estimated Date - Compact */}
+                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-4 text-white">
+                            <div className="text-indigo-200 text-xs mb-1">Estimación de Entrega</div>
+                            {loading ? (
+                                <div className="text-lg font-bold">Calculando...</div>
+                            ) : estimatedDate ? (
+                                <div className="text-lg font-bold capitalize">
+                                    {formatDate(estimatedDate)}
+                                </div>
+                            ) : (
+                                <div className="text-base">No disponible</div>
+                            )}
+                            {project.confirmedDeliveryDate && (
+                                <div className="mt-2 text-xs text-indigo-200">
+                                    ✓ Confirmada: {formatDate(project.confirmedDeliveryDate)}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Disclaimer - Compact */}
+                        <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                            <span className="text-amber-500">⚠</span> Se congela al confirmar el pago del anticipo.
+                        </div>
+
+                        {/* Generate Blocks Button */}
+                        {estimatedDate && hoursData.bufferedHours > 0 && (
+                            <button
+                                onClick={() => generateBlocks()}
+                                disabled={generatingBlocks}
+                                className={`w-full py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all ${blocksGenerated
+                                    ? 'bg-green-100 text-green-700 border border-green-300 hover:bg-green-200'
+                                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                    }`}
+                            >
+                                {generatingBlocks ? (
+                                    'Generando...'
+                                ) : blocksGenerated ? (
+                                    <>
+                                        <Calendar className="w-4 h-4" />
+                                        ✓ Reservado • Click para regenerar
+                                    </>
+                                ) : (
+                                    <>
+                                        <Calendar className="w-4 h-4" />
+                                        Reservar en Calendario (Propuesta)
+                                    </>
+                                )}
+                            </button>
                         )}
-                    </button>
-                )}
 
-                {/* Progress (if project has started) */}
-                {(project.hoursCompleted || 0) > 0 && (
-                    <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-gray-900">Progreso</span>
-                            <span className="text-sm text-gray-500">
-                                {formatHours(project.hoursCompleted)} / {formatHours(hoursData.bufferedHours)}
-                            </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                            <div
-                                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
-                                style={{ width: `${progress}%` }}
-                            ></div>
-                        </div>
-                        <div className="text-right text-sm text-gray-500 mt-1">{progress}% completado</div>
-                    </div>
+                        {/* Progress (if project has started) */}
+                        {(project.hoursCompleted || 0) > 0 && (
+                            <div className="bg-white rounded-lg p-4 border border-indigo-100">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="font-medium text-gray-900">Progreso</span>
+                                    <span className="text-sm text-gray-500">
+                                        {formatHours(project.hoursCompleted)} / {formatHours(hoursData.bufferedHours)}
+                                    </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-3">
+                                    <div
+                                        className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
+                                        style={{ width: `${progress}%` }}
+                                    ></div>
+                                </div>
+                                <div className="text-right text-sm text-gray-500 mt-1">{progress}% completado</div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

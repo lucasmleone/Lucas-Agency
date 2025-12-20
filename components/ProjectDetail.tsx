@@ -1265,9 +1265,12 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                         Resumen
                                     </h3>
 
-                                    <div className="space-y-3 flex-1">
-                                        <span className="font-medium">{generalData.planType}</span>
-                                        <span className="font-bold">{formatCurrency(pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice)}</span>
+                                    <div className="space-y-1 flex-1 flex flex-col">
+                                        <span className="font-medium text-gray-400 text-xs text-left">Plan Seleccionado</span>
+                                        <div className="flex justify-between items-baseline">
+                                            <span className="font-bold text-white text-lg truncate pr-2" title={generalData.planType}>{generalData.planType}</span>
+                                            <span className="font-bold text-green-400 text-lg whitespace-nowrap">{formatCurrency(pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice)}</span>
+                                        </div>
                                     </div>
 
                                     {projectAddOns.length > 0 && (
