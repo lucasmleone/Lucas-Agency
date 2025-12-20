@@ -75,6 +75,7 @@ const getDaysRemaining = (deadline: string) => {
 /**
  * Calcula los días restantes de entrega basado en horas de trabajo
  * Usa la proyección dinámica en lugar del deadline manual
+ * Aplica buffer de 30% para ser consistente con DeliveryProjection
  * @param project - El proyecto con campos estimatedHours, hoursCompleted, dailyDedication
  * @returns Número de días proyectados para terminar (redondeado arriba)
  */
@@ -83,7 +84,11 @@ const getProjectedDeliveryDays = (project: Project): { days: number; hoursRemain
   const hoursCompleted = project.hoursCompleted || 0;
   const dailyDedication = project.dailyDedication || 4; // Default 4h per day
 
-  const hoursRemaining = Math.max(0, estimatedHours - hoursCompleted);
+  // Apply 30% buffer to match DeliveryProjection component
+  const BUFFER_PERCENTAGE = 0.30;
+  const bufferedHours = estimatedHours * (1 + BUFFER_PERCENTAGE);
+
+  const hoursRemaining = Math.max(0, bufferedHours - hoursCompleted);
   const daysNeeded = Math.ceil(hoursRemaining / dailyDedication);
 
   // Calculate how many hours ahead/behind compared to if we started today
