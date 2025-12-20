@@ -918,406 +918,403 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     )}
 
                     {activeTab === 'pricing' && (
-                        <div className="h-full flex flex-col overflow-hidden">
-                            {/* Two Column Layout */}
-                            <div className="flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
-                                {/* Left Column: Configuration */}
-                                <div className="flex-1 space-y-8 overflow-y-auto pr-2 pb-20">
+                        <div className="h-full flex flex-col md:flex-row gap-6 overflow-hidden">
+                            {/* Left Column: Configuration */}
+                            <div className="flex-1 space-y-8 overflow-y-auto pr-2 pb-20">
 
 
-                                    {/* 1. Base Product Selection */}
-                                    <section>
-                                        <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                                            <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
-                                            Producto Base
-                                        </h4>
+                                {/* 1. Base Product Selection */}
+                                <section>
+                                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                                        <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">1</span>
+                                        Producto Base
+                                    </h4>
 
-                                        {/* Radio Button Selection: Plan vs Hourly */}
-                                        <div className="space-y-4 mb-6">
-                                            {/* Option A: Standard Plan */}
-                                            <div className="border-2 rounded-xl p-4"
-                                                style={{ borderColor: !pricingData.isHourlyQuote ? '#10b981' : '#e5e7eb' }}>
-                                                <label className="flex items-start cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="productType"
-                                                        checked={!pricingData.isHourlyQuote}
-                                                        onChange={() => {
-                                                            setPricingData({ ...pricingData, isHourlyQuote: false, basePrice: 200, customHours: 0 });
-                                                            setGeneralData({ ...generalData, planType: PlanType.LANDING });
-                                                        }}
-                                                        className="mt-1 mr-3"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <span className="font-bold text-gray-900 text-base">Plan Estándar</span>
-                                                        <p className="text-sm text-gray-500 mt-1">Selecciona un plan predefinido y agrega módulos adicionales</p>
-                                                    </div>
-                                                </label>
-                                            </div>
-
-                                            {/* Option B: Hourly Quote */}
-                                            <div className="border-2 rounded-xl p-4"
-                                                style={{ borderColor: pricingData.isHourlyQuote ? '#10b981' : '#e5e7eb' }}>
-                                                <label className="flex items-start cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="productType"
-                                                        checked={pricingData.isHourlyQuote}
-                                                        onChange={() => {
-                                                            setPricingData({ ...pricingData, isHourlyQuote: true, basePrice: 0 });
-                                                            setGeneralData({ ...generalData, planType: PlanType.CUSTOM });
-                                                        }}
-                                                        className="mt-1 mr-3"
-                                                    />
-                                                    <div className="flex-1">
-                                                        <span className="font-bold text-gray-900 text-base">Cotización por Horas</span>
-                                                        <p className="text-sm text-gray-500 mt-1">Para proyectos personalizados fuera del alcance estándar</p>
-                                                    </div>
-                                                </label>
-                                            </div>
+                                    {/* Radio Button Selection: Plan vs Hourly */}
+                                    <div className="space-y-4 mb-6">
+                                        {/* Option A: Standard Plan */}
+                                        <div className="border-2 rounded-xl p-4"
+                                            style={{ borderColor: !pricingData.isHourlyQuote ? '#10b981' : '#e5e7eb' }}>
+                                            <label className="flex items-start cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="productType"
+                                                    checked={!pricingData.isHourlyQuote}
+                                                    onChange={() => {
+                                                        setPricingData({ ...pricingData, isHourlyQuote: false, basePrice: 200, customHours: 0 });
+                                                        setGeneralData({ ...generalData, planType: PlanType.LANDING });
+                                                    }}
+                                                    className="mt-1 mr-3"
+                                                />
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-gray-900 text-base">Plan Estándar</span>
+                                                    <p className="text-sm text-gray-500 mt-1">Selecciona un plan predefinido y agrega módulos adicionales</p>
+                                                </div>
+                                            </label>
                                         </div>
 
-                                        {/* Show Plan Cards if Standard Plan is selected */}
-                                        {!pricingData.isHourlyQuote && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {/* Landing Page Card */}
-                                                <div
-                                                    onClick={() => {
-                                                        setGeneralData({ ...generalData, planType: PlanType.LANDING });
-                                                        setPricingData({ ...pricingData, basePrice: 200 });
+                                        {/* Option B: Hourly Quote */}
+                                        <div className="border-2 rounded-xl p-4"
+                                            style={{ borderColor: pricingData.isHourlyQuote ? '#10b981' : '#e5e7eb' }}>
+                                            <label className="flex items-start cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="productType"
+                                                    checked={pricingData.isHourlyQuote}
+                                                    onChange={() => {
+                                                        setPricingData({ ...pricingData, isHourlyQuote: true, basePrice: 0 });
+                                                        setGeneralData({ ...generalData, planType: PlanType.CUSTOM });
                                                     }}
-                                                    className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.LANDING ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
-                                                >
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <span className="font-bold text-gray-900 text-lg">Landing Page</span>
-                                                        {generalData.planType === PlanType.LANDING && <CheckCircle className="text-indigo-600 w-6 h-6" />}
-                                                    </div>
-                                                    <p className="text-sm text-gray-500 mb-4">One Page. Ideal para campañas y conversión rápida.</p>
-                                                    <p className="text-3xl font-black text-gray-900">$200 <span className="text-sm font-normal text-gray-500">USD</span></p>
+                                                    className="mt-1 mr-3"
+                                                />
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-gray-900 text-base">Cotización por Horas</span>
+                                                    <p className="text-sm text-gray-500 mt-1">Para proyectos personalizados fuera del alcance estándar</p>
                                                 </div>
+                                            </label>
+                                        </div>
+                                    </div>
 
-                                                {/* Corporate Web Card */}
-                                                <div
-                                                    onClick={() => {
-                                                        setGeneralData({ ...generalData, planType: PlanType.CORPORATE });
-                                                        setPricingData({ ...pricingData, basePrice: 350 });
-                                                    }}
-                                                    className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.CORPORATE ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
-                                                >
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <span className="font-bold text-gray-900 text-lg">Web Corporativa</span>
-                                                        {generalData.planType === PlanType.CORPORATE && <CheckCircle className="text-indigo-600 w-6 h-6" />}
-                                                    </div>
-                                                    <p className="text-sm text-gray-500 mb-4">Multi-page. Sitio completo institucional.</p>
-                                                    <p className="text-3xl font-black text-gray-900">$350 <span className="text-sm font-normal text-gray-500">USD</span></p>
+                                    {/* Show Plan Cards if Standard Plan is selected */}
+                                    {!pricingData.isHourlyQuote && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Landing Page Card */}
+                                            <div
+                                                onClick={() => {
+                                                    setGeneralData({ ...generalData, planType: PlanType.LANDING });
+                                                    setPricingData({ ...pricingData, basePrice: 200 });
+                                                }}
+                                                className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.LANDING ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                                            >
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="font-bold text-gray-900 text-lg">Landing Page</span>
+                                                    {generalData.planType === PlanType.LANDING && <CheckCircle className="text-indigo-600 w-6 h-6" />}
                                                 </div>
+                                                <p className="text-sm text-gray-500 mb-4">One Page. Ideal para campañas y conversión rápida.</p>
+                                                <p className="text-3xl font-black text-gray-900">$200 <span className="text-sm font-normal text-gray-500">USD</span></p>
                                             </div>
-                                        )}
 
-                                        {/* Show Hourly Input if Hourly Quote is selected */}
-                                        {pricingData.isHourlyQuote && (
-                                            <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-6">
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center justify-between">
-                                                        <div>
-                                                            <label className="text-sm text-gray-900 font-bold block">Horas Estimadas</label>
-                                                            <span className="text-xs text-gray-500">Total de horas de desarrollo</span>
-                                                        </div>
+                                            {/* Corporate Web Card */}
+                                            <div
+                                                onClick={() => {
+                                                    setGeneralData({ ...generalData, planType: PlanType.CORPORATE });
+                                                    setPricingData({ ...pricingData, basePrice: 350 });
+                                                }}
+                                                className={`cursor-pointer border-2 rounded-xl p-6 transition-all relative ${generalData.planType === PlanType.CORPORATE ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                                            >
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="font-bold text-gray-900 text-lg">Web Corporativa</span>
+                                                    {generalData.planType === PlanType.CORPORATE && <CheckCircle className="text-indigo-600 w-6 h-6" />}
+                                                </div>
+                                                <p className="text-sm text-gray-500 mb-4">Multi-page. Sitio completo institucional.</p>
+                                                <p className="text-3xl font-black text-gray-900">$350 <span className="text-sm font-normal text-gray-500">USD</span></p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Show Hourly Input if Hourly Quote is selected */}
+                                    {pricingData.isHourlyQuote && (
+                                        <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-6">
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <label className="text-sm text-gray-900 font-bold block">Horas Estimadas</label>
+                                                        <span className="text-xs text-gray-500">Total de horas de desarrollo</span>
+                                                    </div>
+                                                    <input
+                                                        type="number"
+                                                        value={pricingData.customHours || 0}
+                                                        onChange={(e) => setPricingData({ ...pricingData, customHours: Number(e.target.value) })}
+                                                        className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
+                                                        placeholder="0"
+                                                        min="0"
+                                                    />
+                                                </div>
+
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <label className="text-sm text-gray-900 font-bold block">Tarifa por Hora</label>
+                                                        <span className="text-xs text-gray-500">USD por hora</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-gray-500 font-bold">$</span>
                                                         <input
                                                             type="number"
-                                                            value={pricingData.customHours || 0}
-                                                            onChange={(e) => setPricingData({ ...pricingData, customHours: Number(e.target.value) })}
+                                                            value={pricingData.hourlyRate || 25}
+                                                            onChange={(e) => setPricingData({ ...pricingData, hourlyRate: Number(e.target.value) })}
                                                             className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
-                                                            placeholder="0"
+                                                            placeholder="25"
                                                             min="0"
                                                         />
                                                     </div>
-
-                                                    <div className="flex items-center justify-between">
-                                                        <div>
-                                                            <label className="text-sm text-gray-900 font-bold block">Tarifa por Hora</label>
-                                                            <span className="text-xs text-gray-500">USD por hora</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="text-gray-500 font-bold">$</span>
-                                                            <input
-                                                                type="number"
-                                                                value={pricingData.hourlyRate || 25}
-                                                                onChange={(e) => setPricingData({ ...pricingData, hourlyRate: Number(e.target.value) })}
-                                                                className="border border-gray-300 rounded-lg p-2 w-24 text-right font-medium"
-                                                                placeholder="25"
-                                                                min="0"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {(pricingData.customHours || 0) > 0 && (
-                                                        <div className="pt-4 border-t border-purple-300 flex justify-between items-center">
-                                                            <span className="text-sm font-bold text-purple-900">Subtotal por Horas</span>
-                                                            <span className="text-2xl font-black text-purple-700">
-                                                                {formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}
-                                                            </span>
-                                                        </div>
-                                                    )}
                                                 </div>
-                                            </div>
-                                        )}
-                                    </section>
 
-
-                                    {/* 2. Add-ons Modules - Only show if NOT hourly quote */}
-                                    {!pricingData.isHourlyQuote && (
-                                        <section>
-                                            <div className="flex justify-between items-center mb-4">
-                                                <h4 className="text-lg font-bold text-gray-900 flex items-center">
-                                                    <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">2</span>
-                                                    Módulos Adicionales (Add-ons)
-                                                </h4>
-                                                <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-sm text-indigo-600 font-bold hover:underline flex items-center">
-                                                    <Settings className="w-4 h-4 mr-1" /> Gestionar Librería
-                                                </button>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                {/* Render existing project add-ons with active state */}
-                                                {projectAddOns.map(addon => (
-                                                    <div key={addon.id} className="border-2 border-purple-500 bg-purple-50 rounded-xl p-4 flex justify-between items-center transition-all shadow-sm">
-                                                        <div>
-                                                            <p className="font-bold text-gray-900">{addon.name}</p>
-                                                            <p className="text-xs font-bold text-purple-700">{formatCurrency(addon.price)}</p>
-                                                        </div>
-                                                        <button onClick={() => handleRemoveAddOn(addon.id)} className="text-white bg-purple-600 hover:bg-purple-700 p-1.5 rounded-full transition-colors">
-                                                            <CheckCircle className="w-5 h-5" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-
-                                                {/* Render suggested templates that are NOT added yet */}
-                                                {addOnTemplates.filter(t => !projectAddOns.some(pa => pa.name === t.name)).map(template => (
-                                                    <div key={template.id}
-                                                        onClick={() => handleAddAddOn(template)}
-                                                        className="cursor-pointer border border-gray-200 bg-white rounded-xl p-4 flex justify-between items-center hover:border-purple-300 hover:shadow-md transition-all group"
-                                                    >
-                                                        <div>
-                                                            <p className="font-bold text-gray-700 group-hover:text-purple-700">{template.name}</p>
-                                                            <p className="text-xs text-gray-500 group-hover:text-purple-600">+{formatCurrency(template.default_price)}</p>
-                                                        </div>
-                                                        <div className="text-gray-300 group-hover:text-purple-500 bg-gray-50 group-hover:bg-purple-50 p-1.5 rounded-full">
-                                                            <Plus className="w-5 h-5" />
-                                                        </div>
-                                                    </div>
-                                                ))}
-
-                                                {/* Empty state if no templates */}
-                                                {addOnTemplates.length === 0 && (
-                                                    <div className="col-span-2 text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                                                        <p className="text-gray-500 mb-2">No hay plantillas disponibles.</p>
-                                                        <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-indigo-600 font-bold text-sm">
-                                                            Cargar plantillas base
-                                                        </button>
+                                                {(pricingData.customHours || 0) > 0 && (
+                                                    <div className="pt-4 border-t border-purple-300 flex justify-between items-center">
+                                                        <span className="text-sm font-bold text-purple-900">Subtotal por Horas</span>
+                                                        <span className="text-2xl font-black text-purple-700">
+                                                            {formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>
-                                        </section>
+                                        </div>
                                     )}
+                                </section>
 
-                                    {/* 3. Custom Adjustments */}
-                                    <section className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                                        <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Ajustes Finales</h4>
-                                        <div className="space-y-4">
-                                            {/* Custom Price Override */}
-                                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-                                                <div>
-                                                    <label className="text-sm text-gray-900 font-bold block">Precio Personalizado</label>
-                                                    <span className="text-xs text-gray-500">Sobreescribe el precio base</span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    {pricingData.customPrice > 0 && (
-                                                        <div className="relative">
-                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                                                            <input
-                                                                type="number"
-                                                                value={pricingData.customPrice}
-                                                                onChange={(e) => setPricingData({ ...pricingData, customPrice: Number(e.target.value) })}
-                                                                className="border-2 border-green-500 rounded-lg py-1.5 pl-6 pr-2 w-28 text-right font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    <label className="relative inline-flex items-center cursor-pointer">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={pricingData.customPrice > 0}
-                                                            onChange={(e) => setPricingData({ ...pricingData, customPrice: e.target.checked ? pricingData.basePrice : 0 })}
-                                                            className="sr-only peer"
-                                                        />
-                                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                                                    </label>
-                                                </div>
-                                            </div>
 
-                                            {/* Discount */}
-                                            <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-                                                <div>
-                                                    <label className="text-sm text-gray-900 font-bold block">Descuento</label>
-                                                    <span className="text-xs text-gray-500">Aplicar reducción al total</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <input
-                                                        type="number"
-                                                        value={pricingData.discount}
-                                                        onChange={(e) => setPricingData({ ...pricingData, discount: Number(e.target.value) })}
-                                                        className="border border-gray-300 rounded-lg p-1.5 w-20 text-right font-medium"
-                                                        placeholder="0"
-                                                    />
-                                                    <select
-                                                        value={pricingData.discountType}
-                                                        onChange={(e) => setPricingData({ ...pricingData, discountType: e.target.value as any })}
-                                                        className="border border-gray-300 rounded-lg p-1.5 text-sm bg-gray-50"
-                                                    >
-                                                        <option value="percentage">%</option>
-                                                        <option value="fixed">$</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                {/* 2. Add-ons Modules - Only show if NOT hourly quote */}
+                                {!pricingData.isHourlyQuote && (
+                                    <section>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h4 className="text-lg font-bold text-gray-900 flex items-center">
+                                                <span className="bg-gray-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-2">2</span>
+                                                Módulos Adicionales (Add-ons)
+                                            </h4>
+                                            <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-sm text-indigo-600 font-bold hover:underline flex items-center">
+                                                <Settings className="w-4 h-4 mr-1" /> Gestionar Librería
+                                            </button>
+                                        </div>
 
-                                            {/* Advance Payment Percentage */}
-                                            <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                                <div>
-                                                    <label className="text-sm text-gray-900 font-bold block">Anticipo Requerido</label>
-                                                    <span className="text-xs text-gray-600">Porcentaje a pagar por adelantado</span>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {/* Render existing project add-ons with active state */}
+                                            {projectAddOns.map(addon => (
+                                                <div key={addon.id} className="border-2 border-purple-500 bg-purple-50 rounded-xl p-4 flex justify-between items-center transition-all shadow-sm">
+                                                    <div>
+                                                        <p className="font-bold text-gray-900">{addon.name}</p>
+                                                        <p className="text-xs font-bold text-purple-700">{formatCurrency(addon.price)}</p>
+                                                    </div>
+                                                    <button onClick={() => handleRemoveAddOn(addon.id)} className="text-white bg-purple-600 hover:bg-purple-700 p-1.5 rounded-full transition-colors">
+                                                        <CheckCircle className="w-5 h-5" />
+                                                    </button>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        max="100"
-                                                        value={pricingData.advancePercentage}
-                                                        onChange={(e) => setPricingData({ ...pricingData, advancePercentage: Number(e.target.value) })}
-                                                        className="border border-gray-300 rounded-lg p-1.5 w-20 text-right font-medium"
-                                                        placeholder="50"
-                                                    />
-                                                    <span className="text-gray-600 font-medium">%</span>
-                                                </div>
-                                            </div>
+                                            ))}
 
-                                            {/* Notes */}
-                                            <div>
-                                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Notas Internas</label>
-                                                <textarea
-                                                    rows={2}
-                                                    value={pricingData.pricingNotes}
-                                                    onChange={(e) => setPricingData({ ...pricingData, pricingNotes: e.target.value })}
-                                                    className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                                                    placeholder="Detalles sobre el precio..."
-                                                />
-                                            </div>
-
-                                            {/* Free Benefits Section */}
-                                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-5 mt-4">
-                                                <h3 className="text-base font-bold text-green-900 mb-3 flex items-center">
-                                                    <Sparkles className="w-5 h-5 mr-2 text-green-600" />
-                                                    Beneficios Incluidos
-                                                </h3>
-                                                <div className="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
-                                                    <div className="flex items-start justify-between">
-                                                        <div className="flex-1">
-                                                            <p className="font-bold text-gray-900 mb-1">Mantenimiento Técnico Bonificado</p>
-                                                            <p className="text-sm text-gray-600">2 meses de soporte y actualizaciones sin costo adicional</p>
-                                                        </div>
-                                                        <div className="bg-green-600 text-white px-3 py-1.5 rounded-full text-xs font-black shadow-md ml-3">
-                                                            GRATIS
-                                                        </div>
+                                            {/* Render suggested templates that are NOT added yet */}
+                                            {addOnTemplates.filter(t => !projectAddOns.some(pa => pa.name === t.name)).map(template => (
+                                                <div key={template.id}
+                                                    onClick={() => handleAddAddOn(template)}
+                                                    className="cursor-pointer border border-gray-200 bg-white rounded-xl p-4 flex justify-between items-center hover:border-purple-300 hover:shadow-md transition-all group"
+                                                >
+                                                    <div>
+                                                        <p className="font-bold text-gray-700 group-hover:text-purple-700">{template.name}</p>
+                                                        <p className="text-xs text-gray-500 group-hover:text-purple-600">+{formatCurrency(template.default_price)}</p>
+                                                    </div>
+                                                    <div className="text-gray-300 group-hover:text-purple-500 bg-gray-50 group-hover:bg-purple-50 p-1.5 rounded-full">
+                                                        <Plus className="w-5 h-5" />
                                                     </div>
                                                 </div>
-                                            </div>
+                                            ))}
+
+                                            {/* Empty state if no templates */}
+                                            {addOnTemplates.length === 0 && (
+                                                <div className="col-span-2 text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                                    <p className="text-gray-500 mb-2">No hay plantillas disponibles.</p>
+                                                    <button onClick={() => { setIsLibraryOpen(true); fetchTemplates(); }} className="text-indigo-600 font-bold text-sm">
+                                                        Cargar plantillas base
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </section>
-                                </div>
+                                )}
 
-                                {/* Right Column: Sticky Summary */}
-                                <div className="w-full md:w-80 shrink-0 pb-20 md:pb-0">
-                                    <div className="sticky top-6 bg-gray-900 text-white rounded-xl shadow-2xl p-6 flex flex-col h-fit border border-gray-800">
-                                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-white">
-                                            <Sparkles className="text-yellow-400 w-5 h-5" />
-                                            Resumen
-                                        </h3>
-
-                                        <div className="space-y-3 flex-1">
-                                            <div className="flex justify-between items-center text-sm opacity-90">
-                                                <span className="font-medium">{getPlanDisplayName(generalData.planType)}</span>
-                                                <span className="font-bold">{formatCurrency(pricingData.customPrice > 0 ? pricingData.customPrice : pricingData.basePrice)}</span>
+                                {/* 3. Custom Adjustments */}
+                                <section className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                                    <h4 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Ajustes Finales</h4>
+                                    <div className="space-y-4">
+                                        {/* Custom Price Override */}
+                                        <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                                            <div>
+                                                <label className="text-sm text-gray-900 font-bold block">Precio Personalizado</label>
+                                                <span className="text-xs text-gray-500">Sobreescribe el precio base</span>
                                             </div>
-
-                                            {projectAddOns.length > 0 && (
-                                                <div className="space-y-2 pt-4 border-t border-gray-700">
-                                                    <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Add-ons</p>
-                                                    {projectAddOns.map(addon => (
-                                                        <div key={addon.id} className="flex justify-between items-center text-sm">
-                                                            <span className="truncate pr-2 text-gray-300">{addon.name}</span>
-                                                            <span className="font-medium">{formatCurrency(addon.price)}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {(pricingData.customHours || 0) > 0 && (
-                                                <div className="space-y-2 pt-4 border-t border-gray-700">
-                                                    <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Cotización por Horas</p>
-                                                    <div className="flex justify-between items-center text-sm">
-                                                        <span className="text-gray-300">{pricingData.customHours}h @ ${pricingData.hourlyRate || 25}/h</span>
-                                                        <span className="font-medium">{formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}</span>
+                                            <div className="flex items-center gap-3">
+                                                {pricingData.customPrice > 0 && (
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                                                        <input
+                                                            type="number"
+                                                            value={pricingData.customPrice}
+                                                            onChange={(e) => setPricingData({ ...pricingData, customPrice: Number(e.target.value) })}
+                                                            className="border-2 border-green-500 rounded-lg py-1.5 pl-6 pr-2 w-28 text-right font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200"
+                                                        />
                                                     </div>
-                                                </div>
-                                            )}
-
-                                            {pricingData.discount > 0 && (
-                                                <div className="flex justify-between items-center text-sm text-yellow-300 pt-4 border-t border-gray-700">
-                                                    <span>Descuento</span>
-                                                    <span>- {formatCurrency(pricingData.discountType === 'percentage' ?
-                                                        ((pricingData.customPrice && pricingData.customPrice > 0 ? pricingData.customPrice : (pricingData.basePrice + addOnsTotal)) * pricingData.discount / 100) :
-                                                        pricingData.discount
-                                                    )}</span>
-                                                </div>
-                                            )}
+                                                )}
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={pricingData.customPrice > 0}
+                                                        onChange={(e) => setPricingData({ ...pricingData, customPrice: e.target.checked ? pricingData.basePrice : 0 })}
+                                                        className="sr-only peer"
+                                                    />
+                                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                                </label>
+                                            </div>
                                         </div>
 
-                                        <div className="mt-8 pt-6 border-t border-gray-700">
-                                            <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
-                                                <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
-                                                <span>{formatCurrency(
-                                                    (calculateFinalPrice(
-                                                        pricingData.basePrice,
-                                                        pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
-                                                        pricingData.discount,
-                                                        pricingData.discountType
-                                                    ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
+                                        {/* Discount */}
+                                        <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                                            <div>
+                                                <label className="text-sm text-gray-900 font-bold block">Descuento</label>
+                                                <span className="text-xs text-gray-500">Aplicar reducción al total</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="number"
+                                                    value={pricingData.discount}
+                                                    onChange={(e) => setPricingData({ ...pricingData, discount: Number(e.target.value) })}
+                                                    className="border border-gray-300 rounded-lg p-1.5 w-20 text-right font-medium"
+                                                    placeholder="0"
+                                                />
+                                                <select
+                                                    value={pricingData.discountType}
+                                                    onChange={(e) => setPricingData({ ...pricingData, discountType: e.target.value as any })}
+                                                    className="border border-gray-300 rounded-lg p-1.5 text-sm bg-gray-50"
+                                                >
+                                                    <option value="percentage">%</option>
+                                                    <option value="fixed">$</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {/* Advance Payment Percentage */}
+                                        <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                            <div>
+                                                <label className="text-sm text-gray-900 font-bold block">Anticipo Requerido</label>
+                                                <span className="text-xs text-gray-600">Porcentaje a pagar por adelantado</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="100"
+                                                    value={pricingData.advancePercentage}
+                                                    onChange={(e) => setPricingData({ ...pricingData, advancePercentage: Number(e.target.value) })}
+                                                    className="border border-gray-300 rounded-lg p-1.5 w-20 text-right font-medium"
+                                                    placeholder="50"
+                                                />
+                                                <span className="text-gray-600 font-medium">%</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Notes */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Notas Internas</label>
+                                            <textarea
+                                                rows={2}
+                                                value={pricingData.pricingNotes}
+                                                onChange={(e) => setPricingData({ ...pricingData, pricingNotes: e.target.value })}
+                                                className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                                placeholder="Detalles sobre el precio..."
+                                            />
+                                        </div>
+
+                                        {/* Free Benefits Section */}
+                                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-5 mt-4">
+                                            <h3 className="text-base font-bold text-green-900 mb-3 flex items-center">
+                                                <Sparkles className="w-5 h-5 mr-2 text-green-600" />
+                                                Beneficios Incluidos
+                                            </h3>
+                                            <div className="bg-white rounded-lg p-4 border border-green-200 shadow-sm">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <p className="font-bold text-gray-900 mb-1">Mantenimiento Técnico Bonificado</p>
+                                                        <p className="text-sm text-gray-600">2 meses de soporte y actualizaciones sin costo adicional</p>
+                                                    </div>
+                                                    <div className="bg-green-600 text-white px-3 py-1.5 rounded-full text-xs font-black shadow-md ml-3">
+                                                        GRATIS
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+
+                            {/* Right Column: Sticky Summary */}
+                            <div className="w-full md:w-80 shrink-0 pb-20 md:pb-0">
+                                <div className="sticky top-6 bg-gray-900 text-white rounded-xl shadow-2xl p-6 flex flex-col h-fit border border-gray-800">
+                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-white">
+                                        <Sparkles className="text-yellow-400 w-5 h-5" />
+                                        Resumen
+                                    </h3>
+
+                                    <div className="space-y-3 flex-1">
+                                        <div className="flex justify-between items-center text-sm opacity-90">
+                                            <span className="font-medium">{getPlanDisplayName(generalData.planType)}</span>
+                                            <span className="font-bold">{formatCurrency(pricingData.customPrice > 0 ? pricingData.customPrice : pricingData.basePrice)}</span>
+                                        </div>
+
+                                        {projectAddOns.length > 0 && (
+                                            <div className="space-y-2 pt-4 border-t border-gray-700">
+                                                <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Add-ons</p>
+                                                {projectAddOns.map(addon => (
+                                                    <div key={addon.id} className="flex justify-between items-center text-sm">
+                                                        <span className="truncate pr-2 text-gray-300">{addon.name}</span>
+                                                        <span className="font-medium">{formatCurrency(addon.price)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {(pricingData.customHours || 0) > 0 && (
+                                            <div className="space-y-2 pt-4 border-t border-gray-700">
+                                                <p className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">Cotización por Horas</p>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-gray-300">{pricingData.customHours}h @ ${pricingData.hourlyRate || 25}/h</span>
+                                                    <span className="font-medium">{formatCurrency((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {pricingData.discount > 0 && (
+                                            <div className="flex justify-between items-center text-sm text-yellow-300 pt-4 border-t border-gray-700">
+                                                <span>Descuento</span>
+                                                <span>- {formatCurrency(pricingData.discountType === 'percentage' ?
+                                                    ((pricingData.customPrice && pricingData.customPrice > 0 ? pricingData.customPrice : (pricingData.basePrice + addOnsTotal)) * pricingData.discount / 100) :
+                                                    pricingData.discount
                                                 )}</span>
                                             </div>
-                                            <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
-                                            <p className="text-4xl font-black text-white tracking-tight">
-                                                {formatCurrency(calculateFinalPrice(
+                                        )}
+                                    </div>
+
+                                    <div className="mt-8 pt-6 border-t border-gray-700">
+                                        <div className="flex justify-between items-center mb-2 text-xs text-blue-300">
+                                            <span>Anticipo Requerido ({pricingData.advancePercentage}%)</span>
+                                            <span>{formatCurrency(
+                                                (calculateFinalPrice(
                                                     pricingData.basePrice,
                                                     pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
                                                     pricingData.discount,
                                                     pricingData.discountType
-                                                ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
-                                            </p>
-                                            <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
+                                                ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25))) * (pricingData.advancePercentage || 50) / 100
+                                            )}</span>
                                         </div>
-
-                                        <button
-                                            onClick={handleSaveData}
-                                            className="mt-6 w-full bg-white text-gray-900 font-bold py-3.5 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02]"
-                                        >
-                                            <Save size={18} />
-                                            Guardar Cotización
-                                        </button>
+                                        <p className="text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Total Estimado</p>
+                                        <p className="text-4xl font-black text-white tracking-tight">
+                                            {formatCurrency(calculateFinalPrice(
+                                                pricingData.basePrice,
+                                                pricingData.customPrice > 0 ? pricingData.customPrice : undefined,
+                                                pricingData.discount,
+                                                pricingData.discountType
+                                            ) + addOnsTotal + ((pricingData.customHours || 0) * (pricingData.hourlyRate || 25)))}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1 text-right">USD</p>
                                     </div>
+
+                                    <button
+                                        onClick={handleSaveData}
+                                        className="mt-6 w-full bg-white text-gray-900 font-bold py-3.5 rounded-lg hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                                    >
+                                        <Save size={18} />
+                                        Guardar Cotización
+                                    </button>
                                 </div>
                             </div>
 
-                            {/* Delivery Projection - Below the two-column layout */}
-                            <div className="mt-6 shrink-0">
+                            {/* Delivery Projection - As third column on desktop, or below on mobile */}
+                            <div className="w-full md:w-96 shrink-0 mt-6 md:mt-0">
                                 <DeliveryProjection
                                     project={project}
                                     addons={projectAddOns}
