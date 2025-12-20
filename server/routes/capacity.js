@@ -45,6 +45,7 @@ router.get('/blocks', async (req, res) => {
             startTime: b.start_time,
             isShadow: Boolean(b.is_shadow),
             notes: b.notes,
+            tasks: b.tasks || [], // Support for tasks
             completed: Boolean(b.completed),
             createdAt: b.created_at,
             // Related data
@@ -68,7 +69,7 @@ router.get('/blocks', async (req, res) => {
  */
 router.post('/blocks', async (req, res) => {
     try {
-        const { projectId, title, blockType, date, hours, startTime, isShadow, notes } = req.body;
+        const { projectId, title, blockType, date, hours, startTime, isShadow, notes, tasks } = req.body;
 
         if (!title || !date || !hours) {
             return res.status(400).json({ error: 'title, date, and hours are required' });
@@ -76,8 +77,8 @@ router.post('/blocks', async (req, res) => {
 
         const [result] = await pool.query(`
             INSERT INTO capacity_blocks 
-            (user_id, project_id, title, block_type, date, hours, start_time, is_shadow, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, project_id, title, block_type, date, hours, start_time, is_shadow, notes, tasks)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             req.user.id,
             projectId || null,
@@ -87,7 +88,8 @@ router.post('/blocks', async (req, res) => {
             hours,
             startTime || null,
             isShadow || false,
-            notes || null
+            notes || null,
+            JSON.stringify(tasks || [])
         ]);
 
         res.status(201).json({
@@ -107,7 +109,7 @@ router.post('/blocks', async (req, res) => {
 router.put('/blocks/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, blockType, date, hours, startTime, notes, completed } = req.body;
+        const { title, blockType, date, hours, startTime, notes, completed, tasks } = req.body;
 
         // Verify ownership
         const [existing] = await pool.query(
@@ -127,9 +129,10 @@ router.put('/blocks/:id', async (req, res) => {
                 hours = COALESCE(?, hours),
                 start_time = COALESCE(?, start_time),
                 notes = COALESCE(?, notes),
-                completed = COALESCE(?, completed)
+                completed = COALESCE(?, completed),
+                tasks = COALESCE(?, tasks)
             WHERE id = ? AND user_id = ?
-        `, [title, blockType, date, hours, startTime, notes, completed, id, req.user.id]);
+        `, [title, blockType, date, hours, startTime, notes, completed, tasks ? JSON.stringify(tasks) : null, id, req.user.id]);
 
         res.json({ message: 'Block updated successfully' });
     } catch (err) {

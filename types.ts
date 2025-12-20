@@ -241,6 +241,12 @@ export interface ProjectAddOn {
 // Capacity Management Types
 export type BlockType = 'production' | 'meeting' | 'manual';
 
+export interface BlockTask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface CapacityBlock {
   id: number;
   projectId?: string;
@@ -251,6 +257,7 @@ export interface CapacityBlock {
   startTime?: string; // HH:MM for meetings
   isShadow: boolean;
   notes?: string;
+  tasks?: BlockTask[];
   completed: boolean;
   createdAt: string;
   // Related data (from joins)

@@ -12,7 +12,7 @@ import {
 import { TrendingUp, Briefcase, DollarSign, CheckCircle } from 'lucide-react';
 import { Project, ProjectStatus, FinanceRecord, PaymentStatus } from '../types';
 import { ActionCenter } from './ActionCenter';
-import { WorkloadWidget } from './WorkloadWidget';
+import { DailyRoadmap } from './DailyRoadmap';
 import { formatCurrency } from '../utils/pricing';
 
 interface DashboardProps {
@@ -22,7 +22,7 @@ interface DashboardProps {
     onNavigate?: (view: 'projects' | 'clients' | 'finance' | 'dashboard') => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ projects, finances, logs }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ projects, finances, logs, onNavigate }) => {
     const totalIncome = finances.filter(f => f.type === 'Ingreso').reduce((a, b) => a + Number(b.amount), 0);
     const totalExpenses = finances.filter(f => f.type === 'Gasto').reduce((a, b) => a + Number(b.amount), 0);
     const netIncome = totalIncome - totalExpenses;
@@ -41,9 +41,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, finances, logs }
             {/* Action Center */}
             <ActionCenter projects={projects} logs={logs} />
 
-            {/* Workload Calendar */}
+            {/* Daily Roadmap */}
             <div className="mb-8">
-                <WorkloadWidget projects={projects} />
+                <DailyRoadmap onOpenCalendar={() => onNavigate?.('calendar')} />
             </div>
 
             {/* Stats Cards - Apple Style */}

@@ -209,6 +209,94 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
         }
     };
 
+    // Task Management Handlers
+    const toggleTask = async (blockId: number, taskId: string, completed: boolean) => {
+        const block = blocks.find(b => b.id === blockId);
+        if (!block) return;
+
+        // Optimistic update for local state
+        const updatedTasks = (block.tasks || []).map(t =>
+            t.id === taskId ? { ...t, completed } : t
+        );
+
+        // Update both main blocks list and selected block
+        const updateBlockState = (b: CapacityBlock) =>
+            b.id === blockId ? { ...b, tasks: updatedTasks } : b;
+
+        setBlocks(prev => prev.map(updateBlockState));
+        if (selectedBlock && selectedBlock.id === blockId) {
+            setSelectedBlock(prev => prev ? { ...prev, tasks: updatedTasks } : null);
+        }
+
+        try {
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tasks: updatedTasks })
+            });
+        } catch (err) {
+            console.error('Error updating task:', err);
+        }
+    };
+
+    const addTask = async (blockId: number, text: string) => {
+        const block = blocks.find(b => b.id === blockId);
+        if (!block) return;
+
+        const newTask = {
+            id: crypto.randomUUID(),
+            text,
+            completed: false
+        };
+
+        const updatedTasks = [...(block.tasks || []), newTask];
+
+        // Update both main blocks list and selected block
+        const updateBlockState = (b: CapacityBlock) =>
+            b.id === blockId ? { ...b, tasks: updatedTasks } : b;
+
+        setBlocks(prev => prev.map(updateBlockState));
+        if (selectedBlock && selectedBlock.id === blockId) {
+            setSelectedBlock(prev => prev ? { ...prev, tasks: updatedTasks } : null);
+        }
+
+        try {
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tasks: updatedTasks })
+            });
+        } catch (err) {
+            console.error('Error adding task:', err);
+        }
+    };
+
+    const deleteTask = async (blockId: number, taskId: string) => {
+        const block = blocks.find(b => b.id === blockId);
+        if (!block) return;
+
+        const updatedTasks = (block.tasks || []).filter(t => t.id !== taskId);
+
+        // Update both main blocks list and selected block
+        const updateBlockState = (b: CapacityBlock) =>
+            b.id === blockId ? { ...b, tasks: updatedTasks } : b;
+
+        setBlocks(prev => prev.map(updateBlockState));
+        if (selectedBlock && selectedBlock.id === blockId) {
+            setSelectedBlock(prev => prev ? { ...prev, tasks: updatedTasks } : null);
+        }
+
+        try {
+            await fetch(`/api/capacity/blocks/${blockId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tasks: updatedTasks })
+            });
+        } catch (err) {
+            console.error('Error deleting task:', err);
+        }
+    };
+
     // Format date for header
     const formatHeader = () => {
         if (viewMode === 'week') {
@@ -569,6 +657,51 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                                         <p className="text-sm text-gray-600 whitespace-pre-wrap">{selectedBlock.notes}</p>
                                     </div>
                                 )}
+
+                                {/* Tasks Section */}
+                                <div className="border-t pt-4">
+                                    <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm">
+                                        <CheckCircle className="w-4 h-4 text-indigo-600" />
+                                        Checklist del Bloque
+                                    </h4>
+
+                                    <div className="space-y-2 mb-3">
+                                        {selectedBlock.tasks?.map(task => (
+                                            <div key={task.id} className="flex items-center gap-3 group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={task.completed}
+                                                    onChange={(e) => toggleTask(selectedBlock.id, task.id, e.target.checked)}
+                                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                                />
+                                                <span className={`flex-1 text-sm ${task.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                                                    {task.text}
+                                                </span>
+                                                <button
+                                                    onClick={() => deleteTask(selectedBlock.id, task.id)}
+                                                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
+                                        <Plus className="w-4 h-4 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Agregar sub-tarea..."
+                                            className="bg-transparent border-none text-sm w-full focus:ring-0 p-0 placeholder-gray-400"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                                                    addTask(selectedBlock.id, e.currentTarget.value.trim());
+                                                    e.currentTarget.value = '';
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
 
                                 <div className="flex gap-3 pt-4 border-t">
                                     {!selectedBlock.completed && !selectedBlock.isShadow && (
