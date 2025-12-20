@@ -15,6 +15,7 @@ import {
     Eraser // New icon for bulk delete
 } from 'lucide-react';
 import { WeekBoard } from './Calendar/WeekBoard';
+import { BlockDetailModal } from './Calendar/BlockDetailModal';
 
 interface CalendarViewProps {
     onClose?: () => void;
@@ -753,59 +754,28 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
 
             {/* DETAIL / EDIT MODAL */}
             {showDayDetail && selectedBlock && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowDayDetail(false)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-                        <div className={`p-6 rounded-t-2xl ${getBlockColor(selectedBlock)}`}>
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-bold text-gray-900">{selectedBlock.title}</h3>
-                                <button onClick={() => setShowDayDetail(false)} className="p-1 hover:bg-white/20 rounded">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="p-6">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-gray-400" />
-                                    <span className="font-bold text-2xl">{selectedBlock.hours}h</span>
-                                </div>
-                                {selectedBlock.clientName && (
-                                    <div className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                                        {selectedBlock.clientName}
-                                    </div>
-                                )}
-                            </div>
-
-                            {selectedBlock.notes && (
-                                <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                                    <p className="text-sm text-gray-600">{selectedBlock.notes}</p>
-                                </div>
-                            )}
-
-                            <div className="border-t pt-4 mt-2">
-                                <h4 className="font-bold text-sm mb-2">Acciones</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <button
-                                        onClick={() => setShowDayDetail(false)}
-                                        className="w-full bg-gray-100 hover:bg-gray-200 py-2 rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                        Cerrar
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setShowDayDetail(false);
-                                            setShowDeleteOptions(true);
-                                        }}
-                                        className="w-full bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg text-sm font-medium transition-colors"
-                                    >
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <BlockDetailModal
+                    block={selectedBlock}
+                    onClose={() => setShowDayDetail(false)}
+                    onDelete={() => {
+                        setShowDayDetail(false);
+                        setShowDeleteOptions(true);
+                    }}
+                    onSave={async (updates) => {
+                        try {
+                            await fetch(`/api/capacity/blocks/${selectedBlock.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify(updates)
+                            });
+                            fetchBlocks();
+                            setShowDayDetail(false);
+                        } catch (err) {
+                            console.error('Failed to update block', err);
+                        }
+                    }}
+                />
             )}
         </div>
     );
