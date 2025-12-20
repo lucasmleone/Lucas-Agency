@@ -60,7 +60,13 @@ export const BacklogSidebar: React.FC<BacklogSidebarProps> = ({
                     {filteredProjects.map(project => (
                         <div
                             key={project.id}
-                            className="group p-3 border border-gray-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-sm cursor-pointer transition-all"
+                            draggable
+                            onDragStart={(e) => {
+                                e.dataTransfer.setData('projectId', String(project.id));
+                                e.dataTransfer.setData('clientName', project.clientName);
+                                e.dataTransfer.effectAllowed = 'copy';
+                            }}
+                            className="group p-3 border border-gray-100 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all"
                             onClick={() => onProjectSelect(project)}
                         >
                             <div className="flex justify-between items-start mb-1">

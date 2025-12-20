@@ -42,6 +42,13 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
         }
     };
 
+    const handleProjectDrop = (dateStr: string, projectId: number) => {
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+            onAddBlock(dateStr, project);
+        }
+    };
+
     return (
         <div className="flex flex-1 h-full overflow-hidden bg-white/50 backdrop-blur-xl relative">
             {/* Selection Indicator Overlay */}
@@ -66,6 +73,7 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
                             onDeleteBlock={onDeleteBlock}
                             onMoveToNextDay={onMoveToNextDay}
                             onDuplicateBlock={onDuplicateBlock}
+                            onProjectDrop={handleProjectDrop}
                         />
                     ))}
                 </div>

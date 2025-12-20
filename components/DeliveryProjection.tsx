@@ -295,7 +295,7 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                 )}
 
                 {/* Progress (if project has started) */}
-                {project.hoursCompleted && project.hoursCompleted > 0 && (
+                {(project.hoursCompleted || 0) > 0 && (
                     <div className="bg-white rounded-lg p-4 border border-indigo-100">
                         <div className="flex items-center justify-between mb-2">
                             <span className="font-medium text-gray-900">Progreso</span>

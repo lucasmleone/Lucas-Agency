@@ -1266,7 +1266,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                                     </h3>
 
                                     <div className="space-y-3 flex-1">
-                                        <span className="font-medium">{getPlanDisplayName(generalData.planType)}</span>
+                                        <span className="font-medium">{generalData.planType}</span>
                                         <span className="font-bold">{formatCurrency(pricingData.isCustomPriceActive ? pricingData.customPrice : pricingData.basePrice)}</span>
                                     </div>
 

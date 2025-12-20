@@ -13,6 +13,7 @@ interface DayColumnProps {
     onDeleteBlock: (blockId: number) => void;
     onMoveToNextDay: (blockId: number) => void;
     onDuplicateBlock: (block: CapacityBlock) => void;
+    onProjectDrop?: (dateStr: string, projectId: number) => void;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = ({
@@ -24,9 +25,11 @@ export const DayColumn: React.FC<DayColumnProps> = ({
     onEditBlock,
     onDeleteBlock,
     onMoveToNextDay,
-    onDuplicateBlock
+    onDuplicateBlock,
+    onProjectDrop
 }) => {
     const dateStr = date.toISOString().split('T')[0];
+    const [isDragOver, setIsDragOver] = React.useState(false);
 
     // Sort logic: Fixed times first, then creation order or manual sorting
     const sortedBlocks = useMemo(() => {
@@ -42,8 +45,33 @@ export const DayColumn: React.FC<DayColumnProps> = ({
     const isOverCapacity = totalHours > maxCapacity;
     const capacityPercentage = Math.min((totalHours / maxCapacity) * 100, 100);
 
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        const projectId = e.dataTransfer.getData('projectId');
+        if (projectId && onProjectDrop) {
+            onProjectDrop(dateStr, Number(projectId));
+        }
+    };
+
     return (
-        <div className={`min-w-[280px] w-full flex-1 flex flex-col h-full rounded-2xl ${isToday ? 'bg-indigo-50/30 ring-1 ring-indigo-100' : 'bg-gray-50/50'}`}>
+        <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`min-w-[280px] w-full flex-1 flex flex-col h-full rounded-2xl transition-colors ${isDragOver ? 'bg-indigo-100 ring-2 ring-indigo-300' :
+                    isToday ? 'bg-indigo-50/30 ring-1 ring-indigo-100' : 'bg-gray-50/50'
+                }`}
+        >
             {/* Header */}
             <div className="p-4 border-b border-gray-100 bg-white/50 rounded-t-2xl backdrop-blur-sm sticky top-0 z-10">
                 <div className="flex justify-between items-center mb-2">
@@ -63,7 +91,7 @@ export const DayColumn: React.FC<DayColumnProps> = ({
                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div
                         className={`h-full transition-all duration-500 rounded-full ${isOverCapacity ? 'bg-red-500' :
-                                totalHours >= maxCapacity ? 'bg-green-500' : 'bg-indigo-500'
+                            totalHours >= maxCapacity ? 'bg-green-500' : 'bg-indigo-500'
                             }`}
                         style={{ width: `${capacityPercentage}%` }}
                     />
