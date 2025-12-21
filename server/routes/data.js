@@ -241,7 +241,7 @@ router.put('/projects/:id', async (req, res) => {
 
         // SYNC BLOCK SHADOW STATUS BASED ON PROJECT STAGE
         if (p.status) {
-            const productionStages = ['5. Producción', '6. Cancelado', '7. Entregado'];
+            const productionStages = ['4. Producción', '5. Cierre y Entrega', '6. Cancelado', '6. Perdido', '7. Entregado'];
             const isProductionOrLater = productionStages.includes(p.status);
 
             if (p.status === '7. Entregado') {
