@@ -10,13 +10,18 @@ router.use(verifyToken);
 
 router.get('/projects', async (req, res) => {
     try {
+        // Query with subquery to calculate scheduled hours and days advanced
         const [rows] = await pool.query(`
-      SELECT p.*, c.name as clientName, mt.monthly_tasks as maintenance_tasks_json
+      SELECT p.*, 
+             c.name as clientName, 
+             mt.monthly_tasks as maintenance_tasks_json,
+             (SELECT COALESCE(SUM(cb.hours), 0) FROM capacity_blocks cb WHERE cb.project_id = p.id AND cb.block_type = 'production' AND cb.is_shadow = 0) as scheduled_hours
       FROM projects p 
       JOIN clients c ON p.client_id = c.id 
       LEFT JOIN maintenance_tasks mt ON p.id = mt.project_id
       WHERE p.user_id = ?
     `, [req.user.id]);
+
 
         // Parse JSON fields and map snake_case to camelCase
         const projects = rows.map(p => ({
@@ -77,6 +82,18 @@ router.get('/projects', async (req, res) => {
             confirmedDeliveryDate: p.confirmed_delivery_date,
             dailyDedication: p.daily_dedication ? parseFloat(p.daily_dedication) : 4,
             bufferPercentage: p.buffer_percentage !== null && p.buffer_percentage !== undefined ? parseInt(p.buffer_percentage) : 30,
+            // Acceleration calculation
+            scheduledHours: p.scheduled_hours ? parseFloat(p.scheduled_hours) : 0,
+            daysAdvanced: (() => {
+                if (!p.estimated_hours || !p.scheduled_hours) return 0;
+                const bufferMult = 1 + ((p.buffer_percentage ?? 30) / 100);
+                const neededHours = parseFloat(p.estimated_hours) * bufferMult;
+                const scheduledHours = parseFloat(p.scheduled_hours);
+                const extraHours = scheduledHours - neededHours;
+                if (extraHours <= 0) return 0;
+                const dailyDed = p.daily_dedication ? parseFloat(p.daily_dedication) : 4;
+                return Math.floor(extraHours / dailyDed);
+            })(),
         }));
 
         res.json(projects);

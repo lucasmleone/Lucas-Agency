@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CapacityBlock, Project } from '../../types';
 import { DayColumn } from './DayColumn';
 import { BacklogSidebar } from './BacklogSidebar';
@@ -40,6 +40,19 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
 }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const todayRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to today on mount
+    useEffect(() => {
+        if (todayRef.current && scrollRef.current) {
+            // Scroll today into center of view
+            const container = scrollRef.current;
+            const todayEl = todayRef.current;
+            const scrollLeft = todayEl.offsetLeft - (container.clientWidth / 2) + (todayEl.clientWidth / 2);
+            container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
+        }
+    }, [days]);
 
     const handleProjectSelect = (project: Project) => {
         setSelectedProject(prev => prev?.id === project.id ? null : project);
@@ -64,6 +77,9 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
         onScheduleInboxBlock(blockId, dateStr);
     };
 
+    // Find today's index for ref assignment
+    const todayIndex = days.findIndex(d => d.date.toDateString() === new Date().toDateString());
+
     return (
         <div className="flex flex-1 h-full overflow-hidden bg-white/50 backdrop-blur-xl relative">
             {/* Selection Indicator Overlay */}
@@ -74,26 +90,26 @@ export const WeekBoard: React.FC<WeekBoardProps> = ({
                 </div>
             )}
 
-            {/* Main Board */}
-            <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
+            <div ref={scrollRef} className="flex-1 overflow-x-auto overflow-y-hidden p-6">
                 <div className="flex h-full gap-4 min-w-max">
-                    {days.map((day) => (
-                        <DayColumn
-                            key={day.date.toISOString()}
-                            date={day.date}
-                            blocks={day.blocks}
-                            isToday={day.date.toDateString() === new Date().toDateString()}
-                            onAddBlock={handleColumnAdd}
-                            onEditBlock={onEditBlock}
-                            onDeleteBlock={onDeleteBlock}
-                            onMoveToNextDay={onMoveToNextDay}
-                            onDuplicateBlock={onDuplicateBlock}
-                            onToggleComplete={onToggleComplete}
-                            onStartTracking={onStartTracking}
-                            onStopTracking={onStopTracking}
-                            onProjectDrop={handleProjectDrop}
-                            onInboxBlockDrop={handleInboxBlockDrop}
-                        />
+                    {days.map((day, index) => (
+                        <div key={day.date.toISOString()} ref={index === todayIndex ? todayRef : null}>
+                            <DayColumn
+                                date={day.date}
+                                blocks={day.blocks}
+                                isToday={day.date.toDateString() === new Date().toDateString()}
+                                onAddBlock={handleColumnAdd}
+                                onEditBlock={onEditBlock}
+                                onDeleteBlock={onDeleteBlock}
+                                onMoveToNextDay={onMoveToNextDay}
+                                onDuplicateBlock={onDuplicateBlock}
+                                onToggleComplete={onToggleComplete}
+                                onStartTracking={onStartTracking}
+                                onStopTracking={onStopTracking}
+                                onProjectDrop={handleProjectDrop}
+                                onInboxBlockDrop={handleInboxBlockDrop}
+                            />
+                        </div>
                     ))}
                 </div>
             </div>

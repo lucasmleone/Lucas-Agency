@@ -862,36 +862,12 @@ function App() {
                                     ? `Entrega: ${new Date(project.deadline).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}`
                                     : 'Sin fecha'}
                             </span>
-                            {/* Acceleration indicator */}
-                            {project.endDate && project.estimatedHours && (() => {
-                              // Calculate theoretical delivery date (from today + days needed)
-                              const bufferMult = 1 + ((project.bufferPercentage ?? 30) / 100);
-                              const totalHours = project.estimatedHours * bufferMult;
-                              const dailyDed = project.dailyDedication || 4;
-                              const daysNeeded = Math.ceil(totalHours / dailyDed);
-
-                              // Calculate theoretical date (skip weekends)
-                              const theoreticalDate = new Date();
-                              let remaining = daysNeeded;
-                              while (remaining > 0) {
-                                theoreticalDate.setDate(theoreticalDate.getDate() + 1);
-                                const day = theoreticalDate.getDay();
-                                if (day !== 0 && day !== 6) remaining--;
-                              }
-
-                              const actualEnd = new Date(project.endDate + 'T12:00:00');
-                              const diffMs = theoreticalDate.getTime() - actualEnd.getTime();
-                              const daysAdvanced = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-                              if (daysAdvanced > 0) {
-                                return (
-                                  <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                    ⚡ -{daysAdvanced}d
-                                  </span>
-                                );
-                              }
-                              return null;
-                            })()}
+                            {/* Acceleration indicator - uses pre-calculated daysAdvanced from backend */}
+                            {project.daysAdvanced > 0 && (
+                              <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                ⚡ -{project.daysAdvanced}d
+                              </span>
+                            )}
                           </div>
                           <span className="text-xs font-medium text-blue-600 group-hover:text-blue-700 flex items-center gap-1">
                             Ver detalles
