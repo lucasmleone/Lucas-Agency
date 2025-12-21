@@ -22,7 +22,8 @@ import {
   Send,
   ChevronRight,
   StickyNote,
-  Search
+  Search,
+  Trophy
 } from 'lucide-react';
 import { Project, ProjectStatus, PlanType, ProjectLog, FinanceRecord } from './types';
 import { useAuth } from './context/AuthContext';
@@ -39,6 +40,7 @@ import { Toast } from './components/Toast';
 import { useProjects } from './hooks/useProjects';
 import { formatCurrency } from './utils/pricing';
 import { CalendarView } from './components/CalendarView';
+import { StoicDashboard } from './components/StoicDashboard';
 
 // Helper to format date from YYYY-MM-DD without timezone conversion
 const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
@@ -264,6 +266,7 @@ function App() {
   const [view, setView] = useState<'public' | 'dashboard' | 'projects' | 'finance' | 'clients' | 'notes' | 'calendar'>('dashboard');
   const [showPricingConfig, setShowPricingConfig] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   // Selected Client State
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -539,6 +542,13 @@ function App() {
               >
                 <Calendar className="mr-3 h-5 w-5" />
                 Calendario
+              </button>
+              <button
+                onClick={() => setShowAchievements(true)}
+                className="flex items-center w-full px-4 py-3 text-sm font-bold rounded-lg transition-colors text-gray-400 hover:bg-gray-800 hover:text-white"
+              >
+                <Trophy className="mr-3 h-5 w-5" />
+                Logros
               </button>
             </nav>
             <div className="p-4 border-t border-gray-800">
@@ -1140,6 +1150,9 @@ function App() {
       )}
       {showPricingConfig && (
         <PricingConfigModal onClose={() => setShowPricingConfig(false)} />
+      )}
+      {showAchievements && (
+        <StoicDashboard onClose={() => setShowAchievements(false)} />
       )}
 
       {/* Delete Client Confirmation Toast */}

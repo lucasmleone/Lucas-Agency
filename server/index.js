@@ -16,6 +16,7 @@ import portalRoutes from './routes/portal.js';
 import publicPortalRoutes from './routes/public_portal.js';
 import addonsRoutes from './routes/addons.js';
 import capacityRoutes from './routes/capacity.js';
+import achievementsRoutes from './routes/achievements.js';
 
 dotenv.config();
 
@@ -82,6 +83,7 @@ app.use('/api/notes', internalMiddleware, notesRoutes);
 app.use('/api', internalMiddleware, portalRoutes);
 app.use('/api/addons', internalMiddleware, addonsRoutes);
 app.use('/api/capacity', internalMiddleware, capacityRoutes);
+app.use('/api/achievements', internalMiddleware, achievementsRoutes);
 
 // Serve Static Files (Production)
 if (process.env.NODE_ENV === 'production') {
