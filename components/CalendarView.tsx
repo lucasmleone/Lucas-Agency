@@ -787,6 +787,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                                             <option key={p.id} value={p.id}>{p.clientName}</option>
                                         ))}
                                     </select>
+                                    {/* Acceleration preview message */}
+                                    {newBlock.projectId && newBlock.hours > 0 && (
+                                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
+                                            <span className="font-semibold">⚡ +{newBlock.hours}h</span> de producción adelantarán la entrega del proyecto
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
