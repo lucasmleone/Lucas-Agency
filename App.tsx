@@ -715,9 +715,13 @@ function App() {
                     }
                   })
                   .map((project) => {
-                    // Use projected days based on hours, not manual deadline
+                    // Use endDate (from last block) if available, otherwise fall back to projection or deadline
                     const projection = getProjectedDeliveryDays(project);
-                    const daysLeft = project.estimatedHours ? projection.days : getDaysRemaining(project.deadline);
+                    const daysLeft = project.endDate
+                      ? getDaysRemaining(project.endDate)
+                      : project.estimatedHours
+                        ? projection.days
+                        : getDaysRemaining(project.deadline);
                     const urgencyClass = getUrgencyColor(daysLeft, project.status);
                     const income = finances.filter(f => f.projectId === project.id && f.type === 'Ingreso').reduce((a, b) => a + Number(b.amount), 0);
                     const expenses = finances.filter(f => f.projectId === project.id && f.type === 'Gasto').reduce((a, b) => a + Number(b.amount), 0);
