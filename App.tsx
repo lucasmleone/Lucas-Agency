@@ -479,6 +479,13 @@ function App() {
             <Calendar className="mr-3 h-5 w-5" />
             Calendario
           </button>
+          <button
+            onClick={() => setShowAchievements(true)}
+            className="flex items-center w-full px-4 py-3 text-sm font-bold rounded-lg transition-colors text-gray-400 hover:bg-gray-800 hover:text-white"
+          >
+            <Trophy className="mr-3 h-5 w-5" />
+            Logros
+          </button>
         </nav>
         <div className="p-4 border-t border-gray-800">
           <button onClick={logout} className="flex items-center w-full px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
