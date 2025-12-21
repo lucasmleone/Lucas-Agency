@@ -557,7 +557,11 @@ router.post('/calculate-delivery', async (req, res) => {
 
             const dateKey = currentDate.toISOString().split('T')[0];
             const occupiedHours = occupiedDates.get(dateKey) || 0;
-            const availableHours = Math.max(0, dailyDedication - occupiedHours);
+
+            // Use both dailyDedication and MAX_DAILY_HOURS (6h) limit
+            const MAX_DAILY_HOURS = 6;
+            const globalAvailable = Math.max(0, MAX_DAILY_HOURS - occupiedHours);
+            const availableHours = Math.min(dailyDedication, globalAvailable);
 
             if (availableHours > 0) {
                 remainingHours -= availableHours;
