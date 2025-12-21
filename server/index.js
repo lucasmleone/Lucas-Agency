@@ -30,6 +30,10 @@ import rateLimit from 'express-rate-limit';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust Proxy for Nginx
+app.set('trust proxy', 1); // Trust first proxy (Nginx) for correct IP in rate limiter
+
+
 // Rate Limiting Strategies
 
 // 1. Strict Limiter for Public Routes (Auth, Public Links)
