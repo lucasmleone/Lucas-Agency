@@ -1,49 +1,164 @@
 import React, { useState, useEffect } from 'react';
 
-// Mascot States
-export type MascotState = 'sleeping' | 'awake' | 'focused' | 'victorious' | 'sad';
+// Mascot States based on completion
+export type MascotState = 'sleeping' | 'neutral' | 'happy' | 'excited' | 'ecstatic';
 
 interface MascotProps {
     completionRate: number;
     currentStreak: number;
-    streakLost?: boolean;
     hasNewAchievement?: boolean;
     onClick: () => void;
 }
 
-// Lion emoji states with expressions
-const LION_STATES: Record<MascotState, { emoji: string; bg: string; animation: string }> = {
-    sleeping: { emoji: '😴', bg: 'bg-gray-200', animation: '' },
-    awake: { emoji: '🦁', bg: 'bg-amber-100', animation: 'animate-pulse-slow' },
-    focused: { emoji: '🔥', bg: 'bg-orange-200', animation: 'animate-bounce-slow' },
-    victorious: { emoji: '👑', bg: 'bg-yellow-300', animation: 'animate-wiggle' },
-    sad: { emoji: '😿', bg: 'bg-gray-300', animation: '' }
+// Lion SVG with different expressions
+const LionFace: React.FC<{ state: MascotState }> = ({ state }) => {
+    // Eye expressions based on state
+    const getEyeExpression = () => {
+        switch (state) {
+            case 'sleeping':
+                return (
+                    <>
+                        {/* Closed eyes - curved lines */}
+                        <path d="M12 14 Q14 12 16 14" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
+                        <path d="M24 14 Q26 12 28 14" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    </>
+                );
+            case 'neutral':
+                return (
+                    <>
+                        {/* Normal eyes */}
+                        <circle cx="14" cy="14" r="3" fill="#5D4037" />
+                        <circle cx="26" cy="14" r="3" fill="#5D4037" />
+                        <circle cx="15" cy="13" r="1" fill="white" />
+                        <circle cx="27" cy="13" r="1" fill="white" />
+                    </>
+                );
+            case 'happy':
+                return (
+                    <>
+                        {/* Happy eyes - slightly squinted */}
+                        <ellipse cx="14" cy="14" rx="3" ry="2.5" fill="#5D4037" />
+                        <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="#5D4037" />
+                        <circle cx="15" cy="13" r="1" fill="white" />
+                        <circle cx="27" cy="13" r="1" fill="white" />
+                    </>
+                );
+            case 'excited':
+            case 'ecstatic':
+                return (
+                    <>
+                        {/* Excited eyes - big and sparkling */}
+                        <circle cx="14" cy="14" r="4" fill="#5D4037" />
+                        <circle cx="26" cy="14" r="4" fill="#5D4037" />
+                        <circle cx="15" cy="12" r="1.5" fill="white" />
+                        <circle cx="27" cy="12" r="1.5" fill="white" />
+                        <circle cx="13" cy="15" r="0.8" fill="white" />
+                        <circle cx="25" cy="15" r="0.8" fill="white" />
+                    </>
+                );
+        }
+    };
+
+    // Mouth expressions based on state
+    const getMouthExpression = () => {
+        switch (state) {
+            case 'sleeping':
+                return <path d="M17 22 Q20 23 23 22" stroke="#5D4037" strokeWidth="1.5" fill="none" strokeLinecap="round" />;
+            case 'neutral':
+                return <path d="M16 22 Q20 24 24 22" stroke="#5D4037" strokeWidth="1.5" fill="none" strokeLinecap="round" />;
+            case 'happy':
+                return <path d="M15 21 Q20 26 25 21" stroke="#5D4037" strokeWidth="1.5" fill="none" strokeLinecap="round" />;
+            case 'excited':
+                return (
+                    <>
+                        <path d="M14 20 Q20 28 26 20" stroke="#5D4037" strokeWidth="1.5" fill="#FF8A80" strokeLinecap="round" />
+                        {/* Tongue */}
+                        <ellipse cx="20" cy="24" rx="3" ry="2" fill="#FF5252" />
+                    </>
+                );
+            case 'ecstatic':
+                return (
+                    <>
+                        <path d="M12 19 Q20 30 28 19" stroke="#5D4037" strokeWidth="2" fill="#FF8A80" strokeLinecap="round" />
+                        {/* Big smile with tongue */}
+                        <ellipse cx="20" cy="25" rx="4" ry="3" fill="#FF5252" />
+                    </>
+                );
+        }
+    };
+
+    return (
+        <svg viewBox="0 0 40 40" className="w-full h-full">
+            {/* Mane */}
+            <circle cx="20" cy="20" r="18" fill="#D4A574" />
+            <circle cx="20" cy="20" r="15" fill="#FFB74D" />
+
+            {/* Face base */}
+            <circle cx="20" cy="18" r="12" fill="#FFCC80" />
+
+            {/* Ears */}
+            <circle cx="8" cy="10" r="4" fill="#FFCC80" />
+            <circle cx="8" cy="10" r="2" fill="#FFAB91" />
+            <circle cx="32" cy="10" r="4" fill="#FFCC80" />
+            <circle cx="32" cy="10" r="2" fill="#FFAB91" />
+
+            {/* Nose */}
+            <ellipse cx="20" cy="18" rx="3" ry="2" fill="#8D6E63" />
+            <ellipse cx="20" cy="17.5" rx="1" ry="0.5" fill="#A1887F" />
+
+            {/* Eyes */}
+            {getEyeExpression()}
+
+            {/* Mouth */}
+            {getMouthExpression()}
+
+            {/* Whisker dots */}
+            <circle cx="13" cy="19" r="0.8" fill="#5D4037" />
+            <circle cx="11" cy="17" r="0.8" fill="#5D4037" />
+            <circle cx="27" cy="19" r="0.8" fill="#5D4037" />
+            <circle cx="29" cy="17" r="0.8" fill="#5D4037" />
+
+            {/* Blush for happy states */}
+            {(state === 'happy' || state === 'excited' || state === 'ecstatic') && (
+                <>
+                    <ellipse cx="9" cy="18" rx="2.5" ry="1.5" fill="#FFAB91" opacity="0.7" />
+                    <ellipse cx="31" cy="18" rx="2.5" ry="1.5" fill="#FFAB91" opacity="0.7" />
+                </>
+            )}
+
+            {/* Crown for ecstatic state */}
+            {state === 'ecstatic' && (
+                <g transform="translate(12, -2)">
+                    <polygon points="8,8 6,0 10,4 14,0 12,8" fill="#FFD700" stroke="#FFA000" strokeWidth="0.5" />
+                </g>
+            )}
+        </svg>
+    );
 };
 
 export const Mascot: React.FC<MascotProps> = ({
     completionRate,
     currentStreak,
-    streakLost = false,
     hasNewAchievement = false,
     onClick
 }) => {
-    const [state, setState] = useState<MascotState>('awake');
+    const [state, setState] = useState<MascotState>('neutral');
     const [showBubble, setShowBubble] = useState(false);
 
     // Determine state based on progress
     useEffect(() => {
-        if (streakLost) {
-            setState('sad');
+        if (completionRate >= 100) {
+            setState('ecstatic');
         } else if (completionRate >= 80) {
-            setState('victorious');
+            setState('excited');
         } else if (completionRate >= 50) {
-            setState('focused');
+            setState('happy');
         } else if (completionRate > 0) {
-            setState('awake');
+            setState('neutral');
         } else {
             setState('sleeping');
         }
-    }, [completionRate, streakLost]);
+    }, [completionRate]);
 
     // Show bubble for new achievements
     useEffect(() => {
@@ -52,42 +167,76 @@ export const Mascot: React.FC<MascotProps> = ({
         }
     }, [hasNewAchievement]);
 
-    const config = LION_STATES[state];
+    // Get glow colors based on state
+    const getGlowStyle = () => {
+        switch (state) {
+            case 'ecstatic':
+                return 'shadow-[0_0_20px_rgba(255,215,0,0.8),0_0_40px_rgba(255,107,107,0.5),0_0_60px_rgba(168,85,247,0.3)]';
+            case 'excited':
+                return 'shadow-[0_0_15px_rgba(251,146,60,0.6),0_0_30px_rgba(245,158,11,0.3)]';
+            case 'happy':
+                return 'shadow-[0_0_10px_rgba(34,197,94,0.5)]';
+            default:
+                return '';
+        }
+    };
+
+    // Get animation based on state
+    const getAnimation = () => {
+        switch (state) {
+            case 'ecstatic':
+                return 'animate-wiggle';
+            case 'excited':
+                return 'animate-bounce-slow';
+            case 'happy':
+                return 'animate-pulse-slow';
+            default:
+                return '';
+        }
+    };
 
     return (
         <div className="relative">
+            {/* Rainbow glow background for ecstatic */}
+            {state === 'ecstatic' && (
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 animate-spin-slow opacity-50 blur-md"
+                    style={{ animationDuration: '3s' }} />
+            )}
+
             <button
                 onClick={onClick}
                 className={`
-                    relative w-10 h-10 rounded-full flex items-center justify-center
-                    ${config.bg} ${config.animation}
+                    relative w-12 h-12 rounded-full flex items-center justify-center
+                    bg-gradient-to-br from-amber-100 to-orange-100
                     hover:scale-110 transition-all duration-300
-                    shadow-md hover:shadow-lg
-                    border-2 border-white/50
+                    border-2 border-amber-200
+                    ${getGlowStyle()}
+                    ${getAnimation()}
                 `}
-                title={`Racha: ${currentStreak} días | Progreso: ${completionRate}%`}
+                title={`Racha: ${currentStreak} días | Progreso: ${Math.round(completionRate)}%`}
             >
-                <span className="text-xl">{config.emoji}</span>
+                <LionFace state={state} />
 
                 {/* Streak fire indicator */}
-                {currentStreak > 0 && state !== 'sad' && (
-                    <span className="absolute -bottom-1 -right-1 text-xs">
+                {currentStreak > 0 && (
+                    <span className="absolute -bottom-1 -right-1 text-sm animate-pulse">
                         🔥
                     </span>
                 )}
 
-                {/* Crown for victorious state */}
-                {state === 'victorious' && (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-sm animate-bounce">
-                        ✨
-                    </span>
+                {/* Sparkles for ecstatic */}
+                {state === 'ecstatic' && (
+                    <>
+                        <span className="absolute -top-1 -right-1 text-xs animate-ping">✨</span>
+                        <span className="absolute -top-1 -left-1 text-xs animate-ping" style={{ animationDelay: '0.5s' }}>✨</span>
+                    </>
                 )}
             </button>
 
             {/* Notification bubble */}
             {showBubble && (
                 <div
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-ping-once"
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-bounce cursor-pointer"
                     onClick={(e) => { e.stopPropagation(); setShowBubble(false); onClick(); }}
                 >
                     <span className="text-white text-xs font-bold">!</span>
@@ -96,38 +245,12 @@ export const Mascot: React.FC<MascotProps> = ({
 
             {/* Streak counter badge */}
             {currentStreak > 2 && (
-                <div className="absolute -bottom-1 -left-1 bg-orange-500 text-white text-xs font-bold px-1 rounded-full min-w-[16px] text-center shadow">
+                <div className="absolute -bottom-1 -left-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-1.5 rounded-full min-w-[18px] text-center shadow-lg">
                     {currentStreak}
                 </div>
             )}
         </div>
     );
 };
-
-// CSS to add to global styles
-export const mascotStyles = `
-@keyframes pulse-slow {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-@keyframes bounce-slow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
-}
-@keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-5deg); }
-    75% { transform: rotate(5deg); }
-}
-@keyframes ping-once {
-    0% { transform: scale(1); opacity: 1; }
-    75% { transform: scale(1.2); opacity: 0.5; }
-    100% { transform: scale(1); opacity: 1; }
-}
-.animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
-.animate-bounce-slow { animation: bounce-slow 1s ease-in-out infinite; }
-.animate-wiggle { animation: wiggle 0.5s ease-in-out infinite; }
-.animate-ping-once { animation: ping-once 1s ease-in-out; }
-`;
 
 export default Mascot;
