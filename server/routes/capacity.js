@@ -236,6 +236,27 @@ router.put('/blocks/:id', async (req, res) => {
             }
         }
 
+        // AUTO-UPDATE PROJECT END_DATE: Update to last block date for this project
+        if (block.project_id && date) {
+            try {
+                // Find the latest block date for this project
+                const [latestBlock] = await pool.query(`
+                    SELECT MAX(date) as last_date FROM capacity_blocks 
+                    WHERE project_id = ? AND user_id = ? AND block_type = 'production' AND is_shadow = 0
+                `, [block.project_id, req.user.id]);
+
+                if (latestBlock[0] && latestBlock[0].last_date) {
+                    const lastDate = new Date(latestBlock[0].last_date).toISOString().split('T')[0];
+                    await pool.query(`
+                        UPDATE projects SET end_date = ? WHERE id = ? AND user_id = ?
+                    `, [lastDate, block.project_id, req.user.id]);
+                    console.log(`Updated project ${block.project_id} end_date to ${lastDate}`);
+                }
+            } catch (dateErr) {
+                console.error('Error updating project end_date:', dateErr);
+            }
+        }
+
         res.json({ message: 'Block updated successfully' });
     } catch (err) {
         console.error('Error updating capacity block:', err);
