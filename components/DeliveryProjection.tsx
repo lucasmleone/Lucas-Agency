@@ -102,33 +102,34 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                     if (data.blocks && data.blocks.length > 0) {
                         setBlocksGenerated(true);
 
-                        // Calculate total scheduled hours (not shadow blocks, actual scheduled ones)
-                        const totalScheduled = data.blocks
-                            .filter((b: any) => !b.isShadow && b.blockType === 'production')
+                        // Get production blocks (not shadow)
+                        const productionBlocks = data.blocks
+                            .filter((b: any) => !b.isShadow && b.blockType === 'production');
+
+                        // Calculate total scheduled hours
+                        const totalScheduled = productionBlocks
                             .reduce((sum: number, b: any) => sum + (b.hours || b.plannedHours || 0), 0);
                         setScheduledHours(totalScheduled);
 
-                        // Calculate accelerated delivery if we have extra hours
-                        if (totalScheduled > 0 && estimatedDate && hoursData.bufferedHours > 0) {
-                            // Hours remaining after scheduled work
-                            const hoursRemaining = Math.max(0, hoursData.bufferedHours - totalScheduled);
-                            const daysRemaining = Math.ceil(hoursRemaining / dailyDedication);
+                        // Find the LAST block date - this is when project actually finishes
+                        if (productionBlocks.length > 0 && estimatedDate) {
+                            // Get all dates and find the maximum (last day)
+                            const blockDates = productionBlocks.map((b: any) => {
+                                const dateStr = typeof b.date === 'string'
+                                    ? b.date.split('T')[0]
+                                    : new Date(b.date).toISOString().split('T')[0];
+                                return new Date(dateStr + 'T12:00:00');
+                            });
 
-                            // Calculate new date (skip weekends)
-                            const newDate = new Date();
-                            let daysToAdd = daysRemaining;
-                            while (daysToAdd > 0) {
-                                newDate.setDate(newDate.getDate() + 1);
-                                const day = newDate.getDay();
-                                if (day !== 0 && day !== 6) daysToAdd--;
-                            }
-
-                            // Compare with original date
+                            const lastBlockDate = new Date(Math.max(...blockDates.map((d: Date) => d.getTime())));
                             const originalDate = new Date(estimatedDate + 'T12:00:00');
-                            const diffDays = Math.floor((originalDate.getTime() - newDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                            // Calculate difference in days
+                            const diffMs = originalDate.getTime() - lastBlockDate.getTime();
+                            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
                             if (diffDays > 0) {
-                                setAcceleratedDate(newDate.toISOString().split('T')[0]);
+                                setAcceleratedDate(lastBlockDate.toISOString().split('T')[0]);
                                 setDaysAdvanced(diffDays);
                             } else {
                                 setAcceleratedDate(null);
