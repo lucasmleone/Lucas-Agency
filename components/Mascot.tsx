@@ -7,15 +7,17 @@ interface MascotProps {
     onClick: () => void;
 }
 
-// Duolingo-style flame icon
-const DuolingoFlame: React.FC<{ streakCount: number; size?: number }> = ({
-    streakCount,
-    size = 52
-}) => {
+// Duolingo-style flame icon with animated internal flames
+const DuolingoFlame: React.FC<{ streakCount: number }> = ({ streakCount }) => {
+    // Fire grows with streak
+    const baseSize = 48;
+    const growthFactor = Math.min(streakCount * 1.5, 12);
+    const size = baseSize + growthFactor;
+
     return (
         <div
-            className="relative flex items-center justify-center animate-flame-dance"
-            style={{ width: size, height: size }}
+            className="relative flex items-center justify-center"
+            style={{ width: size, height: size * 1.2 }}
         >
             <svg
                 viewBox="0 0 32 40"
@@ -42,7 +44,7 @@ const DuolingoFlame: React.FC<{ streakCount: number; size?: number }> = ({
                     </filter>
                 </defs>
 
-                {/* Main flame shape */}
+                {/* Main flame shape - with animation */}
                 <path
                     d="M16 0
                        C16 0 6 12 6 24
@@ -51,42 +53,55 @@ const DuolingoFlame: React.FC<{ streakCount: number; size?: number }> = ({
                        C26 12 16 0 16 0Z"
                     fill="url(#flameGradient)"
                     filter="url(#flameShadow)"
+                    className="animate-flame-outer"
                 />
 
-                {/* Inner flame highlight */}
+                {/* Inner flame highlight - animated */}
                 <path
-                    d="M16 12
-                       C16 12 11 20 11 27
-                       C11 32 13 35 16 35
-                       C19 35 21 32 21 27
-                       C21 20 16 12 16 12Z"
+                    d="M16 8
+                       C16 8 10 18 10 26
+                       C10 32 12 36 16 36
+                       C20 36 22 32 22 26
+                       C22 18 16 8 16 8Z"
                     fill="url(#innerGlow)"
-                    opacity="0.8"
+                    opacity="0.9"
+                    className="animate-flame-inner"
                 />
 
-                {/* Core bright spot */}
+                {/* Core bright spot - animated */}
                 <ellipse
                     cx="16"
                     cy="30"
-                    rx="4"
-                    ry="5"
+                    rx="5"
+                    ry="6"
                     fill="#fff9c4"
-                    opacity="0.6"
+                    opacity="0.7"
+                    className="animate-flame-core"
+                />
+
+                {/* Hot center */}
+                <ellipse
+                    cx="16"
+                    cy="28"
+                    rx="3"
+                    ry="4"
+                    fill="#ffffff"
+                    opacity="0.5"
                 />
             </svg>
 
             {/* Number overlay */}
             <div
                 className="absolute inset-0 flex items-center justify-center"
-                style={{ paddingTop: '8px' }}
+                style={{ paddingTop: '10%' }}
             >
                 <span
                     className="font-black"
                     style={{
-                        fontSize: streakCount >= 10 ? '18px' : '22px',
+                        fontSize: streakCount >= 100 ? '14px' : streakCount >= 10 ? '18px' : '22px',
                         color: '#b71c1c',
-                        textShadow: '0 1px 0 rgba(255,255,255,0.5)',
-                        WebkitTextStroke: '0.5px #7f0000'
+                        textShadow: '0 1px 0 rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.3)',
+                        WebkitTextStroke: '0.5px #8b0000'
                     }}
                 >
                     {streakCount}
@@ -96,7 +111,7 @@ const DuolingoFlame: React.FC<{ streakCount: number; size?: number }> = ({
     );
 };
 
-// Simple progress indicator for daily completion
+// Progress indicator dot
 const ProgressDot: React.FC<{ progress: number }> = ({ progress }) => {
     const getColor = () => {
         if (progress >= 100) return 'bg-green-500';
@@ -108,12 +123,34 @@ const ProgressDot: React.FC<{ progress: number }> = ({ progress }) => {
 
     return (
         <div
-            className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ${getColor()} border-2 border-white shadow-sm flex items-center justify-center`}
+            className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ${getColor()} border-2 border-white shadow-md flex items-center justify-center`}
         >
-            {progress >= 100 && <span className="text-[8px]">✓</span>}
+            {progress >= 100 && <span className="text-white text-[8px] font-bold">✓</span>}
         </div>
     );
 };
+
+// Gray flame for no streak
+const GrayFlame: React.FC<{ completionRate: number }> = ({ completionRate }) => (
+    <div className="relative w-12 h-14 flex items-center justify-center">
+        <svg viewBox="0 0 32 40" className="w-12 h-14">
+            <defs>
+                <linearGradient id="grayFlame" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stopColor="#6b7280" />
+                    <stop offset="100%" stopColor="#9ca3af" />
+                </linearGradient>
+            </defs>
+            <path
+                d="M16 2 C16 2 7 12 7 23 C7 31 10 37 16 37 C22 37 25 31 25 23 C25 12 16 2 16 2Z"
+                fill="url(#grayFlame)"
+                opacity="0.6"
+            />
+        </svg>
+        <span className="absolute text-gray-500 font-bold text-sm" style={{ paddingTop: '8px' }}>
+            {completionRate > 0 ? `${Math.round(completionRate)}%` : '–'}
+        </span>
+    </div>
+);
 
 export const Mascot: React.FC<MascotProps> = ({
     completionRate,
@@ -137,29 +174,12 @@ export const Mascot: React.FC<MascotProps> = ({
                 title={`🔥 Racha: ${currentStreak} días | Progreso hoy: ${Math.round(completionRate)}%`}
             >
                 {hasStreak ? (
-                    <DuolingoFlame streakCount={currentStreak} size={48} />
+                    <DuolingoFlame streakCount={currentStreak} />
                 ) : (
-                    // No streak - show gray flame or percentage
-                    <div className="w-12 h-14 flex items-center justify-center bg-gradient-to-b from-gray-300 to-gray-400 rounded-full text-gray-600 font-bold text-lg relative" style={{ clipPath: 'ellipse(50% 50% at 50% 50%)' }}>
-                        <svg viewBox="0 0 32 40" className="w-12 h-14 opacity-40">
-                            <path
-                                d="M16 0 C16 0 6 12 6 24 C6 32 10 38 16 38 C22 38 26 32 26 24 C26 12 16 0 16 0Z"
-                                fill="#9ca3af"
-                            />
-                        </svg>
-                        <span className="absolute text-gray-500 font-bold">
-                            {completionRate > 0 ? `${Math.round(completionRate)}%` : '–'}
-                        </span>
-                    </div>
+                    <GrayFlame completionRate={completionRate} />
                 )}
 
-                {/* Daily progress indicator */}
                 <ProgressDot progress={completionRate} />
-
-                {/* Achievement sparkle */}
-                {completionRate >= 100 && hasStreak && (
-                    <span className="absolute -top-2 -right-2 text-xl animate-bounce">✨</span>
-                )}
             </button>
 
             {/* Notification bubble */}

@@ -118,28 +118,68 @@
       animation: pulse-slow 2s ease-in-out infinite;
     }
 
-    @keyframes flame-dance {
+    @keyframes flame-outer {
 
       0%,
       100% {
-        transform: scale(1) rotate(0deg);
+        transform: scaleX(1) scaleY(1);
       }
 
       25% {
-        transform: scale(1.02) rotate(-2deg);
+        transform: scaleX(0.97) scaleY(1.02);
       }
 
       50% {
-        transform: scale(0.98) rotate(0deg);
+        transform: scaleX(1.03) scaleY(0.98);
       }
 
       75% {
-        transform: scale(1.02) rotate(2deg);
+        transform: scaleX(0.98) scaleY(1.01);
       }
     }
 
-    .animate-flame-dance {
-      animation: flame-dance 1.5s ease-in-out infinite;
+    .animate-flame-outer {
+      animation: flame-outer 0.8s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    @keyframes flame-inner {
+
+      0%,
+      100% {
+        transform: translateY(0) scaleY(1);
+      }
+
+      33% {
+        transform: translateY(-1px) scaleY(1.03);
+      }
+
+      66% {
+        transform: translateY(1px) scaleY(0.97);
+      }
+    }
+
+    .animate-flame-inner {
+      animation: flame-inner 0.6s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    @keyframes flame-core {
+
+      0%,
+      100% {
+        opacity: 0.7;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.9;
+        transform: scale(1.1);
+      }
+    }
+
+    .animate-flame-core {
+      animation: flame-core 0.4s ease-in-out infinite;
     }
 
     .animate-bounce-slow {
