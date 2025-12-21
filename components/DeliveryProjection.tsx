@@ -177,10 +177,22 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                                 } else {
                                     setAcceleratedDate(null);
                                     setDaysAdvanced(0);
+                                    fetch(`/api/projects/${project.id}`, {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        credentials: 'include',
+                                        body: JSON.stringify({ daysAdvanced: 0 })
+                                    }).catch(() => { });
                                 }
                             } else {
                                 setAcceleratedDate(null);
                                 setDaysAdvanced(0);
+                                fetch(`/api/projects/${project.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    credentials: 'include',
+                                    body: JSON.stringify({ daysAdvanced: 0 })
+                                }).catch(() => { });
                             }
                         }
                     }
