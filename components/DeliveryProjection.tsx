@@ -102,35 +102,69 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                     if (data.blocks && data.blocks.length > 0) {
                         setBlocksGenerated(true);
 
-                        // Get production blocks (not shadow)
+                        // Get production blocks (not shadow) and sort by date
                         const productionBlocks = data.blocks
-                            .filter((b: any) => !b.isShadow && b.blockType === 'production');
+                            .filter((b: any) => !b.isShadow && b.blockType === 'production')
+                            .map((b: any) => ({
+                                ...b,
+                                dateStr: typeof b.date === 'string' ? b.date.split('T')[0] : new Date(b.date).toISOString().split('T')[0],
+                                hours: b.hours || b.plannedHours || 0
+                            }))
+                            .sort((a: any, b: any) => a.dateStr.localeCompare(b.dateStr));
 
                         // Calculate total scheduled hours
-                        const totalScheduled = productionBlocks
-                            .reduce((sum: number, b: any) => sum + (b.hours || b.plannedHours || 0), 0);
+                        const totalScheduled = productionBlocks.reduce((sum: number, b: any) => sum + b.hours, 0);
                         setScheduledHours(totalScheduled);
 
-                        // Find the LAST block date - this is when project actually finishes
-                        if (productionBlocks.length > 0 && estimatedDate) {
-                            // Get all dates and find the maximum (last day)
-                            const blockDates = productionBlocks.map((b: any) => {
-                                const dateStr = typeof b.date === 'string'
-                                    ? b.date.split('T')[0]
-                                    : new Date(b.date).toISOString().split('T')[0];
-                                return new Date(dateStr + 'T12:00:00');
-                            });
+                        // Calculate base delivery date = last block date (without acceleration)
+                        if (productionBlocks.length > 0) {
+                            const lastBlockDate = productionBlocks[productionBlocks.length - 1].dateStr;
 
-                            const lastBlockDate = new Date(Math.max(...blockDates.map((d: Date) => d.getTime())));
-                            const originalDate = new Date(estimatedDate + 'T12:00:00');
+                            // Update estimatedDate to use actual last block (override backend calculation)
+                            setEstimatedDate(lastBlockDate);
 
-                            // Calculate difference in days
-                            const diffMs = originalDate.getTime() - lastBlockDate.getTime();
-                            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                            // Calculate if there are EXTRA hours beyond what's needed
+                            const neededHours = hoursData.bufferedHours;
+                            const extraHours = totalScheduled - neededHours;
 
-                            if (diffDays > 0) {
-                                setAcceleratedDate(lastBlockDate.toISOString().split('T')[0]);
-                                setDaysAdvanced(diffDays);
+                            if (extraHours > 0) {
+                                // Work backwards: remove hours from end until extraHours consumed
+                                let hoursToRemove = extraHours;
+                                let newLastBlockIndex = productionBlocks.length - 1;
+
+                                for (let i = productionBlocks.length - 1; i >= 0 && hoursToRemove > 0; i--) {
+                                    const blockHours = productionBlocks[i].hours;
+                                    if (hoursToRemove >= blockHours) {
+                                        // Entire block is eliminated
+                                        hoursToRemove -= blockHours;
+                                        newLastBlockIndex = i - 1;
+                                    } else {
+                                        // Partial block - still ends on this day
+                                        newLastBlockIndex = i;
+                                        hoursToRemove = 0;
+                                    }
+                                }
+
+                                if (newLastBlockIndex >= 0 && newLastBlockIndex < productionBlocks.length - 1) {
+                                    const acceleratedDateStr = productionBlocks[newLastBlockIndex].dateStr;
+
+                                    // Calculate days advanced
+                                    const original = new Date(lastBlockDate + 'T12:00:00');
+                                    const accelerated = new Date(acceleratedDateStr + 'T12:00:00');
+                                    const diffMs = original.getTime() - accelerated.getTime();
+                                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+                                    if (diffDays > 0) {
+                                        setAcceleratedDate(acceleratedDateStr);
+                                        setDaysAdvanced(diffDays);
+                                    } else {
+                                        setAcceleratedDate(null);
+                                        setDaysAdvanced(0);
+                                    }
+                                } else {
+                                    setAcceleratedDate(null);
+                                    setDaysAdvanced(0);
+                                }
                             } else {
                                 setAcceleratedDate(null);
                                 setDaysAdvanced(0);
