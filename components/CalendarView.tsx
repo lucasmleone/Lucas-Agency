@@ -672,23 +672,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
     return (
         <div className="h-full flex flex-col bg-gray-50">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-20">
-                <div className="flex items-center gap-4">
+            <div className="bg-white border-b border-gray-200 px-3 md:px-6 py-3 md:py-4 flex flex-wrap items-center justify-between gap-2 shadow-sm z-20">
+                <div className="flex items-center gap-2 md:gap-4 flex-wrap">
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
                         <X className="w-5 h-5 text-gray-500" />
                     </button>
                     <div className="flex items-center gap-2">
-                        <CalendarIcon className="w-6 h-6 text-indigo-600" />
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Planificación {viewMode === 'week' ? 'Semanal' : 'Mensual'}
+                        <CalendarIcon className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
+                        <h1 className="text-lg md:text-2xl font-bold text-gray-900">
+                            <span className="hidden sm:inline">Planificación </span>{viewMode === 'week' ? 'Semanal' : 'Mensual'}
                         </h1>
                     </div>
 
                     {/* View Mode Toggle */}
-                    <div className="flex items-center bg-gray-100 rounded-lg p-1 ml-4">
+                    <div className="flex items-center bg-gray-100 rounded-lg p-1">
                         <button
                             onClick={() => setViewMode('week')}
-                            className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${viewMode === 'week'
+                            className={`px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-all ${viewMode === 'week'
                                 ? 'bg-white text-indigo-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
                                 }`}
@@ -697,7 +697,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         </button>
                         <button
                             onClick={() => setViewMode('month')}
-                            className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${viewMode === 'month'
+                            className={`px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-all ${viewMode === 'month'
                                 ? 'bg-white text-indigo-600 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
                                 }`}
@@ -706,7 +706,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         </button>
                     </div>
 
-                    <div className="flex items-center bg-gray-100 rounded-lg p-1 ml-2">
+                    <div className="flex items-center bg-gray-100 rounded-lg p-1">
                         <button
                             onClick={() => navigate('prev')}
                             className="p-1 hover:bg-white rounded shadow-sm transition-all"
@@ -715,9 +715,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         </button>
                         <button
                             onClick={goToToday}
-                            className="px-3 py-1 text-sm font-medium hover:bg-white rounded transition-all"
+                            className="px-2 md:px-3 py-1 text-xs md:text-sm font-medium hover:bg-white rounded transition-all"
                         >
-                            {viewMode === 'week' ? 'Esta Semana' : 'Este Mes'}
+                            <span className="hidden sm:inline">{viewMode === 'week' ? 'Esta Semana' : 'Este Mes'}</span>
+                            <span className="sm:hidden">Hoy</span>
                         </button>
                         <button
                             onClick={() => navigate('next')}
@@ -727,9 +728,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         </button>
                     </div>
 
-                    <div className="text-sm font-medium text-gray-500 ml-2">
+                    <div className="text-xs md:text-sm font-medium text-gray-500 hidden md:block">
                         {viewMode === 'week' && days.length > 0 && (
-                            `${new Date(days[0].date).toLocaleDateString('es-AR', { month: 'long', day: 'numeric' })} - ${new Date(days[days.length - 1].date).toLocaleDateString('es-AR', { month: 'long', day: 'numeric' })}`
+                            `${new Date(days[0].date).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })} - ${new Date(days[days.length - 1].date).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`
                         )}
                         {viewMode === 'month' && (
                             currentDate.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
@@ -737,7 +738,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3 flex-wrap">
                     {/* Weekly Stats Summary */}
                     {viewMode === 'week' && days.length > 0 && (() => {
                         const totalHours = days.reduce((sum, d) => sum + d.totalHours, 0);
@@ -746,8 +747,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                         const overloadedDays = days.filter(d => d.totalHours > 8).length;
 
                         return (
-                            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border">
-                                <div className={`text-sm font-bold ${utilizationPct > 100 ? 'text-red-600' :
+                            <div className="flex items-center gap-2 bg-gray-50 px-2 md:px-3 py-1 md:py-1.5 rounded-lg border text-xs md:text-sm">
+                                <div className={`font-bold ${utilizationPct > 100 ? 'text-red-600' :
                                     utilizationPct >= 75 ? 'text-green-600' :
                                         utilizationPct >= 50 ? 'text-yellow-600' : 'text-gray-500'
                                     }`}>
@@ -760,15 +761,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                                     {utilizationPct}%
                                 </div>
                                 {overloadedDays > 0 && (
-                                    <div className="text-xs text-red-600 font-medium">
-                                        ⚠️ {overloadedDays} día{overloadedDays > 1 ? 's' : ''} sobrecargado{overloadedDays > 1 ? 's' : ''}
+                                    <div className="text-xs text-red-600 font-medium hidden sm:block">
+                                        ⚠️ {overloadedDays}d sobrecargado
                                     </div>
                                 )}
                             </div>
                         );
                     })()}
 
-                    <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border">
+                    <div className="hidden lg:flex items-center gap-2 text-xs text-gray-400 bg-gray-50 px-3 py-1.5 rounded-lg border">
                         <div className="w-2 h-2 rounded-full bg-blue-500"></div> Producción
                         <div className="w-2 h-2 rounded-full bg-purple-500 ml-2"></div> Reunión
                         <div className="w-2 h-2 rounded-full bg-amber-500 ml-2"></div> Manual
