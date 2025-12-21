@@ -63,6 +63,52 @@ router.get('/blocks', async (req, res) => {
 });
 
 // =============================================================================
+// GET BLOCKS BY PROJECT ID
+// =============================================================================
+
+/**
+ * Get all blocks for a specific project
+ */
+router.get('/project/:projectId/blocks', async (req, res) => {
+    try {
+        const { projectId } = req.params;
+
+        const [rows] = await pool.query(`
+            SELECT 
+                cb.*,
+                p.plan as project_plan,
+                c.name as client_name
+            FROM capacity_blocks cb
+            LEFT JOIN projects p ON cb.project_id = p.id
+            LEFT JOIN clients c ON p.client_id = c.id
+            WHERE cb.user_id = ? AND cb.project_id = ?
+            ORDER BY cb.date, cb.start_time
+        `, [req.user.id, projectId]);
+
+        const blocks = rows.map(b => ({
+            id: b.id,
+            projectId: b.project_id ? String(b.project_id) : null,
+            title: b.title,
+            blockType: b.block_type,
+            date: b.date,
+            hours: parseFloat(b.hours),
+            plannedHours: parseFloat(b.hours), // Alias for compatibility
+            actualHours: b.actual_hours ? parseFloat(b.actual_hours) : 0,
+            trackingStartTime: b.tracking_start_time || null,
+            startTime: b.start_time,
+            isShadow: Boolean(b.is_shadow),
+            notes: b.notes,
+            completed: Boolean(b.completed),
+        }));
+
+        res.json({ blocks });
+    } catch (err) {
+        console.error('Error fetching project blocks:', err);
+        res.status(500).json({ error: 'Error fetching project blocks' });
+    }
+});
+
+// =============================================================================
 // CREATE BLOCK
 // =============================================================================
 

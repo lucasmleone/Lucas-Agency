@@ -105,7 +105,7 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                         // Calculate total scheduled hours (not shadow blocks, actual scheduled ones)
                         const totalScheduled = data.blocks
                             .filter((b: any) => !b.isShadow && b.blockType === 'production')
-                            .reduce((sum: number, b: any) => sum + (b.plannedHours || 0), 0);
+                            .reduce((sum: number, b: any) => sum + (b.hours || b.plannedHours || 0), 0);
                         setScheduledHours(totalScheduled);
 
                         // Calculate accelerated delivery if we have extra hours
