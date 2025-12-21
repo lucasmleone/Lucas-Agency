@@ -75,7 +75,7 @@ router.get('/projects', async (req, res) => {
             quotedDeliveryDate: p.quoted_delivery_date,
             confirmedDeliveryDate: p.confirmed_delivery_date,
             dailyDedication: p.daily_dedication ? parseFloat(p.daily_dedication) : 4,
-            bufferPercentage: p.buffer_percentage ? parseInt(p.buffer_percentage) : 30,
+            bufferPercentage: p.buffer_percentage !== null && p.buffer_percentage !== undefined ? parseInt(p.buffer_percentage) : 30,
         }));
 
         res.json(projects);

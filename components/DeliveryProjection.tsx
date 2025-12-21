@@ -21,7 +21,7 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
     const [error, setError] = useState<string | null>(null);
 
     // Buffer percentage (customizable, default 30%)
-    const [bufferPercent, setBufferPercent] = useState(project.bufferPercentage || 30);
+    const [bufferPercent, setBufferPercent] = useState(project.bufferPercentage ?? 30);
 
     // Delivery acceleration tracking
     const [scheduledHours, setScheduledHours] = useState<number>(0);
