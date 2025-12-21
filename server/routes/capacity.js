@@ -965,24 +965,59 @@ async function generateBlocksInternal(userId, projectId, clientName, plan, total
     const currentDate = new Date(startDate);
     const blocksToInsert = [];
 
+    // FIXED: Fetch existing blocks to check available capacity
+    const endSearch = new Date(currentDate);
+    endSearch.setMonth(endSearch.getMonth() + 6);
+
+    const [existingBlocks] = await pool.query(`
+        SELECT date, SUM(hours) as total_hours
+        FROM capacity_blocks
+        WHERE user_id = ? 
+        AND date >= ?
+        AND project_id != ?
+        GROUP BY date
+    `, [userId, currentDate.toISOString().split('T')[0], projectId]);
+
+    const occupiedDates = new Map();
+    existingBlocks.forEach(b => {
+        const dateStr = new Date(b.date).toISOString().split('T')[0];
+        occupiedDates.set(dateStr, parseFloat(b.total_hours));
+    });
+
+    const MAX_DAILY_HOURS = 6; // Global limit
+
     while (remainingHours > 0 && blocksToInsert.length < 365) {
         const dayOfWeek = currentDate.getDay();
 
         if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-            const hoursToday = Math.min(remainingHours, dailyDedication);
-            remainingHours -= hoursToday;
+            const dateKey = currentDate.toISOString().split('T')[0];
+            const occupiedHours = occupiedDates.get(dateKey) || 0;
 
-            blocksToInsert.push([
-                userId,
-                projectId,
-                title,
-                'production',
-                currentDate.toISOString().split('T')[0],
-                hoursToday,
-                null,
-                isShadow,
-                null
-            ]);
+            // Calculate real available hours in the day
+            const globalAvailable = Math.max(0, MAX_DAILY_HOURS - occupiedHours);
+
+            // Calculate how much we can book (respecting both daily dedication and global limit)
+            const canBook = Math.min(dailyDedication, globalAvailable);
+
+            if (canBook > 0) {
+                const hoursToBook = Math.min(remainingHours, canBook);
+                remainingHours -= hoursToBook;
+
+                blocksToInsert.push([
+                    userId,
+                    projectId,
+                    title,
+                    'production',
+                    dateKey,
+                    hoursToBook,
+                    null,
+                    isShadow,
+                    null
+                ]);
+
+                // Update occupied map for subsequent iterations
+                occupiedDates.set(dateKey, occupiedHours + hoursToBook);
+            }
         }
 
         currentDate.setDate(currentDate.getDate() + 1);
