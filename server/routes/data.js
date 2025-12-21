@@ -10,12 +10,14 @@ router.use(verifyToken);
 
 router.get('/projects', async (req, res) => {
     try {
-        // Query with subquery to calculate scheduled hours and days advanced
+        // Query with subquery to calculate scheduled hours and block dates for acceleration
         const [rows] = await pool.query(`
       SELECT p.*, 
              c.name as clientName, 
              mt.monthly_tasks as maintenance_tasks_json,
-             (SELECT COALESCE(SUM(cb.hours), 0) FROM capacity_blocks cb WHERE cb.project_id = p.id AND cb.block_type = 'production' AND cb.is_shadow = 0) as scheduled_hours
+             (SELECT COALESCE(SUM(cb.hours), 0) FROM capacity_blocks cb WHERE cb.project_id = p.id AND cb.block_type = 'production' AND cb.is_shadow = 0) as scheduled_hours,
+             (SELECT MIN(cb.date) FROM capacity_blocks cb WHERE cb.project_id = p.id AND cb.block_type = 'production' AND cb.is_shadow = 0) as first_block_date,
+             (SELECT MAX(cb.date) FROM capacity_blocks cb WHERE cb.project_id = p.id AND cb.block_type = 'production' AND cb.is_shadow = 0) as last_block_date
       FROM projects p 
       JOIN clients c ON p.client_id = c.id 
       LEFT JOIN maintenance_tasks mt ON p.id = mt.project_id
@@ -82,17 +84,35 @@ router.get('/projects', async (req, res) => {
             confirmedDeliveryDate: p.confirmed_delivery_date,
             dailyDedication: p.daily_dedication ? parseFloat(p.daily_dedication) : 4,
             bufferPercentage: p.buffer_percentage !== null && p.buffer_percentage !== undefined ? parseInt(p.buffer_percentage) : 30,
-            // Acceleration calculation
+            // Acceleration calculation - compare theoretical vs actual delivery dates
             scheduledHours: p.scheduled_hours ? parseFloat(p.scheduled_hours) : 0,
+            firstBlockDate: p.first_block_date ? new Date(p.first_block_date).toISOString().split('T')[0] : null,
+            lastBlockDate: p.last_block_date ? new Date(p.last_block_date).toISOString().split('T')[0] : null,
             daysAdvanced: (() => {
-                if (!p.estimated_hours || !p.scheduled_hours) return 0;
+                // Need both estimated hours and blocks scheduled
+                if (!p.estimated_hours || !p.scheduled_hours || !p.first_block_date || !p.last_block_date) return 0;
+
                 const bufferMult = 1 + ((p.buffer_percentage ?? 30) / 100);
                 const neededHours = parseFloat(p.estimated_hours) * bufferMult;
-                const scheduledHours = parseFloat(p.scheduled_hours);
-                const extraHours = scheduledHours - neededHours;
-                if (extraHours <= 0) return 0;
                 const dailyDed = p.daily_dedication ? parseFloat(p.daily_dedication) : 4;
-                return Math.floor(extraHours / dailyDed);
+                const daysNeeded = Math.ceil(neededHours / dailyDed);
+
+                // Calculate theoretical end date from first block + days needed (skipping weekends)
+                const firstBlock = new Date(p.first_block_date);
+                const theoreticalEnd = new Date(firstBlock);
+                let remaining = daysNeeded - 1; // -1 because first block is day 1
+                while (remaining > 0) {
+                    theoreticalEnd.setDate(theoreticalEnd.getDate() + 1);
+                    const day = theoreticalEnd.getDay();
+                    if (day !== 0 && day !== 6) remaining--;
+                }
+
+                // Compare with actual last block date
+                const lastBlock = new Date(p.last_block_date);
+                const diffMs = theoreticalEnd.getTime() - lastBlock.getTime();
+                const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+                return diffDays > 0 ? diffDays : 0;
             })(),
         }));
 
