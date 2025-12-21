@@ -78,16 +78,6 @@ const DuolingoFlame: React.FC<{ streakCount: number }> = ({ streakCount }) => {
                     opacity="0.7"
                     className="animate-flame-core"
                 />
-
-                {/* Hot center */}
-                <ellipse
-                    cx="16"
-                    cy="28"
-                    rx="3"
-                    ry="4"
-                    fill="#ffffff"
-                    opacity="0.5"
-                />
             </svg>
 
             {/* Number overlay */}
@@ -111,7 +101,7 @@ const DuolingoFlame: React.FC<{ streakCount: number }> = ({ streakCount }) => {
     );
 };
 
-// Progress indicator dot
+// Progress indicator dot with glow
 const ProgressDot: React.FC<{ progress: number }> = ({ progress }) => {
     const getColor = () => {
         if (progress >= 100) return 'bg-green-500';
@@ -121,11 +111,21 @@ const ProgressDot: React.FC<{ progress: number }> = ({ progress }) => {
         return 'bg-gray-400';
     };
 
+    // Glow intensity based on progress
+    const getGlowStyle = () => {
+        if (progress >= 100) return { boxShadow: '0 0 12px 4px rgba(34, 197, 94, 0.7), 0 0 20px 8px rgba(34, 197, 94, 0.4)' };
+        if (progress >= 80) return { boxShadow: '0 0 10px 3px rgba(34, 197, 94, 0.6)' };
+        if (progress >= 50) return { boxShadow: '0 0 8px 2px rgba(234, 179, 8, 0.5)' };
+        if (progress > 0) return { boxShadow: '0 0 6px 2px rgba(249, 115, 22, 0.4)' };
+        return {};
+    };
+
     return (
         <div
-            className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full ${getColor()} border-2 border-white shadow-md flex items-center justify-center`}
+            className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${getColor()} border-2 border-white flex items-center justify-center transition-all duration-500`}
+            style={getGlowStyle()}
         >
-            {progress >= 100 && <span className="text-white text-[8px] font-bold">✓</span>}
+            {progress >= 100 && <span className="text-white text-[9px] font-bold">✓</span>}
         </div>
     );
 };
