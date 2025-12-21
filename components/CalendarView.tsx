@@ -58,6 +58,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
         projectId: '' // Optional linkage
     });
 
+    // Acceleration preview state for new production blocks
+    const [accelerationPreview, setAccelerationPreview] = useState<{
+        daysAdvanced: number;
+        partialHours: number;
+        loading: boolean;
+    }>({ daysAdvanced: 0, partialHours: 0, loading: false });
+
     // Calculate date range based on view mode
     const getDateRange = useCallback(() => {
         const start = new Date(currentDate);
@@ -107,6 +114,108 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
         fetchProjects();
         fetchInbox();
     }, [fetchBlocks]);
+
+    // Calculate acceleration preview when project/hours change for new block
+    useEffect(() => {
+        const calculateAcceleration = async () => {
+            if (newBlock.blockType !== 'production' || !newBlock.projectId || newBlock.hours <= 0) {
+                setAccelerationPreview({ daysAdvanced: 0, partialHours: 0, loading: false });
+                return;
+            }
+
+            setAccelerationPreview(prev => ({ ...prev, loading: true }));
+
+            try {
+                // Fetch existing blocks for this project
+                const response = await fetch(`/api/capacity/project/${newBlock.projectId}/blocks`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    setAccelerationPreview({ daysAdvanced: 0, partialHours: 0, loading: false });
+                    return;
+                }
+
+                const data = await response.json();
+                const selectedProject = projects.find(p => p.id === newBlock.projectId);
+                if (!selectedProject) {
+                    setAccelerationPreview({ daysAdvanced: 0, partialHours: 0, loading: false });
+                    return;
+                }
+
+                // Get production blocks (not shadow) and sort by date
+                const productionBlocks = (data.blocks || [])
+                    .filter((b: any) => !b.isShadow && b.blockType === 'production')
+                    .map((b: any) => ({
+                        dateStr: typeof b.date === 'string' ? b.date.split('T')[0] : new Date(b.date).toISOString().split('T')[0],
+                        hours: b.hours || b.plannedHours || 0
+                    }))
+                    .sort((a: any, b: any) => a.dateStr.localeCompare(b.dateStr));
+
+                if (productionBlocks.length === 0) {
+                    // No blocks yet - simple calculation
+                    const dailyDed = selectedProject.dailyDedication || 4;
+                    const daysAdv = Math.floor(newBlock.hours / dailyDed);
+                    const partial = newBlock.hours % dailyDed;
+                    setAccelerationPreview({ daysAdvanced: daysAdv, partialHours: partial, loading: false });
+                    return;
+                }
+
+                // Calculate total scheduled hours
+                const totalScheduled = productionBlocks.reduce((sum: number, b: any) => sum + b.hours, 0);
+
+                // Calculate needed hours (estimatedHours with buffer)
+                const bufferMult = 1 + (selectedProject.bufferPercentage ?? 30) / 100;
+                const neededHours = (selectedProject.estimatedHours || 0) * bufferMult;
+
+                // Extra hours = scheduled + new block - needed
+                const extraHours = totalScheduled + newBlock.hours - neededHours;
+
+                if (extraHours <= 0) {
+                    // Not enough to advance, but still adding hours
+                    const dailyDed = selectedProject.dailyDedication || 4;
+                    const daysAdv = Math.floor(newBlock.hours / dailyDed);
+                    setAccelerationPreview({ daysAdvanced: daysAdv, partialHours: newBlock.hours % dailyDed, loading: false });
+                    return;
+                }
+
+                // Work backwards: remove hours from end until extraHours consumed
+                let hoursToRemove = extraHours;
+                let newLastBlockIndex = productionBlocks.length - 1;
+
+                for (let i = productionBlocks.length - 1; i >= 0 && hoursToRemove > 0; i--) {
+                    const blockHours = productionBlocks[i].hours;
+                    if (hoursToRemove >= blockHours) {
+                        hoursToRemove -= blockHours;
+                        newLastBlockIndex = i - 1;
+                    } else {
+                        newLastBlockIndex = i;
+                        hoursToRemove = 0;
+                    }
+                }
+
+                // Calculate days advanced
+                if (newLastBlockIndex >= 0 && newLastBlockIndex < productionBlocks.length - 1) {
+                    const lastBlockDate = productionBlocks[productionBlocks.length - 1].dateStr;
+                    const acceleratedDateStr = productionBlocks[newLastBlockIndex].dateStr;
+
+                    const original = new Date(lastBlockDate + 'T12:00:00');
+                    const accelerated = new Date(acceleratedDateStr + 'T12:00:00');
+                    const diffMs = original.getTime() - accelerated.getTime();
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+                    setAccelerationPreview({ daysAdvanced: diffDays, partialHours: 0, loading: false });
+                } else {
+                    setAccelerationPreview({ daysAdvanced: 0, partialHours: 0, loading: false });
+                }
+            } catch (err) {
+                console.error('Error calculating acceleration:', err);
+                setAccelerationPreview({ daysAdvanced: 0, partialHours: 0, loading: false });
+            }
+        };
+
+        calculateAcceleration();
+    }, [newBlock.projectId, newBlock.hours, newBlock.blockType, projects]);
 
     const fetchProjects = async () => {
         try {
@@ -788,27 +897,22 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                                         ))}
                                     </select>
                                     {/* Acceleration preview message */}
-                                    {newBlock.projectId && newBlock.hours > 0 && (() => {
-                                        const selectedProject = projects.find(p => p.id === newBlock.projectId);
-                                        const dailyDed = selectedProject?.dailyDedication || 4;
-                                        const daysAdvanced = Math.floor(newBlock.hours / dailyDed);
-                                        const partialHours = newBlock.hours % dailyDed;
-
-                                        if (daysAdvanced >= 1) {
-                                            return (
-                                                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
-                                                    <span className="font-semibold">⚡ Adelantás ~{daysAdvanced} día{daysAdvanced > 1 ? 's' : ''}</span>
-                                                    {partialHours > 0 && <span> y {partialHours}h</span>}
-                                                </div>
-                                            );
-                                        } else {
-                                            return (
-                                                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-600">
-                                                    <span className="font-medium">+{newBlock.hours}h de avance</span>
-                                                </div>
-                                            );
-                                        }
-                                    })()}
+                                    {newBlock.projectId && newBlock.hours > 0 && (
+                                        accelerationPreview.loading ? (
+                                            <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-500">
+                                                Calculando...
+                                            </div>
+                                        ) : accelerationPreview.daysAdvanced >= 1 ? (
+                                            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
+                                                <span className="font-semibold">⚡ Adelantás ~{accelerationPreview.daysAdvanced} día{accelerationPreview.daysAdvanced > 1 ? 's' : ''}</span>
+                                                {accelerationPreview.partialHours > 0 && <span> y {accelerationPreview.partialHours}h</span>}
+                                            </div>
+                                        ) : (
+                                            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-600">
+                                                <span className="font-medium">+{newBlock.hours}h de avance</span>
+                                            </div>
+                                        )
+                                    )}
                                 </div>
                             )}
 
