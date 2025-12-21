@@ -71,6 +71,31 @@ export const useGamification = () => {
                 newAchievements: [],
                 loading: false
             });
+
+            // Auto-check achievements when user hits productive threshold
+            if (today.completionRate >= 80 && today.totalBlocks > 0) {
+                try {
+                    await fetch('/api/achievements/check-day', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({})
+                    });
+                    // Refresh stats after checking (for updated streak)
+                    const updatedStats = await fetch('/api/achievements/stats', { credentials: 'include' });
+                    if (updatedStats.ok) {
+                        const newStats = await updatedStats.json();
+                        setState(prev => ({
+                            ...prev,
+                            currentStreak: newStats.currentStreak || prev.currentStreak,
+                            longestStreak: newStats.longestStreak || prev.longestStreak,
+                            totalProductiveDays: newStats.totalProductiveDays || prev.totalProductiveDays
+                        }));
+                    }
+                } catch (e) {
+                    console.error('Error auto-checking achievements:', e);
+                }
+            }
         } catch (err) {
             console.error('Error fetching gamification data:', err);
             setState(prev => ({ ...prev, loading: false }));

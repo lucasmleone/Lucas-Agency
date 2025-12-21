@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Mascot States based on completion
-export type MascotState = 'idle' | 'working' | 'focused' | 'productive' | 'champion';
-
 interface MascotProps {
     completionRate: number;
     currentStreak: number;
@@ -10,125 +7,90 @@ interface MascotProps {
     onClick: () => void;
 }
 
-// L2-style tech mascot - professional geometric design
-const L2Mascot: React.FC<{ state: MascotState; animate?: boolean }> = ({ state, animate = true }) => {
-    // Colors based on state
-    const getColors = () => {
-        switch (state) {
-            case 'idle':
-                return { primary: '#94a3b8', secondary: '#64748b', glow: 'none' };
-            case 'working':
-                return { primary: '#3b82f6', secondary: '#2563eb', glow: 'rgba(59, 130, 246, 0.3)' };
-            case 'focused':
-                return { primary: '#3b82f6', secondary: '#1d4ed8', glow: 'rgba(59, 130, 246, 0.5)' };
-            case 'productive':
-                return { primary: '#22c55e', secondary: '#16a34a', glow: 'rgba(34, 197, 94, 0.5)' };
-            case 'champion':
-                return { primary: '#8b5cf6', secondary: '#7c3aed', glow: 'rgba(139, 92, 246, 0.6)' };
-        }
-    };
-
-    const colors = getColors();
-
-    // Binary animation for tech feel
-    const [binaryBit, setBinaryBit] = useState('1');
-    useEffect(() => {
-        if (!animate || state === 'idle') return;
-        const interval = setInterval(() => {
-            setBinaryBit(prev => prev === '1' ? '0' : '1');
-        }, 500);
-        return () => clearInterval(interval);
-    }, [animate, state]);
+// Animated flame component
+const Flame: React.FC<{ size: 'small' | 'medium' | 'large'; delay?: number }> = ({ size, delay = 0 }) => {
+    const heights = { small: 12, medium: 18, large: 24 };
+    const widths = { small: 8, medium: 12, large: 16 };
+    const h = heights[size];
+    const w = widths[size];
 
     return (
-        <svg viewBox="0 0 40 40" className="w-full h-full">
-            {/* Outer glow for active states */}
-            {state !== 'idle' && (
-                <circle
-                    cx="20" cy="20" r="19"
-                    fill="none"
-                    stroke={colors.primary}
-                    strokeWidth="1"
-                    opacity="0.3"
-                    className={animate ? 'animate-pulse' : ''}
-                />
-            )}
-
-            {/* Main shape - L2 inspired rounded square */}
-            <rect
-                x="6" y="6"
-                width="28" height="28"
-                rx="8"
-                fill={colors.primary}
-                className={state === 'champion' ? 'animate-pulse' : ''}
+        <svg
+            viewBox={`0 0 ${w} ${h}`}
+            width={w}
+            height={h}
+            className="animate-flicker"
+            style={{ animationDelay: `${delay}ms` }}
+        >
+            <defs>
+                <linearGradient id={`flameGrad-${size}`} x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stopColor="#ff6b35" />
+                    <stop offset="40%" stopColor="#ff9500" />
+                    <stop offset="80%" stopColor="#ffcc00" />
+                    <stop offset="100%" stopColor="#fff3b0" />
+                </linearGradient>
+            </defs>
+            <path
+                d={`M${w / 2} 0 
+                    Q${w * 0.9} ${h * 0.3} ${w * 0.8} ${h * 0.5}
+                    Q${w} ${h * 0.7} ${w * 0.7} ${h}
+                    L${w * 0.3} ${h}
+                    Q0 ${h * 0.7} ${w * 0.2} ${h * 0.5}
+                    Q${w * 0.1} ${h * 0.3} ${w / 2} 0`}
+                fill={`url(#flameGrad-${size})`}
             />
-
-            {/* Inner highlight */}
-            <rect
-                x="8" y="8"
-                width="24" height="12"
-                rx="4"
-                fill="white"
-                opacity="0.15"
+            {/* Inner glow */}
+            <ellipse
+                cx={w / 2}
+                cy={h * 0.7}
+                rx={w * 0.25}
+                ry={h * 0.15}
+                fill="#fff3b0"
+                opacity="0.8"
             />
+        </svg>
+    );
+};
 
-            {/* L2 Text */}
-            <text
-                x="20" y="23"
-                textAnchor="middle"
-                fill="white"
-                fontSize="14"
-                fontWeight="bold"
-                fontFamily="system-ui, -apple-system, sans-serif"
-            >
-                L2
-            </text>
+// Progress ring component
+const ProgressRing: React.FC<{ progress: number; size: number; strokeWidth: number }> = ({
+    progress, size, strokeWidth
+}) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = radius * 2 * Math.PI;
+    const strokeDashoffset = circumference - (progress / 100) * circumference;
 
-            {/* Binary indicator at bottom */}
-            <text
-                x="20" y="32"
-                textAnchor="middle"
-                fill="white"
-                fontSize="6"
-                fontFamily="monospace"
-                opacity="0.7"
-            >
-                {state === 'idle' ? '---' : `${binaryBit}${binaryBit === '1' ? '0' : '1'}${binaryBit}`}
-            </text>
+    const getColor = () => {
+        if (progress >= 80) return '#22c55e'; // green
+        if (progress >= 50) return '#eab308'; // yellow
+        return '#94a3b8'; // gray
+    };
 
-            {/* Status indicator dot */}
+    return (
+        <svg width={size} height={size} className="absolute inset-0">
+            {/* Background circle */}
             <circle
-                cx="32" cy="8" r="4"
-                fill={state === 'idle' ? '#94a3b8' : state === 'champion' ? '#fbbf24' : colors.secondary}
-                stroke="white"
-                strokeWidth="1.5"
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                stroke="#1e293b"
+                strokeWidth={strokeWidth}
             />
-
-            {/* Sparkle for champion state */}
-            {state === 'champion' && (
-                <>
-                    <polygon
-                        points="32,2 33,6 37,6 34,8 35,12 32,10 29,12 30,8 27,6 31,6"
-                        fill="#fbbf24"
-                        className="animate-ping"
-                        style={{ transformOrigin: '32px 8px', animationDuration: '1.5s' }}
-                    />
-                </>
-            )}
-
-            {/* Progress arc for non-idle states */}
-            {state !== 'idle' && (
-                <circle
-                    cx="20" cy="20" r="17"
-                    fill="none"
-                    stroke={colors.secondary}
-                    strokeWidth="2"
-                    strokeDasharray={`${state === 'champion' ? 107 : state === 'productive' ? 85 : state === 'focused' ? 54 : 27} 107`}
-                    strokeLinecap="round"
-                    transform="rotate(-90 20 20)"
-                    opacity="0.6"
-                />
-            )}
+            {/* Progress circle */}
+            <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                stroke={getColor()}
+                strokeWidth={strokeWidth}
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                transform={`rotate(-90 ${size / 2} ${size / 2})`}
+                className="transition-all duration-500"
+            />
         </svg>
     );
 };
@@ -139,78 +101,124 @@ export const Mascot: React.FC<MascotProps> = ({
     hasNewAchievement = false,
     onClick
 }) => {
-    const [state, setState] = useState<MascotState>('idle');
     const [showBubble, setShowBubble] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
-    // Determine state based on progress
-    useEffect(() => {
-        if (completionRate >= 100) {
-            setState('champion');
-        } else if (completionRate >= 80) {
-            setState('productive');
-        } else if (completionRate >= 50) {
-            setState('focused');
-        } else if (completionRate > 0) {
-            setState('working');
-        } else {
-            setState('idle');
-        }
-    }, [completionRate]);
-
-    // Show bubble for new achievements
     useEffect(() => {
         if (hasNewAchievement) {
             setShowBubble(true);
         }
     }, [hasNewAchievement]);
 
-    // Get glow style based on state
-    const getGlowStyle = () => {
-        switch (state) {
-            case 'champion':
-                return 'shadow-[0_0_20px_rgba(139,92,246,0.6),0_0_40px_rgba(139,92,246,0.3)]';
-            case 'productive':
-                return 'shadow-[0_0_15px_rgba(34,197,94,0.5)]';
-            case 'focused':
-                return 'shadow-[0_0_12px_rgba(59,130,246,0.5)]';
-            case 'working':
-                return 'shadow-[0_0_8px_rgba(59,130,246,0.3)]';
-            default:
-                return '';
-        }
+    // Determine flame intensity based on streak
+    const getFlameConfig = () => {
+        if (currentStreak >= 7) return { count: 3, size: 'large' as const };
+        if (currentStreak >= 3) return { count: 2, size: 'medium' as const };
+        if (currentStreak >= 1) return { count: 1, size: 'medium' as const };
+        return { count: 0, size: 'small' as const };
+    };
+
+    const flameConfig = getFlameConfig();
+    const hasStreak = currentStreak > 0;
+
+    // Glow effect based on progress
+    const getGlowClass = () => {
+        if (completionRate >= 100) return 'shadow-[0_0_20px_rgba(34,197,94,0.6),0_0_40px_rgba(34,197,94,0.3)]';
+        if (completionRate >= 80) return 'shadow-[0_0_15px_rgba(34,197,94,0.5)]';
+        if (hasStreak) return 'shadow-[0_0_12px_rgba(251,146,60,0.5)]';
+        return '';
     };
 
     return (
         <div className="relative">
             <button
                 onClick={onClick}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 className={`
-                    relative w-11 h-11 rounded-xl flex items-center justify-center
+                    relative w-14 h-14 rounded-full flex items-center justify-center
                     bg-gradient-to-br from-slate-800 to-slate-900
                     hover:scale-105 transition-all duration-300
-                    border border-slate-700
-                    ${getGlowStyle()}
+                    border-2 border-slate-700
+                    ${getGlowClass()}
                 `}
-                title={`Progreso: ${Math.round(completionRate)}% | Racha: ${currentStreak} días`}
+                title={`Racha: ${currentStreak} días | Progreso: ${Math.round(completionRate)}%`}
             >
-                <L2Mascot state={state} />
+                {/* Progress ring */}
+                <ProgressRing progress={completionRate} size={56} strokeWidth={3} />
+
+                {/* Center content */}
+                <div className="relative z-10 flex flex-col items-center justify-center">
+                    {hasStreak ? (
+                        <>
+                            {/* Flames container */}
+                            <div className="flex items-end justify-center -mb-1" style={{ height: 20 }}>
+                                {flameConfig.count >= 2 && (
+                                    <div className="-mr-1 transform -rotate-12">
+                                        <Flame size="small" delay={100} />
+                                    </div>
+                                )}
+                                <div className="relative z-10">
+                                    <Flame size={flameConfig.size} />
+                                </div>
+                                {flameConfig.count >= 2 && (
+                                    <div className="-ml-1 transform rotate-12">
+                                        <Flame size="small" delay={200} />
+                                    </div>
+                                )}
+                                {flameConfig.count >= 3 && (
+                                    <>
+                                        <div className="-ml-2 transform rotate-20">
+                                            <Flame size="small" delay={300} />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            {/* Streak number */}
+                            <span className="text-white font-bold text-sm leading-none">
+                                {currentStreak}
+                            </span>
+                        </>
+                    ) : (
+                        // No streak - show percentage
+                        <div className="text-center">
+                            <span className="text-white font-bold text-lg leading-none">
+                                {completionRate > 0 ? Math.round(completionRate) : '–'}
+                            </span>
+                            {completionRate > 0 && (
+                                <span className="text-gray-400 text-[8px] block">%</span>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Achievement sparkle for 100% */}
+                {completionRate >= 100 && (
+                    <div className="absolute -top-1 -right-1 text-yellow-400 animate-ping">
+                        ✨
+                    </div>
+                )}
             </button>
+
+            {/* Tooltip on hover */}
+            {isHovered && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-lg whitespace-nowrap z-50 border border-slate-700">
+                    {hasStreak ? (
+                        <span>🔥 Racha de {currentStreak} días</span>
+                    ) : (
+                        <span>Progreso del día: {Math.round(completionRate)}%</span>
+                    )}
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-l border-t border-slate-700 transform rotate-45"></div>
+                </div>
+            )}
 
             {/* Notification bubble */}
             {showBubble && (
                 <div
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center animate-bounce cursor-pointer"
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-bounce cursor-pointer z-20"
                     onClick={(e) => { e.stopPropagation(); setShowBubble(false); onClick(); }}
                 >
-                    <span className="text-white text-[10px] font-bold">!</span>
-                </div>
-            )}
-
-            {/* Streak badge */}
-            {currentStreak > 0 && (
-                <div className="absolute -bottom-1 -left-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-1.5 rounded-full min-w-[16px] text-center shadow-lg flex items-center gap-0.5">
-                    <span>🔥</span>
-                    <span>{currentStreak}</span>
+                    <span className="text-white text-xs font-bold">!</span>
                 </div>
             )}
         </div>
