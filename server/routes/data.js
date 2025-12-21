@@ -28,6 +28,7 @@ router.get('/projects', async (req, res) => {
             paymentStatus: p.payment_status,
             maintenanceStatus: p.maintenance_status,
             deadline: p.end_date,
+            endDate: p.end_date ? new Date(p.end_date).toISOString().split('T')[0] : null,
             alertNeeds: p.alert_needs,
             description: p.description,
             discoveryData: typeof p.discovery_data === 'string' ? JSON.parse(p.discovery_data) : p.discovery_data,
