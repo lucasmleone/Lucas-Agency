@@ -1,12 +1,4 @@
-# Build Stage
-FROM node:18-alpine as build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# Production Stage
+# Production Stage - Uses pre-built dist from repository
 FROM node:18-alpine
 WORKDIR /app
 
@@ -14,10 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Copy built assets from build stage
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/server ./server
-COPY --from=build /app/scripts ./scripts
+# Copy pre-built frontend assets from repo (not rebuilding)
+COPY dist ./dist
+COPY server ./server
+COPY scripts ./scripts
 
 # Environment and Start
 ENV NODE_ENV=production
