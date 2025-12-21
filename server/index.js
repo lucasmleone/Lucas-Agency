@@ -34,26 +34,9 @@ const PORT = process.env.PORT || 3001;
 app.set('trust proxy', 1); // Trust first proxy (Nginx) for correct IP in rate limiter
 
 
-// Rate Limiting Strategies
-
-// 1. Strict Limiter for Public Routes (Auth, Public Links)
-// Prevents brute force attacks and abuse of public endpoints
-const publicLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: 'Too many requests, please try again later.' }
-});
-
-// 2. Relaxed Limiter for Internal API (Authenticated Users)
-// Allows intensive usage (auto-refresh, dashboard) without blocking legitimate work
-const internalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5000, // High limit: ~5 requests per second sustained for 15 mins
-    standardHeaders: true,
-    legacyHeaders: false,
-});
+// Rate Limiting Strategies - DISABLED TEMPORARILY
+const publicLimiter = (req, res, next) => next();
+const internalLimiter = (req, res, next) => next();
 
 // Middleware
 // app.use(helmet()); // Disabled for HTTP testing
@@ -72,12 +55,12 @@ app.use(cookieParser());
 
 // API Routes
 // Apply strict limits to public/auth routes
-app.use('/api/public', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), publicRoutes);
-app.use('/api/auth', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), authRoutes);
-app.use('/api/portal', process.env.NODE_ENV === 'production' ? publicLimiter : (req, res, next) => next(), publicPortalRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/portal', publicPortalRoutes);
 
 // Apply relaxed limits to internal routes
-const internalMiddleware = process.env.NODE_ENV === 'production' ? internalLimiter : (req, res, next) => next();
+const internalMiddleware = (req, res, next) => next();
 
 app.use('/api', internalMiddleware, dataRoutes);
 app.use('/api/config', internalMiddleware, configRoutes);
