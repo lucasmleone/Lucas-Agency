@@ -19,6 +19,7 @@ import { BlockDetailModal } from './Calendar/BlockDetailModal';
 
 interface CalendarViewProps {
     onClose?: () => void;
+    onBlockComplete?: () => void;
 }
 
 type ViewMode = 'week' | 'month' | 'infinite';
@@ -34,7 +35,7 @@ interface DayData {
     hasOverlap: boolean;
 }
 
-export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
+export const CalendarView: React.FC<CalendarViewProps> = ({ onClose, onBlockComplete }) => {
     const [viewMode, setViewMode] = useState<ViewMode>('infinite');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [blocks, setBlocks] = useState<CapacityBlock[]>([]);
@@ -583,6 +584,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                 body: JSON.stringify({ completed })
             });
             fetchBlocks();
+            // Notify parent to refresh gamification data
+            onBlockComplete?.();
         } catch (err) {
             console.error('Failed to toggle complete', err);
         }

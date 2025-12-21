@@ -40,8 +40,8 @@ import { Toast } from './components/Toast';
 import { useProjects } from './hooks/useProjects';
 import { formatCurrency } from './utils/pricing';
 import { CalendarView } from './components/CalendarView';
-import { Mascot, mascotStyles } from './components/Mascot';
-import { ProgressModal, progressModalStyles } from './components/ProgressModal';
+import { Mascot } from './components/Mascot';
+import { ProgressModal } from './components/ProgressModal';
 import { useGamification } from './hooks/useGamification';
 
 // Helper to format date from YYYY-MM-DD without timezone conversion
@@ -1133,7 +1133,7 @@ function App() {
           )}
 
           {view === 'calendar' && (
-            <CalendarView />
+            <CalendarView onBlockComplete={gamification.refresh} />
           )}
         </main>
       </div>
