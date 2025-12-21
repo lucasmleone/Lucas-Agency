@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Project, ProjectAddOn } from '../types';
-import { Calendar, Clock, TrendingUp, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, AlertTriangle, ChevronRight, Zap } from 'lucide-react';
 import { calculateTotalHours, WORK_CONFIG, formatHours } from '../utils/timeConfig';
 
 interface DeliveryProjectionProps {
@@ -19,6 +19,11 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
     const [workDays, setWorkDays] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Delivery acceleration tracking
+    const [scheduledHours, setScheduledHours] = useState<number>(0);
+    const [acceleratedDate, setAcceleratedDate] = useState<string | null>(null);
+    const [daysAdvanced, setDaysAdvanced] = useState<number>(0);
 
     // Calculate hours based on plan and addons
     const hoursData = calculateTotalHours(
@@ -81,7 +86,7 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
     const [blocksGenerated, setBlocksGenerated] = useState(false);
     const [generatingBlocks, setGeneratingBlocks] = useState(false);
 
-    // Check if blocks already exist for this project
+    // Check if blocks already exist for this project and calculate acceleration
     useEffect(() => {
         const checkExistingBlocks = async () => {
             try {
@@ -92,6 +97,40 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                     const data = await response.json();
                     if (data.blocks && data.blocks.length > 0) {
                         setBlocksGenerated(true);
+
+                        // Calculate total scheduled hours (not shadow blocks, actual scheduled ones)
+                        const totalScheduled = data.blocks
+                            .filter((b: any) => !b.isShadow && b.blockType === 'production')
+                            .reduce((sum: number, b: any) => sum + (b.plannedHours || 0), 0);
+                        setScheduledHours(totalScheduled);
+
+                        // Calculate accelerated delivery if we have extra hours
+                        if (totalScheduled > 0 && estimatedDate && hoursData.bufferedHours > 0) {
+                            // Hours remaining after scheduled work
+                            const hoursRemaining = Math.max(0, hoursData.bufferedHours - totalScheduled);
+                            const daysRemaining = Math.ceil(hoursRemaining / dailyDedication);
+
+                            // Calculate new date (skip weekends)
+                            const newDate = new Date();
+                            let daysToAdd = daysRemaining;
+                            while (daysToAdd > 0) {
+                                newDate.setDate(newDate.getDate() + 1);
+                                const day = newDate.getDay();
+                                if (day !== 0 && day !== 6) daysToAdd--;
+                            }
+
+                            // Compare with original date
+                            const originalDate = new Date(estimatedDate + 'T12:00:00');
+                            const diffDays = Math.floor((originalDate.getTime() - newDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                            if (diffDays > 0) {
+                                setAcceleratedDate(newDate.toISOString().split('T')[0]);
+                                setDaysAdvanced(diffDays);
+                            } else {
+                                setAcceleratedDate(null);
+                                setDaysAdvanced(0);
+                            }
+                        }
                     }
                 }
             } catch (err) {
@@ -99,7 +138,7 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
             }
         };
         checkExistingBlocks();
-    }, [project.id]);
+    }, [project.id, estimatedDate, hoursData.bufferedHours, dailyDedication]);
 
     const generateBlocks = async (forceRegenerate: boolean = false) => {
         if (!hoursData.bufferedHours || hoursData.bufferedHours <= 0) return;
@@ -270,6 +309,32 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                                 </div>
                             )}
                         </div>
+
+                        {/* Delivery Acceleration - Show when extra hours scheduled */}
+                        {daysAdvanced > 0 && acceleratedDate && (
+                            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-4 text-white">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Zap className="w-4 h-4" />
+                                    <span className="text-sm font-bold">¡Entrega Acelerada!</span>
+                                </div>
+                                <div className="space-y-1 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-green-100">Fecha original:</span>
+                                        <span className="line-through text-green-200">{formatDate(estimatedDate!)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-green-100">Nueva fecha:</span>
+                                        <span className="font-bold">{formatDate(acceleratedDate)}</span>
+                                    </div>
+                                    <div className="mt-2 pt-2 border-t border-green-400 text-center">
+                                        <span className="text-lg font-bold">✅ Adelantas {daysAdvanced} día{daysAdvanced > 1 ? 's' : ''}</span>
+                                    </div>
+                                </div>
+                                <div className="mt-2 text-xs text-green-200">
+                                    Horas programadas: {scheduledHours}h de {hoursData.bufferedHours}h
+                                </div>
+                            </div>
+                        )}
 
                         {/* Disclaimer - Compact */}
                         <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-2">
