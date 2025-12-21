@@ -40,7 +40,9 @@ import { Toast } from './components/Toast';
 import { useProjects } from './hooks/useProjects';
 import { formatCurrency } from './utils/pricing';
 import { CalendarView } from './components/CalendarView';
-import { StoicDashboard } from './components/StoicDashboard';
+import { Mascot, mascotStyles } from './components/Mascot';
+import { ProgressModal, progressModalStyles } from './components/ProgressModal';
+import { useGamification } from './hooks/useGamification';
 
 // Helper to format date from YYYY-MM-DD without timezone conversion
 const formatDateForDisplay = (dateStr: string, locale: string = 'es-AR'): string => {
@@ -267,6 +269,9 @@ function App() {
   const [showPricingConfig, setShowPricingConfig] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+
+  // Gamification hook
+  const gamification = useGamification();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   // Selected Client State
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -479,13 +484,6 @@ function App() {
             <Calendar className="mr-3 h-5 w-5" />
             Calendario
           </button>
-          <button
-            onClick={() => setShowAchievements(true)}
-            className="flex items-center w-full px-4 py-3 text-sm font-bold rounded-lg transition-colors text-gray-400 hover:bg-gray-800 hover:text-white"
-          >
-            <Trophy className="mr-3 h-5 w-5" />
-            Logros
-          </button>
         </nav>
         <div className="p-4 border-t border-gray-800">
           <button onClick={logout} className="flex items-center w-full px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
@@ -550,13 +548,6 @@ function App() {
                 <Calendar className="mr-3 h-5 w-5" />
                 Calendario
               </button>
-              <button
-                onClick={() => setShowAchievements(true)}
-                className="flex items-center w-full px-4 py-3 text-sm font-bold rounded-lg transition-colors text-gray-400 hover:bg-gray-800 hover:text-white"
-              >
-                <Trophy className="mr-3 h-5 w-5" />
-                Logros
-              </button>
             </nav>
             <div className="p-4 border-t border-gray-800">
               <button onClick={logout} className="flex items-center w-full px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
@@ -579,6 +570,14 @@ function App() {
             <span className="font-black text-lg">LEONE <span className="text-xs text-green-600 bg-green-100 px-1 rounded ml-2">v2.2 FIX</span></span>
           </div>
           <div className="flex items-center justify-end w-full gap-4">
+            {/* Mascot - Gamification */}
+            <Mascot
+              completionRate={gamification.completionRate}
+              currentStreak={gamification.currentStreak}
+              streakLost={gamification.streakLost}
+              hasNewAchievement={gamification.hasNewAchievement}
+              onClick={() => setShowAchievements(true)}
+            />
             <button
               onClick={() => setShowPricingConfig(true)}
               className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
@@ -1159,7 +1158,19 @@ function App() {
         <PricingConfigModal onClose={() => setShowPricingConfig(false)} />
       )}
       {showAchievements && (
-        <StoicDashboard onClose={() => setShowAchievements(false)} />
+        <ProgressModal
+          isOpen={showAchievements}
+          onClose={() => setShowAchievements(false)}
+          completionRate={gamification.completionRate}
+          completedBlocks={gamification.completedBlocks}
+          totalBlocks={gamification.totalBlocks}
+          currentStreak={gamification.currentStreak}
+          longestStreak={gamification.longestStreak}
+          totalBlocksCompleted={gamification.totalBlocksCompleted}
+          totalProductiveDays={gamification.totalProductiveDays}
+          newAchievements={gamification.newAchievements}
+          onClearAchievements={gamification.clearNewAchievement}
+        />
       )}
 
       {/* Delete Client Confirmation Toast */}

@@ -20,6 +20,33 @@
     body {
       font-family: 'Inter', sans-serif;
     }
+    /* Gamification Animations */
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+    }
+    @keyframes scale-in {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fall {
+      from { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+      to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    .animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
+    .animate-bounce-slow { animation: bounce-slow 1s ease-in-out infinite; }
+    .animate-wiggle { animation: wiggle 0.5s ease-in-out infinite; }
+    .animate-scale-in { animation: scale-in 0.3s ease-out; }
+    .animate-fall { animation: fall linear forwards; }
   </style>
   <script type="importmap">
 {
