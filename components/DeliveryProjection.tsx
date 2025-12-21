@@ -157,9 +157,22 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                                     if (diffDays > 0) {
                                         setAcceleratedDate(acceleratedDateStr);
                                         setDaysAdvanced(diffDays);
+                                        // Persist to DB for Cartera display
+                                        fetch(`/api/projects/${project.id}`, {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            credentials: 'include',
+                                            body: JSON.stringify({ daysAdvanced: diffDays })
+                                        }).catch(() => { });
                                     } else {
                                         setAcceleratedDate(null);
                                         setDaysAdvanced(0);
+                                        fetch(`/api/projects/${project.id}`, {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            credentials: 'include',
+                                            body: JSON.stringify({ daysAdvanced: 0 })
+                                        }).catch(() => { });
                                     }
                                 } else {
                                     setAcceleratedDate(null);

@@ -84,36 +84,11 @@ router.get('/projects', async (req, res) => {
             confirmedDeliveryDate: p.confirmed_delivery_date,
             dailyDedication: p.daily_dedication ? parseFloat(p.daily_dedication) : 4,
             bufferPercentage: p.buffer_percentage !== null && p.buffer_percentage !== undefined ? parseInt(p.buffer_percentage) : 30,
-            // Acceleration calculation - compare theoretical vs actual delivery dates
+            // Acceleration data - read from DB (persisted by DeliveryProjection)
             scheduledHours: p.scheduled_hours ? parseFloat(p.scheduled_hours) : 0,
             firstBlockDate: p.first_block_date ? new Date(p.first_block_date).toISOString().split('T')[0] : null,
             lastBlockDate: p.last_block_date ? new Date(p.last_block_date).toISOString().split('T')[0] : null,
-            daysAdvanced: (() => {
-                // Need both estimated hours and blocks scheduled
-                if (!p.estimated_hours || !p.scheduled_hours || !p.first_block_date || !p.last_block_date) return 0;
-
-                const bufferMult = 1 + ((p.buffer_percentage ?? 30) / 100);
-                const neededHours = parseFloat(p.estimated_hours) * bufferMult;
-                const dailyDed = p.daily_dedication ? parseFloat(p.daily_dedication) : 4;
-                const daysNeeded = Math.ceil(neededHours / dailyDed);
-
-                // Calculate theoretical end date from first block + days needed (skipping weekends)
-                const firstBlock = new Date(p.first_block_date);
-                const theoreticalEnd = new Date(firstBlock);
-                let remaining = daysNeeded - 1; // -1 because first block is day 1
-                while (remaining > 0) {
-                    theoreticalEnd.setDate(theoreticalEnd.getDate() + 1);
-                    const day = theoreticalEnd.getDay();
-                    if (day !== 0 && day !== 6) remaining--;
-                }
-
-                // Compare with actual last block date
-                const lastBlock = new Date(p.last_block_date);
-                const diffMs = theoreticalEnd.getTime() - lastBlock.getTime();
-                const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-                return diffDays > 0 ? diffDays : 0;
-            })(),
+            daysAdvanced: p.days_advanced || 0,
         }));
 
         res.json(projects);
@@ -268,6 +243,7 @@ router.put('/projects/:id', async (req, res) => {
         addUpdate('confirmed_delivery_date', p.confirmedDeliveryDate, false, true);
         addUpdate('daily_dedication', p.dailyDedication);
         addUpdate('buffer_percentage', p.bufferPercentage);
+        addUpdate('days_advanced', p.daysAdvanced); // Acceleration badge
 
         if (updates.length === 0) return res.json({ success: true, message: 'No updates provided' });
 
