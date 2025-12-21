@@ -67,17 +67,6 @@ const DuolingoFlame: React.FC<{ streakCount: number }> = ({ streakCount }) => {
                     opacity="0.9"
                     className="animate-flame-inner"
                 />
-
-                {/* Core bright spot - animated */}
-                <ellipse
-                    cx="16"
-                    cy="30"
-                    rx="5"
-                    ry="6"
-                    fill="#fff9c4"
-                    opacity="0.7"
-                    className="animate-flame-core"
-                />
             </svg>
 
             {/* Number overlay */}
