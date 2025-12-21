@@ -851,19 +851,11 @@ function App() {
                           <span className="text-xs text-gray-400">
                             {project.status === ProjectStatus.DELIVERED && project.nextMaintenanceDate
                               ? `Próximo mantenimiento: ${new Date(project.nextMaintenanceDate).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`
-                              : project.estimatedHours
-                                ? `Entrega estimada: ${(() => {
-                                  const projectedDate = new Date();
-                                  let daysToAdd = projection.days;
-                                  // Skip weekends (Saturday = 6, Sunday = 0)
-                                  while (daysToAdd > 0) {
-                                    projectedDate.setDate(projectedDate.getDate() + 1);
-                                    const day = projectedDate.getDay();
-                                    if (day !== 0 && day !== 6) daysToAdd--;
-                                  }
-                                  return projectedDate.toLocaleDateString('es-AR', { month: 'short', day: 'numeric' });
-                                })()}`
-                                : `Entrega: ${new Date(project.deadline).toLocaleDateString('es-AR', { month: 'short', day: 'numeric' })}`}
+                              : project.endDate
+                                ? `Entrega: ${new Date(project.endDate + 'T12:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}`
+                                : project.deadline
+                                  ? `Entrega: ${new Date(project.deadline).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}`
+                                  : 'Sin fecha'}
                           </span>
                           <span className="text-xs font-medium text-blue-600 group-hover:text-blue-700 flex items-center gap-1">
                             Ver detalles
