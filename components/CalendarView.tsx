@@ -788,11 +788,27 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                                         ))}
                                     </select>
                                     {/* Acceleration preview message */}
-                                    {newBlock.projectId && newBlock.hours > 0 && (
-                                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
-                                            <span className="font-semibold">⚡ +{newBlock.hours}h</span> de producción adelantarán la entrega del proyecto
-                                        </div>
-                                    )}
+                                    {newBlock.projectId && newBlock.hours > 0 && (() => {
+                                        const selectedProject = projects.find(p => p.id === newBlock.projectId);
+                                        const dailyDed = selectedProject?.dailyDedication || 4;
+                                        const daysAdvanced = Math.floor(newBlock.hours / dailyDed);
+                                        const partialHours = newBlock.hours % dailyDed;
+
+                                        if (daysAdvanced >= 1) {
+                                            return (
+                                                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
+                                                    <span className="font-semibold">⚡ Adelantás ~{daysAdvanced} día{daysAdvanced > 1 ? 's' : ''}</span>
+                                                    {partialHours > 0 && <span> y {partialHours}h</span>}
+                                                </div>
+                                            );
+                                        } else {
+                                            return (
+                                                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-600">
+                                                    <span className="font-medium">+{newBlock.hours}h de avance</span>
+                                                </div>
+                                            );
+                                        }
+                                    })()}
                                 </div>
                             )}
 
