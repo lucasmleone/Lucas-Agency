@@ -80,14 +80,22 @@ router.get('/', async (req, res) => {
 // Get today's progress
 router.get('/today', async (req, res) => {
     try {
-        const today = new Date().toISOString().split('T')[0];
+        // Use Argentina timezone (UTC-3) for date calculation
+        const argentinaOffset = -3 * 60; // -3 hours in minutes
+        const now = new Date();
+        const argentinaTime = new Date(now.getTime() + (argentinaOffset - now.getTimezoneOffset()) * 60000);
+        const today = argentinaTime.toISOString().split('T')[0];
+
+        console.log('[Achievements] Fetching today progress:', { today, userId: req.user.id });
 
         // Get today's blocks
         const [blocks] = await pool.query(`
-            SELECT id, completed, hours 
+            SELECT id, completed, hours, title, DATE(date) as block_date 
             FROM capacity_blocks 
             WHERE user_id = ? AND DATE(date) = ? AND is_shadow = 0
         `, [req.user.id, today]);
+
+        console.log('[Achievements] Found blocks:', blocks.map(b => ({ id: b.id, title: b.title, completed: b.completed, date: b.block_date })));
 
         const totalBlocks = blocks.length;
         const completedBlocks = blocks.filter(b => b.completed).length;
@@ -97,6 +105,9 @@ router.get('/today', async (req, res) => {
         const completionRate = totalBlocks > 0 ? Math.round((completedBlocks / totalBlocks) * 100) : 0;
         const isProductiveDay = completionRate >= 80;
         const isPerfectDay = completionRate === 100 && totalBlocks > 0;
+
+        console.log('[Achievements] Progress:', { totalBlocks, completedBlocks, completionRate });
+
 
         // Get current streak
         const [stats] = await pool.query(
