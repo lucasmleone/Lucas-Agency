@@ -21,7 +21,7 @@ interface CalendarViewProps {
     onClose?: () => void;
 }
 
-type ViewMode = 'week' | 'month';
+type ViewMode = 'week' | 'month' | 'infinite';
 
 interface DayData {
     date: Date;
@@ -35,7 +35,7 @@ interface DayData {
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
-    const [viewMode, setViewMode] = useState<ViewMode>('week');
+    const [viewMode, setViewMode] = useState<ViewMode>('infinite');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [blocks, setBlocks] = useState<CapacityBlock[]>([]);
     const [loading, setLoading] = useState(true);
@@ -67,10 +67,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
 
     // Calculate date range based on view mode
     const getDateRange = useCallback(() => {
+        const today = new Date();
         const start = new Date(currentDate);
         const end = new Date(currentDate);
 
-        if (viewMode === 'week') {
+        if (viewMode === 'infinite') {
+            // Infinite view: 7 days back + today + 21 days forward = 29 days total
+            start.setTime(today.getTime());
+            start.setDate(start.getDate() - 7);
+            end.setTime(today.getTime());
+            end.setDate(end.getDate() + 21);
+        } else if (viewMode === 'week') {
             // Start from Monday
             const day = start.getDay();
             const diff = start.getDate() - day + (day === 0 ? -6 : 1);
@@ -680,12 +687,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onClose }) => {
                     <div className="flex items-center gap-2">
                         <CalendarIcon className="w-5 h-5 md:w-6 md:h-6 text-indigo-600" />
                         <h1 className="text-lg md:text-2xl font-bold text-gray-900">
-                            <span className="hidden sm:inline">Planificación </span>{viewMode === 'week' ? 'Semanal' : 'Mensual'}
+                            <span className="hidden sm:inline">Planificación </span>{viewMode === 'week' ? 'Semanal' : viewMode === 'month' ? 'Mensual' : 'Continua'}
                         </h1>
                     </div>
 
                     {/* View Mode Toggle */}
                     <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                        <button
+                            onClick={() => setViewMode('infinite')}
+                            className={`px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-all ${viewMode === 'infinite'
+                                ? 'bg-white text-indigo-600 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                        >
+                            Continuo
+                        </button>
                         <button
                             onClick={() => setViewMode('week')}
                             className={`px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-all ${viewMode === 'week'
