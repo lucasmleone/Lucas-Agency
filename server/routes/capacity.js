@@ -934,6 +934,20 @@ router.post('/smart-start/:projectId', async (req, res) => {
                     'UPDATE capacity_blocks SET is_shadow = FALSE WHERE project_id = ? AND user_id = ?',
                     [projectId, req.user.id]
                 );
+
+                // Also update project end_date to last block date
+                const [lastBlock] = await pool.query(`
+                    SELECT MAX(date) as last_date FROM capacity_blocks 
+                    WHERE project_id = ? AND user_id = ? AND block_type = 'production'
+                `, [projectId, req.user.id]);
+
+                if (lastBlock[0] && lastBlock[0].last_date) {
+                    const lastDate = new Date(lastBlock[0].last_date).toISOString().split('T')[0];
+                    await pool.query(`
+                        UPDATE projects SET end_date = ? WHERE id = ? AND user_id = ?
+                    `, [lastDate, projectId, req.user.id]);
+                    console.log(`Updated project ${projectId} end_date to ${lastDate} (shadow->solid)`);
+                }
             }
         } else {
             // No blocks exist - generate new ones
@@ -1032,7 +1046,7 @@ async function generateBlocksInternal(userId, projectId, clientName, plan, total
     const currentDate = new Date(startDate);
     const blocksToInsert = [];
 
-    // FIXED: Fetch existing blocks to check available capacity
+    // FIXED: Fetch existing SOLID blocks only (not shadow) to check available capacity
     const endSearch = new Date(currentDate);
     endSearch.setMonth(endSearch.getMonth() + 6);
 
@@ -1042,6 +1056,7 @@ async function generateBlocksInternal(userId, projectId, clientName, plan, total
         WHERE user_id = ? 
         AND date >= ?
         AND project_id != ?
+        AND is_shadow = 0
         GROUP BY date
     `, [userId, currentDate.toISOString().split('T')[0], projectId]);
 
@@ -1096,6 +1111,13 @@ async function generateBlocksInternal(userId, projectId, clientName, plan, total
             (user_id, project_id, title, block_type, date, hours, start_time, is_shadow, notes)
             VALUES ?
         `, [blocksToInsert]);
+
+        // UPDATE PROJECT END_DATE to last block date
+        const lastBlockDate = blocksToInsert[blocksToInsert.length - 1][4]; // index 4 is dateKey
+        await pool.query(`
+            UPDATE projects SET end_date = ? WHERE id = ? AND user_id = ?
+        `, [lastBlockDate, projectId, userId]);
+        console.log(`Updated project ${projectId} end_date to ${lastBlockDate}`);
     }
 
     return blocksToInsert.length;
