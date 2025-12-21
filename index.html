@@ -118,6 +118,30 @@
       animation: pulse-slow 2s ease-in-out infinite;
     }
 
+    @keyframes flame-dance {
+
+      0%,
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+
+      25% {
+        transform: scale(1.02) rotate(-2deg);
+      }
+
+      50% {
+        transform: scale(0.98) rotate(0deg);
+      }
+
+      75% {
+        transform: scale(1.02) rotate(2deg);
+      }
+    }
+
+    .animate-flame-dance {
+      animation: flame-dance 1.5s ease-in-out infinite;
+    }
+
     .animate-bounce-slow {
       animation: bounce-slow 1s ease-in-out infinite;
     }
