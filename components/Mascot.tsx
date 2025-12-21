@@ -7,52 +7,42 @@ interface MascotProps {
     onClick: () => void;
 }
 
-// Animated flame component
-const Flame: React.FC<{ size: 'small' | 'medium' | 'large'; delay?: number }> = ({ size, delay = 0 }) => {
-    const heights = { small: 12, medium: 18, large: 24 };
-    const widths = { small: 8, medium: 12, large: 16 };
-    const h = heights[size];
-    const w = widths[size];
+// Clean fire SVG icon
+const FireIcon: React.FC<{ size?: number; intensity?: 'low' | 'medium' | 'high' }> = ({
+    size = 24,
+    intensity = 'medium'
+}) => {
+    const colors = {
+        low: { outer: '#f97316', inner: '#fbbf24', core: '#fef3c7' },
+        medium: { outer: '#ea580c', inner: '#f97316', core: '#fcd34d' },
+        high: { outer: '#dc2626', inner: '#f97316', core: '#fef08a' }
+    };
+    const c = colors[intensity];
 
     return (
-        <svg
-            viewBox={`0 0 ${w} ${h}`}
-            width={w}
-            height={h}
-            className="animate-flicker"
-            style={{ animationDelay: `${delay}ms` }}
-        >
-            <defs>
-                <linearGradient id={`flameGrad-${size}`} x1="0%" y1="100%" x2="0%" y2="0%">
-                    <stop offset="0%" stopColor="#ff6b35" />
-                    <stop offset="40%" stopColor="#ff9500" />
-                    <stop offset="80%" stopColor="#ffcc00" />
-                    <stop offset="100%" stopColor="#fff3b0" />
-                </linearGradient>
-            </defs>
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            {/* Outer flame */}
             <path
-                d={`M${w / 2} 0 
-                    Q${w * 0.9} ${h * 0.3} ${w * 0.8} ${h * 0.5}
-                    Q${w} ${h * 0.7} ${w * 0.7} ${h}
-                    L${w * 0.3} ${h}
-                    Q0 ${h * 0.7} ${w * 0.2} ${h * 0.5}
-                    Q${w * 0.1} ${h * 0.3} ${w / 2} 0`}
-                fill={`url(#flameGrad-${size})`}
+                d="M12 2C12 2 9 7 9 11C9 13 10 14 10 14C10 14 9 12 10 10C11 8 12 6 12 6C12 6 13 8 14 10C15 12 14 14 14 14C14 14 15 13 15 11C15 7 12 2 12 2Z"
+                fill={c.outer}
             />
-            {/* Inner glow */}
-            <ellipse
-                cx={w / 2}
-                cy={h * 0.7}
-                rx={w * 0.25}
-                ry={h * 0.15}
-                fill="#fff3b0"
-                opacity="0.8"
+            {/* Middle flame */}
+            <path
+                d="M12 6C12 6 10 9 10 12C10 14 11 15 11 15C11 15 10.5 13.5 11 12C11.5 10.5 12 9 12 9C12 9 12.5 10.5 13 12C13.5 13.5 13 15 13 15C13 15 14 14 14 12C14 9 12 6 12 6Z"
+                fill={c.inner}
+            />
+            {/* Core glow */}
+            <ellipse cx="12" cy="16" rx="2" ry="3" fill={c.core} />
+            {/* Base */}
+            <path
+                d="M8 20C8 18 10 16 12 16C14 16 16 18 16 20C16 22 14 22 12 22C10 22 8 22 8 20Z"
+                fill={c.outer}
             />
         </svg>
     );
 };
 
-// Progress ring component
+// Progress ring
 const ProgressRing: React.FC<{ progress: number; size: number; strokeWidth: number }> = ({
     progress, size, strokeWidth
 }) => {
@@ -61,14 +51,15 @@ const ProgressRing: React.FC<{ progress: number; size: number; strokeWidth: numb
     const strokeDashoffset = circumference - (progress / 100) * circumference;
 
     const getColor = () => {
-        if (progress >= 80) return '#22c55e'; // green
-        if (progress >= 50) return '#eab308'; // yellow
-        return '#94a3b8'; // gray
+        if (progress >= 100) return '#22c55e';
+        if (progress >= 80) return '#22c55e';
+        if (progress >= 50) return '#eab308';
+        if (progress > 0) return '#f97316';
+        return '#475569';
     };
 
     return (
         <svg width={size} height={size} className="absolute inset-0">
-            {/* Background circle */}
             <circle
                 cx={size / 2}
                 cy={size / 2}
@@ -77,7 +68,6 @@ const ProgressRing: React.FC<{ progress: number; size: number; strokeWidth: numb
                 stroke="#1e293b"
                 strokeWidth={strokeWidth}
             />
-            {/* Progress circle */}
             <circle
                 cx={size / 2}
                 cy={size / 2}
@@ -89,7 +79,7 @@ const ProgressRing: React.FC<{ progress: number; size: number; strokeWidth: numb
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
                 transform={`rotate(-90 ${size / 2} ${size / 2})`}
-                className="transition-all duration-500"
+                className="transition-all duration-700 ease-out"
             />
         </svg>
     );
@@ -102,30 +92,18 @@ export const Mascot: React.FC<MascotProps> = ({
     onClick
 }) => {
     const [showBubble, setShowBubble] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
-        if (hasNewAchievement) {
-            setShowBubble(true);
-        }
+        if (hasNewAchievement) setShowBubble(true);
     }, [hasNewAchievement]);
 
-    // Determine flame intensity based on streak
-    const getFlameConfig = () => {
-        if (currentStreak >= 7) return { count: 3, size: 'large' as const };
-        if (currentStreak >= 3) return { count: 2, size: 'medium' as const };
-        if (currentStreak >= 1) return { count: 1, size: 'medium' as const };
-        return { count: 0, size: 'small' as const };
-    };
-
-    const flameConfig = getFlameConfig();
     const hasStreak = currentStreak > 0;
+    const intensity = currentStreak >= 7 ? 'high' : currentStreak >= 3 ? 'medium' : 'low';
 
-    // Glow effect based on progress
     const getGlowClass = () => {
-        if (completionRate >= 100) return 'shadow-[0_0_20px_rgba(34,197,94,0.6),0_0_40px_rgba(34,197,94,0.3)]';
-        if (completionRate >= 80) return 'shadow-[0_0_15px_rgba(34,197,94,0.5)]';
-        if (hasStreak) return 'shadow-[0_0_12px_rgba(251,146,60,0.5)]';
+        if (completionRate >= 100) return 'shadow-[0_0_20px_rgba(34,197,94,0.6)]';
+        if (completionRate >= 80) return 'shadow-[0_0_15px_rgba(34,197,94,0.4)]';
+        if (hasStreak) return 'shadow-[0_0_12px_rgba(249,115,22,0.5)]';
         return '';
     };
 
@@ -133,92 +111,41 @@ export const Mascot: React.FC<MascotProps> = ({
         <div className="relative">
             <button
                 onClick={onClick}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
                 className={`
-                    relative w-14 h-14 rounded-full flex items-center justify-center
-                    bg-gradient-to-br from-slate-800 to-slate-900
+                    relative w-12 h-12 rounded-full flex items-center justify-center
+                    bg-slate-800 hover:bg-slate-700
                     hover:scale-105 transition-all duration-300
-                    border-2 border-slate-700
+                    border-2 border-slate-600
                     ${getGlowClass()}
                 `}
                 title={`Racha: ${currentStreak} días | Progreso: ${Math.round(completionRate)}%`}
             >
-                {/* Progress ring */}
-                <ProgressRing progress={completionRate} size={56} strokeWidth={3} />
+                <ProgressRing progress={completionRate} size={48} strokeWidth={3} />
 
-                {/* Center content */}
                 <div className="relative z-10 flex flex-col items-center justify-center">
                     {hasStreak ? (
                         <>
-                            {/* Flames container */}
-                            <div className="flex items-end justify-center -mb-1" style={{ height: 20 }}>
-                                {flameConfig.count >= 2 && (
-                                    <div className="-mr-1 transform -rotate-12">
-                                        <Flame size="small" delay={100} />
-                                    </div>
-                                )}
-                                <div className="relative z-10">
-                                    <Flame size={flameConfig.size} />
-                                </div>
-                                {flameConfig.count >= 2 && (
-                                    <div className="-ml-1 transform rotate-12">
-                                        <Flame size="small" delay={200} />
-                                    </div>
-                                )}
-                                {flameConfig.count >= 3 && (
-                                    <>
-                                        <div className="-ml-2 transform rotate-20">
-                                            <Flame size="small" delay={300} />
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                            {/* Streak number */}
-                            <span className="text-white font-bold text-sm leading-none">
-                                {currentStreak}
-                            </span>
+                            <FireIcon size={20} intensity={intensity} />
+                            <span className="text-white font-bold text-xs -mt-1">{currentStreak}</span>
                         </>
                     ) : (
-                        // No streak - show percentage
-                        <div className="text-center">
-                            <span className="text-white font-bold text-lg leading-none">
-                                {completionRate > 0 ? Math.round(completionRate) : '–'}
-                            </span>
-                            {completionRate > 0 && (
-                                <span className="text-gray-400 text-[8px] block">%</span>
-                            )}
-                        </div>
+                        <span className="text-white font-bold text-sm">
+                            {completionRate > 0 ? `${Math.round(completionRate)}%` : '–'}
+                        </span>
                     )}
                 </div>
 
-                {/* Achievement sparkle for 100% */}
                 {completionRate >= 100 && (
-                    <div className="absolute -top-1 -right-1 text-yellow-400 animate-ping">
-                        ✨
-                    </div>
+                    <span className="absolute -top-0.5 -right-0.5 text-xs">✨</span>
                 )}
             </button>
 
-            {/* Tooltip on hover */}
-            {isHovered && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-lg whitespace-nowrap z-50 border border-slate-700">
-                    {hasStreak ? (
-                        <span>🔥 Racha de {currentStreak} días</span>
-                    ) : (
-                        <span>Progreso del día: {Math.round(completionRate)}%</span>
-                    )}
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-l border-t border-slate-700 transform rotate-45"></div>
-                </div>
-            )}
-
-            {/* Notification bubble */}
             {showBubble && (
                 <div
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-bounce cursor-pointer z-20"
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center animate-bounce cursor-pointer z-20"
                     onClick={(e) => { e.stopPropagation(); setShowBubble(false); onClick(); }}
                 >
-                    <span className="text-white text-xs font-bold">!</span>
+                    <span className="text-white text-[10px] font-bold">!</span>
                 </div>
             )}
         </div>

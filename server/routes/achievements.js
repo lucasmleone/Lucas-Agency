@@ -332,4 +332,98 @@ function isWeekendBetween(date1, date2) {
     return true;
 }
 
+// Recalculate streak from historical data
+router.post('/recalculate-streak', async (req, res) => {
+    try {
+        // Use Argentina timezone
+        const argentinaOffset = -3 * 60;
+        const now = new Date();
+        const argentinaTime = new Date(now.getTime() + (argentinaOffset - now.getTimezoneOffset()) * 60000);
+        const today = argentinaTime.toISOString().split('T')[0];
+
+        // Get all days with blocks for this user (last 90 days)
+        const [allDays] = await pool.query(`
+            SELECT DATE(date) as day,
+                   COUNT(*) as total,
+                   SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed
+            FROM capacity_blocks 
+            WHERE user_id = ? 
+              AND is_shadow = 0 
+              AND date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+            GROUP BY DATE(date)
+            ORDER BY DATE(date) DESC
+        `, [req.user.id]);
+
+        // Find productive days (80%+)
+        const productiveDays = allDays
+            .filter(d => d.total > 0 && (d.completed / d.total) >= 0.8)
+            .map(d => d.day)
+            .sort((a, b) => new Date(b) - new Date(a)); // Most recent first
+
+        console.log('[Recalculate] Found productive days:', productiveDays.map(d => d.toISOString().split('T')[0]));
+
+        // Calculate streak from today going backwards
+        let currentStreak = 0;
+        let checkDate = new Date(today);
+
+        for (const prodDay of productiveDays) {
+            const prodDate = new Date(prodDay);
+            const prodDateStr = prodDate.toISOString().split('T')[0];
+            const checkDateStr = checkDate.toISOString().split('T')[0];
+
+            // Check if this productive day matches our check date
+            if (prodDateStr === checkDateStr) {
+                currentStreak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                // Check if only weekend between
+                const diffDays = Math.floor((checkDate - prodDate) / (1000 * 60 * 60 * 24));
+                if (diffDays <= 2 && isWeekendBetween(prodDate, checkDate)) {
+                    currentStreak++;
+                    checkDate = new Date(prodDate);
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break; // Streak broken
+                }
+            }
+        }
+
+        // Update stats
+        const totalProductiveDays = productiveDays.length;
+        const lastProductiveDay = productiveDays[0] ? productiveDays[0].toISOString().split('T')[0] : null;
+
+        // Get current longest streak to preserve it if current is less
+        const [existingStats] = await pool.query(
+            'SELECT longest_streak FROM user_stats WHERE user_id = ?',
+            [req.user.id]
+        );
+
+        const existingLongest = existingStats[0]?.longest_streak || 0;
+        const longestStreak = Math.max(existingLongest, currentStreak);
+
+        await pool.query(`
+            INSERT INTO user_stats (user_id, current_streak, longest_streak, last_productive_day, total_productive_days)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                current_streak = VALUES(current_streak),
+                longest_streak = VALUES(longest_streak),
+                last_productive_day = VALUES(last_productive_day),
+                total_productive_days = VALUES(total_productive_days)
+        `, [req.user.id, currentStreak, longestStreak, lastProductiveDay, totalProductiveDays]);
+
+        console.log('[Recalculate] Updated streak:', { currentStreak, longestStreak, totalProductiveDays });
+
+        res.json({
+            success: true,
+            currentStreak,
+            longestStreak,
+            totalProductiveDays,
+            lastProductiveDay
+        });
+    } catch (err) {
+        console.error('Error recalculating streak:', err);
+        res.status(500).json({ error: 'Error recalculating streak' });
+    }
+});
+
 export default router;

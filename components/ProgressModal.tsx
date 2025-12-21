@@ -85,17 +85,17 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
             {/* Confetti effect */}
             {showConfetti && (
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    {[...Array(50)].map((_, i) => (
+                    {[...Array(30)].map((_, i) => (
                         <div
                             key={i}
-                            className="absolute animate-fall"
+                            className="absolute text-xl opacity-80"
                             style={{
                                 left: `${Math.random() * 100}%`,
-                                animationDelay: `${Math.random() * 2}s`,
-                                animationDuration: `${2 + Math.random() * 2}s`
+                                top: '-20px',
+                                animation: `fall ${2 + Math.random() * 2}s linear ${Math.random() * 1}s forwards`
                             }}
                         >
-                            {['🎉', '✨', '🔥', '⭐', '💪'][Math.floor(Math.random() * 5)]}
+                            {['🔥', '✨', '⭐'][Math.floor(Math.random() * 3)]}
                         </div>
                     ))}
                 </div>
@@ -120,8 +120,8 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
 
                     <div className="relative">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="text-5xl animate-bounce-slow">
-                                {completionRate >= 80 ? '🦁' : completionRate >= 50 ? '🔥' : '💪'}
+                            <div className="text-5xl">
+                                {currentStreak > 0 ? '🔥' : completionRate >= 80 ? '✨' : '💪'}
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold">Tu Progreso</h2>

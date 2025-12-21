@@ -134,9 +134,23 @@ export const useGamification = () => {
         setState(prev => ({ ...prev, hasNewAchievement: false, newAchievements: [] }));
     }, []);
 
-    // Initial fetch
+    // Initial fetch with streak recalculation
     useEffect(() => {
-        fetchData();
+        const init = async () => {
+            // First recalculate streak from historical data
+            try {
+                await fetch('/api/achievements/recalculate-streak', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+            } catch (e) {
+                console.error('Error recalculating streak:', e);
+            }
+            // Then fetch display data
+            fetchData();
+        };
+        init();
 
         // Refresh every 5 minutes
         const interval = setInterval(fetchData, 5 * 60 * 1000);
