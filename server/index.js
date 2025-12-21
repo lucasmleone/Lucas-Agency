@@ -30,22 +30,30 @@ import rateLimit from 'express-rate-limit';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Trust Proxy for Nginx
-app.set('trust proxy', 1); // Trust first proxy (Nginx) for correct IP in rate limiter
+// Trust Proxy for Nginx (required for rate limiter to work behind reverse proxy)
+app.set('trust proxy', 1);
 
+// Rate Limiting Strategies
+// 1. Strict Limiter for Public Routes (Auth, Public Links)
+const publicLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+});
 
-// Rate Limiting Strategies - DISABLED TEMPORARILY
-const publicLimiter = (req, res, next) => next();
-const internalLimiter = (req, res, next) => next();
+// 2. Relaxed Limiter for Internal API (Authenticated Users)
+const internalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5000, // High limit: ~5 requests per second sustained for 15 mins
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 // Middleware
-// app.use(helmet()); // Disabled for HTTP testing
-// Note: Global limiter removed in favor of route-specific limiters
-
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow all origins for now (testing purposes)
-        // In production with HTTPS, you'd want to restrict this
         callback(null, true);
     },
     credentials: true
@@ -55,22 +63,19 @@ app.use(cookieParser());
 
 // API Routes
 // Apply strict limits to public/auth routes
-app.use('/api/public', publicRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/portal', publicPortalRoutes);
+app.use('/api/public', publicLimiter, publicRoutes);
+app.use('/api/auth', publicLimiter, authRoutes);
+app.use('/api/portal', publicLimiter, publicPortalRoutes);
 
 // Apply relaxed limits to internal routes
-const internalMiddleware = (req, res, next) => next();
-
-app.use('/api', internalMiddleware, dataRoutes);
-app.use('/api/config', internalMiddleware, configRoutes);
-app.use('/api/config', internalMiddleware, configRoutes);
-app.use('/api/maintenance', internalMiddleware, maintenanceRoutes);
-app.use('/api/notes', internalMiddleware, notesRoutes);
-app.use('/api', internalMiddleware, portalRoutes);
-app.use('/api/addons', internalMiddleware, addonsRoutes);
-app.use('/api/capacity', internalMiddleware, capacityRoutes);
-app.use('/api/achievements', internalMiddleware, achievementsRoutes);
+app.use('/api', internalLimiter, dataRoutes);
+app.use('/api/config', internalLimiter, configRoutes);
+app.use('/api/maintenance', internalLimiter, maintenanceRoutes);
+app.use('/api/notes', internalLimiter, notesRoutes);
+app.use('/api', internalLimiter, portalRoutes);
+app.use('/api/addons', internalLimiter, addonsRoutes);
+app.use('/api/capacity', internalLimiter, capacityRoutes);
+app.use('/api/achievements', internalLimiter, achievementsRoutes);
 
 // Serve Static Files (Production)
 if (process.env.NODE_ENV === 'production') {
