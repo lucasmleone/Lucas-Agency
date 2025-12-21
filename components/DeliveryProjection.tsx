@@ -91,89 +91,78 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
     const [generatingBlocks, setGeneratingBlocks] = useState(false);
 
     // Check if blocks already exist for this project and calculate acceleration
-    useEffect(() => {
-        const checkExistingBlocks = async () => {
-            try {
-                const response = await fetch(`/api/capacity/project/${project.id}/blocks`, {
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.blocks && data.blocks.length > 0) {
-                        setBlocksGenerated(true);
+    const checkExistingBlocks = useCallback(async () => {
+        try {
+            const response = await fetch(`/api/capacity/project/${project.id}/blocks`, {
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.blocks && data.blocks.length > 0) {
+                    setBlocksGenerated(true);
 
-                        // Get production blocks (not shadow) and sort by date
-                        const productionBlocks = data.blocks
-                            .filter((b: any) => !b.isShadow && b.blockType === 'production')
-                            .map((b: any) => ({
-                                ...b,
-                                dateStr: typeof b.date === 'string' ? b.date.split('T')[0] : new Date(b.date).toISOString().split('T')[0],
-                                hours: b.hours || b.plannedHours || 0
-                            }))
-                            .sort((a: any, b: any) => a.dateStr.localeCompare(b.dateStr));
+                    // Get production blocks (not shadow) and sort by date
+                    const productionBlocks = data.blocks
+                        .filter((b: any) => !b.isShadow && b.blockType === 'production')
+                        .map((b: any) => ({
+                            ...b,
+                            dateStr: typeof b.date === 'string' ? b.date.split('T')[0] : new Date(b.date).toISOString().split('T')[0],
+                            hours: b.hours || b.plannedHours || 0
+                        }))
+                        .sort((a: any, b: any) => a.dateStr.localeCompare(b.dateStr));
 
-                        // Calculate total scheduled hours
-                        const totalScheduled = productionBlocks.reduce((sum: number, b: any) => sum + b.hours, 0);
-                        setScheduledHours(totalScheduled);
+                    // Calculate total scheduled hours
+                    const totalScheduled = productionBlocks.reduce((sum: number, b: any) => sum + b.hours, 0);
+                    setScheduledHours(totalScheduled);
 
-                        // Calculate base delivery date = last block date (without acceleration)
-                        if (productionBlocks.length > 0) {
-                            const lastBlockDate = productionBlocks[productionBlocks.length - 1].dateStr;
+                    // Calculate base delivery date = last block date (without acceleration)
+                    if (productionBlocks.length > 0) {
+                        const lastBlockDate = productionBlocks[productionBlocks.length - 1].dateStr;
 
-                            // Update estimatedDate to use actual last block (override backend calculation)
-                            setEstimatedDate(lastBlockDate);
+                        // Update estimatedDate to use actual last block (override backend calculation)
+                        setEstimatedDate(lastBlockDate);
 
-                            // Calculate if there are EXTRA hours beyond what's needed
-                            const neededHours = hoursData.bufferedHours;
-                            const extraHours = totalScheduled - neededHours;
+                        // Calculate if there are EXTRA hours beyond what's needed
+                        const neededHours = hoursData.bufferedHours;
+                        const extraHours = totalScheduled - neededHours;
 
-                            if (extraHours > 0) {
-                                // Work backwards: remove hours from end until extraHours consumed
-                                let hoursToRemove = extraHours;
-                                let newLastBlockIndex = productionBlocks.length - 1;
+                        if (extraHours > 0) {
+                            // Work backwards: remove hours from end until extraHours consumed
+                            let hoursToRemove = extraHours;
+                            let newLastBlockIndex = productionBlocks.length - 1;
 
-                                for (let i = productionBlocks.length - 1; i >= 0 && hoursToRemove > 0; i--) {
-                                    const blockHours = productionBlocks[i].hours;
-                                    if (hoursToRemove >= blockHours) {
-                                        // Entire block is eliminated
-                                        hoursToRemove -= blockHours;
-                                        newLastBlockIndex = i - 1;
-                                    } else {
-                                        // Partial block - still ends on this day
-                                        newLastBlockIndex = i;
-                                        hoursToRemove = 0;
-                                    }
+                            for (let i = productionBlocks.length - 1; i >= 0 && hoursToRemove > 0; i--) {
+                                const blockHours = productionBlocks[i].hours;
+                                if (hoursToRemove >= blockHours) {
+                                    // Entire block is eliminated
+                                    hoursToRemove -= blockHours;
+                                    newLastBlockIndex = i - 1;
+                                } else {
+                                    // Partial block - still ends on this day
+                                    newLastBlockIndex = i;
+                                    hoursToRemove = 0;
                                 }
+                            }
 
-                                if (newLastBlockIndex >= 0 && newLastBlockIndex < productionBlocks.length - 1) {
-                                    const acceleratedDateStr = productionBlocks[newLastBlockIndex].dateStr;
+                            if (newLastBlockIndex >= 0 && newLastBlockIndex < productionBlocks.length - 1) {
+                                const acceleratedDateStr = productionBlocks[newLastBlockIndex].dateStr;
 
-                                    // Calculate days advanced
-                                    const original = new Date(lastBlockDate + 'T12:00:00');
-                                    const accelerated = new Date(acceleratedDateStr + 'T12:00:00');
-                                    const diffMs = original.getTime() - accelerated.getTime();
-                                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                                // Calculate days advanced
+                                const original = new Date(lastBlockDate + 'T12:00:00');
+                                const accelerated = new Date(acceleratedDateStr + 'T12:00:00');
+                                const diffMs = original.getTime() - accelerated.getTime();
+                                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-                                    if (diffDays > 0) {
-                                        setAcceleratedDate(acceleratedDateStr);
-                                        setDaysAdvanced(diffDays);
-                                        // Persist to DB for Cartera display
-                                        fetch(`/api/projects/${project.id}`, {
-                                            method: 'PUT',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            credentials: 'include',
-                                            body: JSON.stringify({ daysAdvanced: diffDays })
-                                        }).catch(() => { });
-                                    } else {
-                                        setAcceleratedDate(null);
-                                        setDaysAdvanced(0);
-                                        fetch(`/api/projects/${project.id}`, {
-                                            method: 'PUT',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            credentials: 'include',
-                                            body: JSON.stringify({ daysAdvanced: 0 })
-                                        }).catch(() => { });
-                                    }
+                                if (diffDays > 0) {
+                                    setAcceleratedDate(acceleratedDateStr);
+                                    setDaysAdvanced(diffDays);
+                                    // Persist to DB for Cartera display
+                                    fetch(`/api/projects/${project.id}`, {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        credentials: 'include',
+                                        body: JSON.stringify({ daysAdvanced: diffDays })
+                                    }).catch(() => { });
                                 } else {
                                     setAcceleratedDate(null);
                                     setDaysAdvanced(0);
@@ -194,15 +183,32 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                                     body: JSON.stringify({ daysAdvanced: 0 })
                                 }).catch(() => { });
                             }
+                        } else {
+                            setAcceleratedDate(null);
+                            setDaysAdvanced(0);
+                            fetch(`/api/projects/${project.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ daysAdvanced: 0 })
+                            }).catch(() => { });
                         }
                     }
                 }
-            } catch (err) {
-                // Ignore errors - just means no blocks yet
             }
-        };
-        checkExistingBlocks();
+        } catch (err) {
+            // Ignore errors - just means no blocks yet
+        }
     }, [project.id, estimatedDate, hoursData.bufferedHours, dailyDedication]);
+
+    // Call checkExistingBlocks on mount and poll every 5 seconds for updates
+    useEffect(() => {
+        checkExistingBlocks();
+
+        // Poll every 5 seconds to catch new blocks added from Calendar
+        const interval = setInterval(checkExistingBlocks, 5000);
+        return () => clearInterval(interval);
+    }, [checkExistingBlocks]);
 
     const generateBlocks = async (forceRegenerate: boolean = false) => {
         if (!hoursData.bufferedHours || hoursData.bufferedHours <= 0) return;
