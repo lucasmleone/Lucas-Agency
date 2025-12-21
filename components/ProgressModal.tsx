@@ -78,7 +78,10 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={onClose}
+        >
             {/* Confetti effect */}
             {showConfetti && (
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -98,14 +101,17 @@ export const ProgressModal: React.FC<ProgressModalProps> = ({
                 </div>
             )}
 
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in">
+            <div
+                className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Header with gradient */}
                 <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-6 text-white relative overflow-hidden">
                     <button
-                        onClick={() => { onClose(); onClearAchievements?.(); }}
-                        className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
+                        onClick={(e) => { e.stopPropagation(); onClose(); onClearAchievements?.(); }}
+                        className="absolute top-4 right-4 z-20 p-2 bg-white/20 hover:bg-white/40 rounded-full transition-colors"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-6 h-6" />
                     </button>
 
                     {/* Animated background circles */}
