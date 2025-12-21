@@ -905,49 +905,33 @@ router.post('/smart-start/:projectId', async (req, res) => {
             WHERE id = ?
         `, [confirmedDate.toISOString().split('T')[0], projectId]);
 
-        // Convert shadow blocks to solid and regenerate if needed
+        // Convert shadow blocks to solid - NEVER regenerate, just convert
         const [existingBlocks] = await pool.query(
             'SELECT COUNT(*) as count FROM capacity_blocks WHERE project_id = ?',
             [projectId]
         );
 
         if (existingBlocks[0].count > 0) {
-            // Regenerate blocks with new start date if scenario B or C
-            if (scenario === 'B' || scenario === 'C') {
-                await pool.query(
-                    'DELETE FROM capacity_blocks WHERE project_id = ? AND user_id = ?',
-                    [projectId, req.user.id]
-                );
-                await generateBlocksInternal(
-                    req.user.id,
-                    projectId,
-                    project.client_name,
-                    project.plan,
-                    estimatedHours,
-                    dailyDedication,
-                    today,
-                    false // Not shadow anymore
-                );
-            } else {
-                // Just convert shadows to solid
-                await pool.query(
-                    'UPDATE capacity_blocks SET is_shadow = FALSE WHERE project_id = ? AND user_id = ?',
-                    [projectId, req.user.id]
-                );
+            // Always just convert shadows to solid - NEVER delete and regenerate
+            // This preserves the original block distribution
+            await pool.query(
+                'UPDATE capacity_blocks SET is_shadow = FALSE WHERE project_id = ? AND user_id = ?',
+                [projectId, req.user.id]
+            );
+            console.log(`Converted ${existingBlocks[0].count} shadow blocks to solid for project ${projectId}`);
 
-                // Also update project end_date to last block date
-                const [lastBlock] = await pool.query(`
-                    SELECT MAX(date) as last_date FROM capacity_blocks 
-                    WHERE project_id = ? AND user_id = ? AND block_type = 'production'
-                `, [projectId, req.user.id]);
+            // Also update project end_date to last block date
+            const [lastBlock] = await pool.query(`
+                SELECT MAX(date) as last_date FROM capacity_blocks 
+                WHERE project_id = ? AND user_id = ? AND block_type = 'production'
+            `, [projectId, req.user.id]);
 
-                if (lastBlock[0] && lastBlock[0].last_date) {
-                    const lastDate = new Date(lastBlock[0].last_date).toISOString().split('T')[0];
-                    await pool.query(`
-                        UPDATE projects SET end_date = ? WHERE id = ? AND user_id = ?
-                    `, [lastDate, projectId, req.user.id]);
-                    console.log(`Updated project ${projectId} end_date to ${lastDate} (shadow->solid)`);
-                }
+            if (lastBlock[0] && lastBlock[0].last_date) {
+                const lastDate = new Date(lastBlock[0].last_date).toISOString().split('T')[0];
+                await pool.query(`
+                    UPDATE projects SET end_date = ? WHERE id = ? AND user_id = ?
+                `, [lastDate, projectId, req.user.id]);
+                console.log(`Updated project ${projectId} end_date to ${lastDate}`);
             }
         } else {
             // No blocks exist - generate new ones
