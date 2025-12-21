@@ -20,16 +20,20 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Buffer percentage (customizable, default 30%)
+    const [bufferPercent, setBufferPercent] = useState(project.bufferPercentage || 30);
+
     // Delivery acceleration tracking
     const [scheduledHours, setScheduledHours] = useState<number>(0);
     const [acceleratedDate, setAcceleratedDate] = useState<string | null>(null);
     const [daysAdvanced, setDaysAdvanced] = useState<number>(0);
 
-    // Calculate hours based on plan and addons
+    // Calculate hours based on plan, addons, and custom buffer
     const hoursData = calculateTotalHours(
         project.planType,
         addons,
-        project.customHours
+        project.customHours,
+        bufferPercent
     );
 
     // Fetch estimated delivery date from backend
@@ -199,6 +203,19 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
         }
     };
 
+    // Handle buffer percentage change
+    const handleBufferChange = async (value: number) => {
+        setBufferPercent(value);
+        setBlocksGenerated(false); // Reset so user can regenerate
+
+        // Save to project
+        try {
+            await onUpdate({ bufferPercentage: value });
+        } catch (err) {
+            console.error('Error saving buffer:', err);
+        }
+    };
+
     // Format date for display
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr + 'T12:00:00');
@@ -255,10 +272,26 @@ export const DeliveryProjection: React.FC<DeliveryProjectionProps> = ({
                             </div>
                         </div>
 
-                        {/* Buffer Breakdown - Inline */}
+                        {/* Buffer Breakdown - With Slider */}
                         <div className="bg-white rounded-lg p-3 border border-indigo-100">
-                            <div className="text-xs font-medium text-gray-600 mb-1">Buffer 30%:</div>
-                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-xs font-medium text-gray-600">Buffer</div>
+                                <div className="text-sm font-bold text-indigo-600">{bufferPercent}%</div>
+                            </div>
+                            <input
+                                type="range"
+                                min={0}
+                                max={50}
+                                step={5}
+                                value={bufferPercent}
+                                onChange={(e) => handleBufferChange(parseInt(e.target.value))}
+                                className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                            />
+                            <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>0%</span>
+                                <span>50%</span>
+                            </div>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs mt-2">
                                 <span className="flex items-center gap-1">
                                     <span className="w-2 h-2 rounded-full bg-orange-400"></span>
                                     Técnico: {hoursData.breakdown.technical}h

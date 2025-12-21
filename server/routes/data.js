@@ -75,6 +75,7 @@ router.get('/projects', async (req, res) => {
             quotedDeliveryDate: p.quoted_delivery_date,
             confirmedDeliveryDate: p.confirmed_delivery_date,
             dailyDedication: p.daily_dedication ? parseFloat(p.daily_dedication) : 4,
+            bufferPercentage: p.buffer_percentage ? parseInt(p.buffer_percentage) : 30,
         }));
 
         res.json(projects);
@@ -228,6 +229,7 @@ router.put('/projects/:id', async (req, res) => {
         addUpdate('quoted_delivery_date', p.quotedDeliveryDate, false, true);
         addUpdate('confirmed_delivery_date', p.confirmedDeliveryDate, false, true);
         addUpdate('daily_dedication', p.dailyDedication);
+        addUpdate('buffer_percentage', p.bufferPercentage);
 
         if (updates.length === 0) return res.json({ success: true, message: 'No updates provided' });
 

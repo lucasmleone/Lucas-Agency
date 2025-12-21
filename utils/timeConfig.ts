@@ -76,12 +76,17 @@ export const getHoursForAddOn = (addonName: string): number => {
 
 /**
  * Calculate total hours for a project including buffer
+ * @param planType - The plan type
+ * @param addons - Array of add-ons
+ * @param customHours - Custom hours (overrides plan hours)
+ * @param customBufferPercent - Optional custom buffer percentage (0-100), defaults to 30%
  */
 export const calculateTotalHours = (
     planType: PlanType | string,
     addons: { name: string }[],
-    customHours?: number
-): { rawHours: number; bufferedHours: number; breakdown: { technical: number; admin: number } } => {
+    customHours?: number,
+    customBufferPercent?: number
+): { rawHours: number; bufferedHours: number; breakdown: { technical: number; admin: number }; bufferPercent: number } => {
 
     // Base hours from plan
     let baseHours = customHours && customHours > 0
@@ -95,10 +100,14 @@ export const calculateTotalHours = (
 
     const rawHours = baseHours + addonHours;
 
-    // Apply buffer
-    const technicalBuffer = rawHours * BUFFER_CONFIG.TECHNICAL;
-    const adminBuffer = rawHours * BUFFER_CONFIG.ADMIN;
-    const bufferedHours = Math.ceil(rawHours * (1 + BUFFER_CONFIG.TOTAL));
+    // Use custom buffer or default 30%
+    const bufferPercent = customBufferPercent !== undefined ? customBufferPercent : BUFFER_CONFIG.TOTAL * 100;
+    const bufferMultiplier = bufferPercent / 100;
+
+    // Split buffer: 2/3 technical, 1/3 admin
+    const technicalBuffer = rawHours * (bufferMultiplier * 2 / 3);
+    const adminBuffer = rawHours * (bufferMultiplier * 1 / 3);
+    const bufferedHours = Math.ceil(rawHours * (1 + bufferMultiplier));
 
     return {
         rawHours,
@@ -106,7 +115,8 @@ export const calculateTotalHours = (
         breakdown: {
             technical: Math.ceil(technicalBuffer),
             admin: Math.ceil(adminBuffer),
-        }
+        },
+        bufferPercent
     };
 };
 

@@ -123,6 +123,7 @@ export interface Project {
   quotedDeliveryDate?: string; // Date promised in proposal
   confirmedDeliveryDate?: string; // Date confirmed after deposit
   dailyDedication?: number; // Hours per day for this project (default 4)
+  bufferPercentage?: number; // Custom buffer percentage (default 30)
 }
 
 export interface Milestone {
