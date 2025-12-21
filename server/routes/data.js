@@ -239,6 +239,51 @@ router.put('/projects/:id', async (req, res) => {
 
         await pool.query(`UPDATE projects SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`, values);
 
+        // SYNC BLOCK SHADOW STATUS BASED ON PROJECT STAGE
+        if (p.status) {
+            const productionStages = ['5. Producción', '6. Cancelado', '7. Entregado'];
+            const isProductionOrLater = productionStages.includes(p.status);
+
+            if (p.status === '7. Entregado') {
+                // Delivered: Complete today's block, delete future blocks
+                const today = new Date().toISOString().split('T')[0];
+
+                // Mark today's block as completed
+                await pool.query(`
+                    UPDATE capacity_blocks 
+                    SET completed = TRUE, is_shadow = FALSE 
+                    WHERE project_id = ? AND user_id = ? AND date = ?
+                `, [id, req.user.id, today]);
+
+                // Delete future blocks
+                await pool.query(`
+                    DELETE FROM capacity_blocks 
+                    WHERE project_id = ? AND user_id = ? AND date > ?
+                `, [id, req.user.id, today]);
+
+                // Update end_date to today
+                await pool.query(`
+                    UPDATE projects SET end_date = ? WHERE id = ? AND user_id = ?
+                `, [today, id, req.user.id]);
+
+                console.log(`Project ${id} delivered: completed today's block, deleted future blocks`);
+            } else if (isProductionOrLater) {
+                // Production or Cancelled: Blocks should be solid (not shadow)
+                await pool.query(`
+                    UPDATE capacity_blocks SET is_shadow = FALSE 
+                    WHERE project_id = ? AND user_id = ?
+                `, [id, req.user.id]);
+                console.log(`Project ${id} in production: blocks set to solid`);
+            } else {
+                // Before Production: Blocks should be shadow
+                await pool.query(`
+                    UPDATE capacity_blocks SET is_shadow = TRUE 
+                    WHERE project_id = ? AND user_id = ?
+                `, [id, req.user.id]);
+                console.log(`Project ${id} before production: blocks set to shadow`);
+            }
+        }
+
         // Trigger Maintenance Task Creation if Delivered
         if (p.status === '7. Entregado') {
             const [existing] = await pool.query('SELECT id FROM maintenance_tasks WHERE project_id = ?', [id]);
