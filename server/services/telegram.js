@@ -45,27 +45,32 @@ class TelegramService {
 
     // Setup command handlers
     setupCommands() {
-        // /start - Link account
+        // /start - Link account (simplified: auto-link to main user)
         this.bot.onText(/\/start(?: (.+))?/, async (msg, match) => {
             const chatId = msg.chat.id;
-            const linkCode = match[1];
-
-            if (!linkCode) {
-                this.bot.sendMessage(chatId,
-                    `🔗 *Para vincular tu cuenta:*\n\n` +
-                    `1. Andá a la app web\n` +
-                    `2. Configuración → Telegram\n` +
-                    `3. Copiá el código y mandámelo con /start CODIGO`,
-                    { parse_mode: 'Markdown' }
-                );
-                return;
-            }
 
             try {
-                // Find user by link code and update their chat_id
+                // Check if already linked
+                const [existingUsers] = await pool.query(
+                    'SELECT id FROM users WHERE telegram_chat_id = ?',
+                    [chatId.toString()]
+                );
+
+                if (existingUsers.length > 0) {
+                    this.bot.sendMessage(chatId,
+                        `✅ *Ya estás vinculado!*\n\n` +
+                        `Comandos:\n` +
+                        `• /win - Completar todas las tareas del día\n` +
+                        `• /status - Ver estado actual`,
+                        { parse_mode: 'Markdown' }
+                    );
+                    return;
+                }
+
+                // Auto-link to user_id 2 (main user - single user system)
                 const [result] = await pool.query(
-                    'UPDATE users SET telegram_chat_id = ?, telegram_link_code = NULL WHERE telegram_link_code = ?',
-                    [chatId.toString(), linkCode]
+                    'UPDATE users SET telegram_chat_id = ? WHERE id = 2',
+                    [chatId.toString()]
                 );
 
                 if (result.affectedRows > 0) {
@@ -73,14 +78,16 @@ class TelegramService {
                         `✅ *¡Cuenta vinculada!*\n\n` +
                         `Vas a recibir:\n` +
                         `• Tus tareas del día a las 9am\n` +
-                        `• Tu racha actual\n\n` +
-                        `Comandos:\n` +
+                        `• Tu racha actual\n` +
+                        `• Frases motivadoras/amenazadoras\n\n` +
+                        `*Comandos:*\n` +
                         `• /win - Completar todas las tareas del día\n` +
-                        `• /status - Ver estado actual`,
+                        `• /status - Ver estado actual\n\n` +
+                        `🔥 A trabajar!`,
                         { parse_mode: 'Markdown' }
                     );
                 } else {
-                    this.bot.sendMessage(chatId, '❌ Código inválido o expirado. Generá uno nuevo en la app.');
+                    this.bot.sendMessage(chatId, '❌ Error al vincular. Contactá al administrador.');
                 }
             } catch (err) {
                 console.error('[Telegram] Error linking account:', err);
