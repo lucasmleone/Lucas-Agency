@@ -28,6 +28,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - NODE_ENV=production
       - USE_MOCK_DB=false
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 
   db:
     image: mysql:8.0
