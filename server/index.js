@@ -17,6 +17,8 @@ import publicPortalRoutes from './routes/public_portal.js';
 import addonsRoutes from './routes/addons.js';
 import capacityRoutes from './routes/capacity.js';
 import achievementsRoutes from './routes/achievements.js';
+import telegramService from './services/telegram.js';
+import setupDailyReminder from './cron/dailyReminder.js';
 
 dotenv.config();
 
@@ -98,4 +100,12 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log('NODE_ENV:', process.env.NODE_ENV);
+
+    // Initialize Telegram bot if token is provided
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+        telegramService.initialize(process.env.TELEGRAM_BOT_TOKEN);
+        setupDailyReminder();
+    } else {
+        console.log('[Telegram] No TELEGRAM_BOT_TOKEN provided, bot disabled');
+    }
 });
