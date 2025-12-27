@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../db.js';
 import jwt from 'jsonwebtoken';
+import telegramService from '../services/telegram.js';
 
 const router = express.Router();
 
@@ -221,6 +222,13 @@ router.post('/:token/action', verifyPortalAuth, async (req, res) => {
             await pool.query('INSERT INTO project_logs (user_id, project_id, message) VALUES (?, ?, ?)',
                 [project.user_id, project.id, 'Cliente aprobó propuesta desde el Portal']);
 
+            // Get project name for notification
+            const [projectData] = await pool.query('SELECT name FROM projects WHERE id = ?', [project.id]);
+            telegramService.sendNotification(
+                `✅ *Cliente aprobó propuesta*\n\nEl proyecto pasó a "Espera Recursos"`,
+                projectData[0]?.name || 'Proyecto'
+            );
+
             return res.json({ success: true, newStatus: '3. Espera Recursos' });
         }
 
@@ -232,6 +240,13 @@ router.post('/:token/action', verifyPortalAuth, async (req, res) => {
             // Notify Admin (Log)
             await pool.query('INSERT INTO project_logs (user_id, project_id, message) VALUES (?, ?, ?)',
                 [project.user_id, project.id, 'Cliente confirmó envío de recursos y pago desde el Portal']);
+
+            // Get project name and send Telegram notification
+            const [projectData] = await pool.query('SELECT name FROM projects WHERE id = ?', [project.id]);
+            telegramService.sendNotification(
+                `📦 *Cliente confirmó recursos y pago*\n\n¡Ya podés empezar a trabajar!`,
+                projectData[0]?.name || 'Proyecto'
+            );
 
             // Do NOT advance status automatically (as per requirements)
             return res.json({ success: true, message: 'Notified' });
@@ -246,6 +261,13 @@ router.post('/:token/action', verifyPortalAuth, async (req, res) => {
             // Log the action
             await pool.query('INSERT INTO project_logs (user_id, project_id, message) VALUES (?, ?, ?)',
                 [project.user_id, project.id, `Cliente confirmó anticipo: ${paymentInfo}`]);
+
+            // Get project name and send Telegram notification
+            const [projectData] = await pool.query('SELECT name FROM projects WHERE id = ?', [project.id]);
+            telegramService.sendNotification(
+                `💰 *Cliente confirmó anticipo*\n\n${paymentInfo}`,
+                projectData[0]?.name || 'Proyecto'
+            );
 
             return res.json({ success: true, message: 'Advance payment info saved' });
         }

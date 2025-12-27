@@ -322,6 +322,36 @@ class TelegramService {
     getRandomQuote() {
         return QUOTES[Math.floor(Math.random() * QUOTES.length)];
     }
+
+    // Send app notification to all linked users
+    async sendNotification(message, projectName = null) {
+        if (!this.isInitialized) return;
+
+        try {
+            // Get all users with telegram linked
+            const [users] = await pool.query(
+                'SELECT telegram_chat_id FROM users WHERE telegram_chat_id IS NOT NULL'
+            );
+
+            const header = projectName
+                ? `🔔 *Notificación: ${projectName}*\n\n`
+                : `🔔 *Notificación*\n\n`;
+
+            const fullMessage = header + message;
+
+            for (const user of users) {
+                try {
+                    await this.bot.sendMessage(user.telegram_chat_id, fullMessage, { parse_mode: 'Markdown' });
+                } catch (sendErr) {
+                    console.error(`[Telegram] Failed to send to ${user.telegram_chat_id}:`, sendErr.message);
+                }
+            }
+
+            console.log(`[Telegram] Sent notification to ${users.length} users`);
+        } catch (err) {
+            console.error('[Telegram] Error sending notification:', err);
+        }
+    }
 }
 
 // Singleton instance

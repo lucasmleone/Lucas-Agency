@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../db.js';
+import telegramService from '../services/telegram.js';
 
 const router = express.Router();
 
@@ -26,6 +27,12 @@ router.post('/accept-proposal', async (req, res) => {
         // Add Log
         await pool.query('INSERT INTO project_logs (user_id, project_id, message) VALUES (?, ?, ?)',
             [project.user_id, project.id, 'Cliente aceptó presupuesto vía web (Automático)']
+        );
+
+        // Send Telegram notification
+        telegramService.sendNotification(
+            `✅ *Cliente aceptó presupuesto*\n\nEl proyecto pasó a "Espera Recursos"`,
+            project.name
         );
 
         res.json({ success: true, clientName: project.clientName || project.name || 'Cliente' });
